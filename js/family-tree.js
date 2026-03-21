@@ -1,4 +1,4 @@
-// family-tree.js - Dynamic family tree with SVG lines
+// family-tree.js - Family tree with JS-positioned lines
 
 var FAMILY_DATA = {
     name: 'שלמה ודוריס לוי ז"ל',
@@ -59,40 +59,41 @@ function calcAgeFromDate(dateStr) {
     if (parts.length < 3) return null;
     var d = parseInt(parts[0]), m = parseInt(parts[1]) - 1, y = parseInt(parts[2]);
     if (y < 100) y += (y > 50 ? 1900 : 2000);
-    var birth = new Date(y, m, d);
     var now = new Date();
-    var age = now.getFullYear() - birth.getFullYear();
+    var age = now.getFullYear() - y;
     if (now.getMonth() < m || (now.getMonth() === m && now.getDate() < d)) age--;
     return age;
 }
 
 function buildInfoTooltip(info) {
     if (!info) return '';
-    var parts = info.split('|');
-    var lines = [];
-    parts.forEach(function(p) {
+    return info.split('|').map(function(p) {
         p = p.trim();
         var dateMatch = p.match(/(\d{2}\.\d{2}\.\d{4})/);
         if (dateMatch && p.indexOf('נישואים') === -1) {
             var age = calcAgeFromDate(dateMatch[1]);
-            lines.push(age !== null ? p + ' (גיל ' + age + ')' : p);
-        } else {
-            lines.push(p);
+            return age !== null ? p + ' (גיל ' + age + ')' : p;
         }
-    });
-    return lines.join('\n');
+        return p;
+    }).join('\n');
+}
+
+function escHtml(s) {
+    var d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
 }
 
 function renderFamilyTree() {
     var container = document.getElementById('family-tree-container');
     if (!container) return;
+    container.innerHTML = '<div class="ft" id="ft-root">' + renderNode(FAMILY_DATA) + '</div>';
 
-    var html = '<div class="ft">';
-    html += renderNode(FAMILY_DATA);
-    html += '</div>';
-    container.innerHTML = html;
+    // Position horizontal lines after layout
+    setTimeout(positionHLines, 50);
+    window.addEventListener('resize', positionHLines);
 
-    // Add tooltip listeners
+    // Tooltips
     container.querySelectorAll('.ft-node[data-info]').forEach(function(el) {
         el.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -104,57 +105,78 @@ function renderFamilyTree() {
 }
 
 function renderNode(node) {
-    var hasChildren = node.children && node.children.length > 0;
+    var hasKids = node.children && node.children.length > 0;
     var cls = 'ft-node ft-' + node.level;
     var infoAttr = node.info ? ' data-info="' + escHtml(node.info) + '"' : '';
-    var displayName = node.name;
-    if (node.spouse) displayName += ' ו' + node.spouse;
+    var name = node.spouse ? node.name + ' ו' + node.spouse : node.name;
 
-    var html = '<div class="ft-item">';
-    html += '<div class="' + cls + '"' + infoAttr + '>' + escHtml(displayName) + '</div>';
+    var h = '<div class="ft-item">';
+    h += '<div class="' + cls + '"' + infoAttr + '>' + escHtml(name) + '</div>';
 
-    if (hasChildren) {
-        html += '<div class="ft-down-line"></div>';
-        html += '<div class="ft-children">';
-        // Horizontal connector
-        if (node.children.length > 1) {
-            html += '<div class="ft-h-line"></div>';
-        }
-        html += '<div class="ft-children-row">';
-        node.children.forEach(function(child) {
-            html += '<div class="ft-child-wrapper">';
-            html += '<div class="ft-up-line"></div>';
-            html += renderNode(child);
-            html += '</div>';
+    if (hasKids) {
+        h += '<div class="ft-vline"></div>';
+        h += '<div class="ft-kids">';
+        h += '<div class="ft-hline"></div>'; // positioned by JS
+        h += '<div class="ft-kids-row">';
+        node.children.forEach(function(kid) {
+            h += '<div class="ft-kid-col">';
+            h += '<div class="ft-vline-up"></div>';
+            h += renderNode(kid);
+            h += '</div>';
         });
-        html += '</div>';
-        html += '</div>';
+        h += '</div></div>';
     }
-
-    html += '</div>';
-    return html;
+    h += '</div>';
+    return h;
 }
 
-function escHtml(str) {
-    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+// Position horizontal lines using actual DOM positions
+function positionHLines() {
+    document.querySelectorAll('.ft-kids').forEach(function(kids) {
+        var hline = kids.querySelector(':scope > .ft-hline');
+        var row = kids.querySelector(':scope > .ft-kids-row');
+        if (!hline || !row) return;
+
+        var cols = row.querySelectorAll(':scope > .ft-kid-col');
+        if (cols.length < 2) { hline.style.display = 'none'; return; }
+
+        var first = cols[0];
+        var last = cols[cols.length - 1];
+        var rowRect = row.getBoundingClientRect();
+        var firstRect = first.getBoundingClientRect();
+        var lastRect = last.getBoundingClientRect();
+
+        // Center of first child to center of last child
+        var leftPos = firstRect.left + firstRect.width / 2 - rowRect.left;
+        var rightPos = lastRect.left + lastRect.width / 2 - rowRect.left;
+
+        // Ensure left < right
+        var l = Math.min(leftPos, rightPos);
+        var r = Math.max(leftPos, rightPos);
+
+        hline.style.display = 'block';
+        hline.style.position = 'absolute';
+        hline.style.top = '0';
+        hline.style.left = l + 'px';
+        hline.style.width = (r - l) + 'px';
+        hline.style.height = '2px';
+    });
 }
 
-// Tooltip
+// Tooltips
 function showTreeTooltip(el) {
     hideAllTooltips();
     var info = el.dataset.info;
     if (!info) return;
-    var text = buildInfoTooltip(info);
     var tip = document.createElement('div');
     tip.className = 'ft-tooltip';
-    tip.textContent = text;
-    tip.style.whiteSpace = 'pre-line';
+    tip.textContent = buildInfoTooltip(info);
     el.appendChild(tip);
 }
 
 function hideTreeTooltip(el) {
-    var tip = el.querySelector('.ft-tooltip');
-    if (tip) tip.remove();
+    var t = el.querySelector('.ft-tooltip');
+    if (t) t.remove();
 }
 
 function hideAllTooltips() {

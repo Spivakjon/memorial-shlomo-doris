@@ -1090,7 +1090,7 @@ hr {
     }
 }
 
-/* ===== Family Tree (JS-rendered) ===== */
+/* ===== Family Tree ===== */
 .family-tree-section {
     display: block !important;
     margin-bottom: 2.5rem;
@@ -1100,6 +1100,7 @@ hr {
     padding: 1.5rem 0.5rem 2rem;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
     overflow-x: auto;
+    overflow-y: visible;
     -webkit-overflow-scrolling: touch;
 }
 
@@ -1111,9 +1112,7 @@ hr {
     text-align: center;
 }
 
-.ft {
-    min-width: 700px;
-}
+.ft { display: inline-block; min-width: 100%; }
 
 .ft-item {
     display: flex;
@@ -1121,6 +1120,7 @@ hr {
     align-items: center;
 }
 
+/* Node cards */
 .ft-node {
     display: inline-block;
     padding: 0.5rem 0.9rem;
@@ -1128,8 +1128,8 @@ hr {
     text-align: center;
     font-weight: 600;
     white-space: nowrap;
-    cursor: default;
     position: relative;
+    cursor: default;
     transition: transform 0.15s, box-shadow 0.15s;
 }
 
@@ -1138,15 +1138,13 @@ hr {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
-.ft-node[data-info] {
-    cursor: pointer;
-}
+.ft-node[data-info] { cursor: pointer; }
 
 .ft-root {
     background: linear-gradient(135deg, var(--accent), var(--accent-dark));
     color: #fff;
     padding: 0.85rem 2rem;
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     font-weight: 700;
     border-radius: 14px;
     box-shadow: 0 4px 15px rgba(201, 169, 110, 0.3);
@@ -1156,7 +1154,7 @@ hr {
     background: var(--bg-card);
     border: 2.5px solid var(--accent);
     color: var(--text);
-    font-size: 0.92rem;
+    font-size: 0.9rem;
     padding: 0.5rem 1rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
@@ -1165,61 +1163,63 @@ hr {
     background: var(--bg);
     border: 1.5px solid var(--border);
     color: var(--text);
-    font-size: 0.8rem;
-    padding: 0.4rem 0.65rem;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    font-size: 0.78rem;
+    padding: 0.38rem 0.6rem;
 }
 
 .ft-ggc {
     background: var(--bg);
     border: 1.5px solid var(--accent);
     color: var(--accent-dark);
-    font-size: 0.73rem;
-    padding: 0.3rem 0.55rem;
+    font-size: 0.72rem;
+    padding: 0.28rem 0.5rem;
     border-radius: 8px;
     font-weight: 500;
 }
 
-/* Vertical lines */
-.ft-down-line {
+/* Vertical line down from parent */
+.ft-vline {
     width: 2px;
-    height: 18px;
+    height: 16px;
     background: var(--accent);
+    flex-shrink: 0;
 }
 
-.ft-up-line {
+/* Vertical line up from child to h-bar */
+.ft-vline-up {
     width: 2px;
-    height: 18px;
+    height: 16px;
     background: var(--accent);
     margin: 0 auto;
+    flex-shrink: 0;
 }
 
-/* Children container */
-.ft-children {
+/* Children area */
+.ft-kids {
     position: relative;
-    padding-top: 0;
 }
 
-.ft-h-line {
+/* Horizontal line - positioned by JS */
+.ft-hline {
+    background: var(--accent);
+    height: 2px;
     position: absolute;
     top: 0;
-    height: 2px;
-    background: var(--accent);
-    left: 0;
-    right: 0;
 }
 
-.ft-children-row {
+.ft-kids-row {
     display: flex;
     justify-content: center;
-    gap: 4px;
+    gap: 6px;
 }
 
-.ft-child-wrapper {
+.ft-kid-col {
     display: flex;
     flex-direction: column;
     align-items: center;
 }
+
+/* Only-child: hide h-line and up-line not needed */
 
 /* Tooltip */
 .ft-tooltip {
@@ -1241,240 +1241,12 @@ hr {
 }
 
 @media (max-width: 768px) {
-    .ft {
-        min-width: 620px;
-    }
-
-    .ft-root { font-size: 0.92rem; padding: 0.6rem 1.2rem; }
-    .ft-child { font-size: 0.8rem; padding: 0.4rem 0.7rem; }
-    .ft-gc { font-size: 0.7rem; padding: 0.3rem 0.5rem; }
-    .ft-ggc { font-size: 0.65rem; padding: 0.25rem 0.4rem; }
-    .ft-down-line, .ft-up-line { height: 14px; }
-    .ft-children-row { gap: 2px; }
-}
-
-/* ===== DEPRECATED - old .ftree styles removed ===== */
-.ftree {
-    width: 100%;
-    min-width: 680px;
-}
-
-.ftree ul {
-    position: relative;
-    list-style: none;
-    margin: 0;
-    padding: 20px 0 0 0;
-    display: flex;
-    justify-content: center;
-}
-
-.ftree > ul {
-    padding-top: 0;
-}
-
-.ftree li {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 0 8px;
-}
-
-/* === Connecting lines === */
-
-/* Vertical line UP from child to horizontal bar */
-.ftree li::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 2px;
-    height: 20px;
-    background: var(--accent);
-}
-
-/* Horizontal line connecting siblings */
-.ftree li::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: var(--accent);
-}
-
-/* First child: horizontal only from center to right */
-.ftree li:first-child::after {
-    left: 50%;
-    right: 0;
-}
-
-/* Last child: horizontal only from left to center */
-.ftree li:last-child::after {
-    left: 0;
-    right: 50%;
-}
-
-/* Only child: just vertical, no horizontal */
-.ftree li:only-child::after {
-    display: none;
-}
-
-/* Root: no lines above */
-.ftree > ul > li::before,
-.ftree > ul > li::after {
-    display: none;
-}
-
-/* Vertical line DOWN from parent node to children ul */
-.ftree li:has(> ul)::after {
-    /* keep the horizontal line */
-}
-
-/* We need a separate element for the downward line from a parent.
-   Use a padding-based approach: the UL itself draws the line up to the horizontal bar */
-.ftree ul ul::before {
-    content: '';
-    position: absolute;
-    top: -20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 2px;
-    height: 20px;
-    background: var(--accent);
-}
-
-/* But root > first ul doesn't need the line */
-.ftree > ul::before {
-    display: none;
-}
-
-/* === Node cards === */
-.ftree span {
-    display: inline-block;
-    padding: 0.5rem 0.9rem;
-    border-radius: 10px;
-    text-align: center;
-    font-weight: 600;
-    white-space: nowrap;
-    cursor: default;
-    position: relative;
-    transition: transform 0.15s, box-shadow 0.15s;
-}
-
-.ftree span:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-/* Downward line from node to its children */
-.ftree li:has(> ul) > span::after {
-    content: '';
-    position: absolute;
-    bottom: -21px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 2px;
-    height: 21px;
-    background: var(--accent);
-    z-index: 1;
-}
-
-/* Root */
-.ft-root {
-    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-    color: #fff;
-    padding: 0.85rem 2rem;
-    font-size: 1.15rem;
-    font-weight: 700;
-    border-radius: 14px;
-    box-shadow: 0 4px 15px rgba(201, 169, 110, 0.3);
-}
-
-/* Children (gen 2) */
-.ft-child {
-    background: var(--bg-card);
-    border: 2.5px solid var(--accent);
-    color: var(--text);
-    font-size: 0.95rem;
-    padding: 0.55rem 1.1rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-/* Grandchildren (gen 3) */
-.ft-gc {
-    background: var(--bg);
-    border: 1.5px solid var(--border);
-    color: var(--text);
-    font-size: 0.82rem;
-    padding: 0.4rem 0.7rem;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-}
-
-/* Great-grandchildren (gen 4 - ninin) */
-.ft-ggc {
-    background: var(--bg);
-    border: 1.5px solid var(--accent);
-    color: var(--accent-dark);
-    font-size: 0.75rem;
-    padding: 0.3rem 0.6rem;
-    border-radius: 8px;
-    font-weight: 500;
-}
-
-/* Tree tooltip (JS-generated) */
-.tree-tooltip {
-    position: absolute;
-    bottom: calc(100% + 8px);
-    left: 50%;
-    transform: translateX(-50%);
-    background: #333;
-    color: #fff;
-    padding: 5px 12px;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-weight: 400;
-    white-space: nowrap;
-    z-index: 100;
-    animation: tooltipFade 3s ease-in-out;
-}
-
-@keyframes tooltipFade {
-    0%, 80% { opacity: 1; }
-    100% { opacity: 0; }
-}
-
-/* Mobile */
-@media (max-width: 768px) {
-    .family-tree-section {
-        padding: 1rem 0.25rem 1.5rem;
-    }
-
-    .ft-root {
-        font-size: 0.95rem;
-        padding: 0.6rem 1.2rem;
-    }
-
-    .ft-child {
-        font-size: 0.82rem;
-        padding: 0.4rem 0.7rem;
-    }
-
-    .ft-gc {
-        font-size: 0.72rem;
-        padding: 0.3rem 0.5rem;
-    }
-
-    .ft-ggc {
-        font-size: 0.68rem;
-        padding: 0.25rem 0.45rem;
-    }
-
-    .ftree li {
-        padding: 0 5px;
-    }
+    .ft-root { font-size: 0.88rem; padding: 0.55rem 1rem; }
+    .ft-child { font-size: 0.78rem; padding: 0.4rem 0.65rem; }
+    .ft-gc { font-size: 0.68rem; padding: 0.3rem 0.45rem; }
+    .ft-ggc { font-size: 0.62rem; padding: 0.22rem 0.4rem; }
+    .ft-vline, .ft-vline-up { height: 12px; }
+    .ft-kids-row { gap: 3px; }
 }
 
 /* ===== Gallery ===== */
