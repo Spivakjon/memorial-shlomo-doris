@@ -637,6 +637,22 @@ function initApp() {
 
     // Gallery
     initGallery();
+
+    // Tree tooltips for mobile (tap to show birth date)
+    document.querySelectorAll('.ftree span[data-birth]').forEach(function(el) {
+        el.addEventListener('click', function(e) {
+            e.stopPropagation();
+            // Remove any existing mobile tooltip
+            var old = document.querySelector('.mobile-tooltip');
+            if (old) old.remove();
+            // Create tooltip
+            var tip = document.createElement('div');
+            tip.className = 'mobile-tooltip';
+            tip.textContent = this.dataset.birth;
+            this.appendChild(tip);
+            setTimeout(function() { tip.remove(); }, 3000);
+        });
+    });
 }
 
 document.addEventListener('DOMContentLoaded', initAuth);
