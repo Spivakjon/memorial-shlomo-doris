@@ -151,10 +151,11 @@ function loadGallery() {
                 var thumbUrl = 'https://lh3.googleusercontent.com/d/' + f.fileId + '=w600';
                 var fullUrl = 'https://lh3.googleusercontent.com/d/' + f.fileId + '=w2000';
 
+                var safeDesc = (f.description || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
                 if (isVideo) {
-                    var videoViewUrl = 'https://drive.google.com/file/d/' + f.fileId + '/preview';
                     div.innerHTML =
-                        '<img src="' + thumbUrl + '" alt="סרטון" loading="lazy" onclick="openDriveVideo(\'' + f.fileId + '\')">' +
+                        '<img src="' + thumbUrl + '" alt="סרטון" loading="lazy" onclick="openDriveVideo(\'' + f.fileId + '\', \'' + safeDesc + '\')">' +
                         '<div class="play-overlay">▶</div>' +
                         '<div class="gallery-meta">' +
                         (f.description ? '<p class="gallery-caption">' + f.description + '</p>' : '') +
@@ -163,7 +164,7 @@ function loadGallery() {
                 } else {
                     div.innerHTML =
                         '<img src="' + thumbUrl + '" alt="' + (f.description || '') + '" loading="lazy" ' +
-                        'onclick="openMedia(\'' + fullUrl + '\', \'image\')">' +
+                        'onclick="openMedia(\'' + fullUrl + '\', \'image\', \'' + f.fileId + '\', \'' + safeDesc + '\')">' +
                         '<div class="gallery-meta">' +
                         (f.description ? '<p class="gallery-caption">' + f.description + '</p>' : '') +
                         '<p class="gallery-uploader">' + dateStr + '</p>' +
@@ -268,26 +269,81 @@ document.addEventListener('click', function(e) {
     if (menu && !menu.contains(e.target)) menu.classList.add('hidden');
 });
 
-// Lightbox
-function openMedia(src, type) {
+// Lightbox - full screen overlay with edit
+function openMedia(src, type, fileId, currentDesc) {
     var overlay = document.createElement('div');
     overlay.className = 'media-lightbox';
-    overlay.onclick = function(e) {
-        if (e.target === overlay || e.target.tagName === 'IMG') {
-            document.body.removeChild(overlay);
-        }
-    };
-    overlay.innerHTML = '<img src="' + src + '" style="max-width:95vw;max-height:90vh;object-fit:contain;border-radius:4px;">';
+    overlay.id = 'active-lightbox';
+
+    var descText = currentDesc || '';
+    var descHtml = descText ? '<p class="lb-desc">' + descText + '</p>' : '<p class="lb-desc lb-empty">לחצו להוסיף תיאור</p>';
+
+    overlay.innerHTML =
+        '<div class="lb-close" onclick="closeLightbox()">✕</div>' +
+        '<div class="lb-content">' +
+            '<img src="' + src + '">' +
+            '<div class="lb-bottom">' +
+                descHtml +
+                (fileId ? '<button class="lb-edit-btn" onclick="editDescription(\'' + fileId + '\')">ערוך תיאור</button>' : '') +
+            '</div>' +
+        '</div>';
+
     document.body.appendChild(overlay);
+
+    // Close on background click
+    overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) closeLightbox();
+    });
 }
 
-function openDriveVideo(fileId) {
+function openDriveVideo(fileId, currentDesc) {
     var overlay = document.createElement('div');
     overlay.className = 'media-lightbox';
-    overlay.onclick = function(e) {
-        if (e.target === overlay) document.body.removeChild(overlay);
-    };
-    overlay.innerHTML = '<iframe src="https://drive.google.com/file/d/' + fileId + '/preview" ' +
-        'style="width:90vw;height:80vh;border:none;border-radius:8px;" allowfullscreen></iframe>';
+    overlay.id = 'active-lightbox';
+
+    var descText = currentDesc || '';
+    var descHtml = descText ? '<p class="lb-desc">' + descText + '</p>' : '';
+
+    overlay.innerHTML =
+        '<div class="lb-close" onclick="closeLightbox()">✕</div>' +
+        '<div class="lb-content">' +
+            '<iframe src="https://drive.google.com/file/d/' + fileId + '/preview" allowfullscreen></iframe>' +
+            '<div class="lb-bottom">' +
+                descHtml +
+                '<button class="lb-edit-btn" onclick="editDescription(\'' + fileId + '\')">ערוך תיאור</button>' +
+            '</div>' +
+        '</div>';
+
     document.body.appendChild(overlay);
+    overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) closeLightbox();
+    });
+}
+
+function closeLightbox() {
+    var lb = document.getElementById('active-lightbox');
+    if (lb) lb.remove();
+}
+
+function editDescription(fileId) {
+    var pass = prompt('הזן סיסמה לעריכה:');
+    if (pass !== '2803') {
+        if (pass !== null) alert('סיסמה שגויה');
+        return;
+    }
+    var newDesc = prompt('תיאור התמונה (מקום, תאריך, אירוע):');
+    if (newDesc === null) return;
+
+    // Update via Apps Script
+    fetch(APPS_SCRIPT_URL + '?action=updateDesc&fileId=' + encodeURIComponent(fileId) + '&desc=' + encodeURIComponent(newDesc) + '&pass=' + pass)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                closeLightbox();
+                loadGallery();
+            } else {
+                alert(data.error || 'שגיאה בעדכון');
+            }
+        })
+        .catch(function(err) { alert('שגיאה: ' + err.message); });
 }

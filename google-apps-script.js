@@ -49,6 +49,25 @@ function doGet(e) {
   try {
     var action = e.parameter.action;
 
+    if (action === 'updateDesc') {
+      var pass = e.parameter.pass;
+      if (pass !== '2803') {
+        return ContentService.createTextOutput(JSON.stringify({
+          success: false, error: 'סיסמה שגויה'
+        })).setMimeType(ContentService.MimeType.JSON);
+      }
+      var fileId = e.parameter.fileId;
+      var desc = e.parameter.desc || '';
+      var file = DriveApp.getFileById(fileId);
+      var meta = {};
+      try { meta = JSON.parse(file.getDescription()); } catch (x) {}
+      meta.description = desc;
+      file.setDescription(JSON.stringify(meta));
+      return ContentService.createTextOutput(JSON.stringify({
+        success: true
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
     if (action === 'delete') {
       var pass = e.parameter.pass;
       if (pass !== '2803') {
