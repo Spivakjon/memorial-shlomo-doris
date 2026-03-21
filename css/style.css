@@ -975,3 +975,167 @@ hr {
         padding-top: env(safe-area-inset-top);
     }
 }
+
+/* ===== PDF Overlay ===== */
+#pdf-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    background: #fff;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+#pdf-overlay.pdf-visible {
+    display: block;
+}
+
+.pdf-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 1001;
+    background: #333;
+    padding: 0.5rem 1rem;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.pdf-toolbar button {
+    padding: 0.5rem 1.5rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    background: var(--accent);
+    color: #fff;
+}
+
+.pdf-close-btn {
+    background: #666 !important;
+}
+
+.pdf-body {
+    direction: rtl;
+    text-align: right;
+    padding: 10mm 15mm;
+    max-width: 210mm;
+    margin: 0 auto;
+    font-family: 'Segoe UI', 'Arial', 'Tahoma', sans-serif;
+    font-size: 14pt;
+    line-height: 1.9;
+    color: #1a1a1a;
+}
+
+.pdf-body h1.pdf-main-title {
+    text-align: center;
+    font-size: 22pt;
+    font-weight: bold;
+    margin-bottom: 6pt;
+}
+
+.pdf-body h1.pdf-sub-title {
+    text-align: center;
+    font-size: 18pt;
+    font-weight: normal;
+    margin-bottom: 10pt;
+}
+
+.pdf-body .pdf-info {
+    text-align: center;
+    font-size: 12pt;
+    margin-bottom: 4pt;
+    color: #333;
+}
+
+.pdf-body .pdf-divider {
+    text-align: center;
+    font-size: 14pt;
+    color: #c9a96e;
+    margin: 14pt 0;
+}
+
+.pdf-body h2.pdf-section-title {
+    text-align: center;
+    font-size: 16pt;
+    font-weight: bold;
+    margin: 20pt 0 8pt;
+    padding-bottom: 4pt;
+    border-bottom: 2pt solid #c9a96e;
+    color: #5a4020;
+}
+
+.pdf-body h3.pdf-letter-title {
+    text-align: center;
+    font-size: 14pt;
+    font-weight: bold;
+    margin: 14pt 0 6pt;
+    color: #5a4020;
+}
+
+.pdf-body .pdf-instruction {
+    text-align: center;
+    font-size: 11pt;
+    color: #666;
+    margin-bottom: 6pt;
+}
+
+.pdf-body .pdf-prayer {
+    font-size: 14pt;
+    line-height: 2;
+    margin-bottom: 10pt;
+}
+
+.pdf-body .pdf-footer {
+    text-align: center;
+    font-size: 18pt;
+    font-weight: bold;
+    margin-top: 20pt;
+}
+
+/* ===== Print Styles ===== */
+@media print {
+    /* Hide everything except PDF overlay */
+    body > *:not(#pdf-overlay) {
+        display: none !important;
+    }
+
+    #pdf-overlay {
+        display: block !important;
+        position: static;
+        overflow: visible;
+    }
+
+    .pdf-toolbar {
+        display: none !important;
+    }
+
+    .pdf-body {
+        padding: 0;
+        max-width: none;
+        font-size: 13pt;
+    }
+
+    .pdf-body .pdf-prayer {
+        font-size: 13pt;
+        line-height: 1.9;
+    }
+
+    .pdf-body h2.pdf-section-title {
+        page-break-after: avoid;
+    }
+
+    .pdf-body h3.pdf-letter-title {
+        page-break-after: avoid;
+    }
+
+    @page {
+        margin: 15mm;
+        size: A4;
+    }
+}

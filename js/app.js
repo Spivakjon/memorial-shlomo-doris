@@ -306,7 +306,6 @@ function downloadCalendarEvent() {
     const azkara = state.azkara;
     const title = `אזכרה ${azkara.yearLabel} - ${getPersonTitle(azkara.forPerson)}`;
 
-    // Build Google Calendar URL (works on all devices)
     const startDate = new Date(azkara.date + 'T' + azkara.time + ':00');
     const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
 
@@ -325,7 +324,14 @@ function downloadCalendarEvent() {
         '&details=' + encodeURIComponent(title + '\n' + azkara.location) +
         '&ctz=Asia/Jerusalem';
 
-    window.open(gcalUrl, '_blank');
+    // Use a link click instead of window.open to avoid popup blocker
+    const a = document.createElement('a');
+    a.href = gcalUrl;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 }
 
 // ==================== PDF GENERATION ====================
@@ -473,28 +479,39 @@ h3.pdf-letter-title {
 }
 `;
 
-function openPdfWindow(bodyHtml, title) {
-    const win = window.open('', '_blank');
-    if (!win) {
-        alert('אנא אפשר חלונות קופצים כדי להוריד את הסידור');
-        return;
+function openPdfView(bodyHtml, title) {
+    // Create a full-screen overlay with the PDF content for printing
+    let overlay = document.getElementById('pdf-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'pdf-overlay';
+        document.body.appendChild(overlay);
     }
-    win.document.write(`<!DOCTYPE html>
-<html lang="he" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${title}</title>
-<style>${PDF_STYLES}</style>
-</head>
-<body>
-${bodyHtml}
-<script>
-setTimeout(function() { window.print(); }, 300);
-<\/script>
-</body>
-</html>`);
-    win.document.close();
+
+    overlay.innerHTML = `
+        <div class="pdf-toolbar">
+            <button onclick="printPdf()">שמור / הדפס PDF</button>
+            <button onclick="closePdfView()" class="pdf-close-btn">✕ סגור</button>
+        </div>
+        <div class="pdf-body" id="pdf-body">
+            ${bodyHtml}
+        </div>
+    `;
+    overlay.classList.add('pdf-visible');
+    document.body.classList.add('pdf-mode');
+}
+
+function printPdf() {
+    window.print();
+}
+
+function closePdfView() {
+    const overlay = document.getElementById('pdf-overlay');
+    if (overlay) {
+        overlay.classList.remove('pdf-visible');
+        overlay.innerHTML = '';
+    }
+    document.body.classList.remove('pdf-mode');
 }
 
 // Quick PDF from main page
@@ -556,7 +573,7 @@ function generateQuickPdf() {
     html += `<div class="pdf-divider">✦ ✦ ✦</div>`;
     html += `<p class="pdf-footer">ת.נ.צ.ב.ה</p>`;
 
-    openPdfWindow(html, `סדר אזכרה - ${getPersonTitle(azkara.forPerson)}`);
+    openPdfView(html, `סדר אזכרה - ${getPersonTitle(azkara.forPerson)}`);
 }
 
 // Advanced PDF from manage page
@@ -593,7 +610,7 @@ function generateAdvancedPdf() {
     html += `<div class="pdf-divider">✦ ✦ ✦</div>`;
     html += `<p class="pdf-footer">ת.נ.צ.ב.ה</p>`;
 
-    openPdfWindow(html, 'סדר אזכרה מותאם');
+    openPdfView(html, 'סדר אזכרה מותאם');
 }
 
 // ==================== LOCAL STORAGE ====================
