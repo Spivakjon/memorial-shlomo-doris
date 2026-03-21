@@ -514,6 +514,17 @@ body {
     margin-top: 0.5rem !important;
 }
 
+/* Calendar Section */
+.calendar-section {
+    margin-bottom: 1.5rem;
+}
+
+.btn-full {
+    width: 100%;
+    padding: 0.85rem;
+    font-size: 1.05rem;
+}
+
 /* Quick PDF Section (main page) */
 .quick-pdf-section {
     background: var(--bg-card);

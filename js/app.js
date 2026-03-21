@@ -120,38 +120,9 @@ function updateMemorialAzkara() {
     `;
 }
 
-// ==================== AUTH ====================
+// ==================== AUTH (disabled) ====================
 
 function initAuth() {
-    const loginBtn = document.getElementById('login-btn');
-    const passwordInput = document.getElementById('password-input');
-    const loginError = document.getElementById('login-error');
-
-    if (sessionStorage.getItem('authenticated') === 'true') {
-        showApp();
-        return;
-    }
-
-    function attemptLogin() {
-        if (passwordInput.value === CONFIG.password) {
-            sessionStorage.setItem('authenticated', 'true');
-            showApp();
-        } else {
-            loginError.classList.remove('hidden');
-            passwordInput.value = '';
-            passwordInput.focus();
-        }
-    }
-
-    loginBtn.addEventListener('click', attemptLogin);
-    passwordInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') attemptLogin();
-    });
-}
-
-function showApp() {
-    document.getElementById('login-screen').classList.add('hidden');
-    document.getElementById('app').classList.remove('hidden');
     initApp();
 }
 
@@ -379,35 +350,29 @@ function getSelectedLettersForPerson(personKey) {
 }
 
 function getFirstNameLetters(personKey) {
-    // Returns only the first name letters (שלמה / דוריס), not family name
     const person = CONFIG.people[personKey];
-    let indices;
-    if (personKey === 'shlomo') {
-        indices = person.nameGroups.first; // שלמה
-    } else {
-        indices = person.nameGroups.doris; // דוריס
-    }
+    const indices = personKey === 'shlomo' ? person.nameGroups.first : person.nameGroups.doris;
     return indices.map(i => person.lettersForTehillim[i]);
 }
 
 function buildTehillimHtml(letters, title) {
-    let html = `<div class="separator">✦</div>`;
-    html += `<h2>תהילים לפי אותיות השם - ${title}</h2>`;
+    let html = `<div class="pdf-divider">✦</div>`;
+    html += `<h2 class="pdf-section-title">תהילים לפי אותיות השם - ${title}</h2>`;
     const seen = new Set();
     letters.forEach(letter => {
         if (PSALM_119[letter] && !seen.has(letter)) {
             seen.add(letter);
-            html += `<h2>${PSALM_119[letter].title}</h2>`;
-            html += `<div class="prayer-text">${PSALM_119[letter].verses}</div>`;
+            html += `<h3 class="pdf-letter-title">${PSALM_119[letter].title}</h3>`;
+            html += `<p class="pdf-prayer">${PSALM_119[letter].verses}</p>`;
         }
     });
     return html;
 }
 
 function buildPrayerSection(prayer) {
-    let html = `<h2>${prayer.title}</h2>`;
-    if (prayer.instruction) html += `<p class="instruction">${prayer.instruction}</p>`;
-    html += `<div class="prayer-text">${prayer.text}</div>`;
+    let html = `<h2 class="pdf-section-title">${prayer.title}</h2>`;
+    if (prayer.instruction) html += `<p class="pdf-instruction">${prayer.instruction}</p>`;
+    html += `<p class="pdf-prayer">${prayer.text}</p>`;
     return html;
 }
 
@@ -416,36 +381,154 @@ function formatDate(dateStr) {
     return `${parts[2]}/${parts[1]}/${parts[0]}`;
 }
 
-// Quick PDF from main page - generates based on current azkara
+// PDF styles that go into the print window
+const PDF_STYLES = `
+@import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;700&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'Frank Ruhl Libre', 'David', 'Times New Roman', serif;
+    direction: rtl;
+    text-align: right;
+    line-height: 2;
+    color: #1a1a1a;
+    background: #fff;
+    padding: 12mm;
+    max-width: 210mm;
+    margin: 0 auto;
+}
+
+h1.pdf-main-title {
+    text-align: center;
+    font-size: 22pt;
+    font-weight: 700;
+    margin-bottom: 4pt;
+}
+
+h1.pdf-sub-title {
+    text-align: center;
+    font-size: 18pt;
+    font-weight: 500;
+    margin-bottom: 8pt;
+}
+
+.pdf-info {
+    text-align: center;
+    font-size: 12pt;
+    margin-bottom: 4pt;
+    color: #333;
+}
+
+.pdf-divider {
+    text-align: center;
+    font-size: 14pt;
+    color: #c9a96e;
+    letter-spacing: 8px;
+    margin: 16pt 0;
+}
+
+h2.pdf-section-title {
+    text-align: center;
+    font-size: 16pt;
+    font-weight: 700;
+    margin: 20pt 0 8pt;
+    padding-bottom: 4pt;
+    border-bottom: 1.5pt solid #c9a96e;
+    color: #5a4020;
+    page-break-after: avoid;
+}
+
+h3.pdf-letter-title {
+    text-align: center;
+    font-size: 14pt;
+    font-weight: 500;
+    margin: 14pt 0 6pt;
+    color: #5a4020;
+    page-break-after: avoid;
+}
+
+.pdf-instruction {
+    text-align: center;
+    font-size: 11pt;
+    color: #666;
+    font-style: italic;
+    margin-bottom: 6pt;
+}
+
+.pdf-prayer {
+    font-size: 13pt;
+    line-height: 2.2;
+    white-space: pre-line;
+    margin-bottom: 8pt;
+    text-align: right;
+}
+
+.pdf-footer {
+    text-align: center;
+    font-size: 18pt;
+    font-weight: 700;
+    margin-top: 20pt;
+    letter-spacing: 4px;
+}
+
+@media print {
+    body { padding: 0; }
+    @page { margin: 15mm; size: A4; }
+}
+`;
+
+function openPdfWindow(bodyHtml, title) {
+    const win = window.open('', '_blank');
+    if (!win) {
+        alert('אנא אפשר חלונות קופצים כדי להוריד את הסידור');
+        return;
+    }
+    win.document.write(`<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${title}</title>
+<style>${PDF_STYLES}</style>
+</head>
+<body>
+${bodyHtml}
+<script>
+// Wait for fonts to load then trigger print
+document.fonts.ready.then(function() {
+    setTimeout(function() { window.print(); }, 400);
+});
+<\/script>
+</body>
+</html>`);
+    win.document.close();
+}
+
+// Quick PDF from main page
 function generateQuickPdf() {
     const azkara = state.azkara;
     const checkedItems = [];
     document.querySelectorAll('#main-seder-checklist input:checked').forEach(cb => checkedItems.push(cb.value));
 
-    // Determine which people are in this azkara
     const people = [];
     if (azkara.forPerson === 'both' || azkara.forPerson === 'shlomo') people.push({ data: CONFIG.people.shlomo, key: 'shlomo' });
     if (azkara.forPerson === 'both' || azkara.forPerson === 'doris') people.push({ data: CONFIG.people.doris, key: 'doris' });
 
-    const pdfDiv = document.getElementById('pdf-content');
-    pdfDiv.classList.remove('hidden');
-
-    let html = `<div class="pdf-page">`;
-    html += `<h1>סדר אזכרה ${azkara.yearLabel}</h1>`;
-    html += `<h1>${getPersonTitle(azkara.forPerson)}</h1>`;
+    let html = `<h1 class="pdf-main-title">סדר אזכרה ${azkara.yearLabel}</h1>`;
+    html += `<h1 class="pdf-sub-title">${getPersonTitle(azkara.forPerson)}</h1>`;
 
     people.forEach(p => {
         const prefix = p.data.gender === 'male' ? 'נפטר' : 'נפטרה';
-        html += `<p style="text-align:center;">${p.data.name} - ${prefix}: ${p.data.deathDateHebrew} | ${formatDate(p.data.deathDateGregorian)}</p>`;
+        html += `<p class="pdf-info">${p.data.name} - ${prefix}: ${p.data.deathDateHebrew} | ${formatDate(p.data.deathDateGregorian)}</p>`;
     });
 
     const dateParts = azkara.date.split('-');
-    html += `<p style="text-align:center;">${dateParts[2]}/${dateParts[1]}/${dateParts[0]} | ${azkara.time} | ${azkara.location}</p>`;
-    html += `<div class="separator">✦ ✦ ✦</div>`;
+    html += `<p class="pdf-info">${dateParts[2]}/${dateParts[1]}/${dateParts[0]} | ${azkara.time} | ${azkara.location}</p>`;
+    html += `<div class="pdf-divider">✦ ✦ ✦</div>`;
 
     if (checkedItems.includes('candle')) html += buildPrayerSection(PRAYERS.candle);
 
-    // Tehillim - first name letters only (שלמה / דוריס)
     if (checkedItems.includes('tehillim')) {
         people.forEach(p => {
             const letters = getFirstNameLetters(p.key);
@@ -454,16 +537,15 @@ function generateQuickPdf() {
         });
     }
 
-    // Tehillim - neshama letters
     if (checkedItems.includes('neshama')) {
         const seen = new Set();
-        html += `<div class="separator">✦</div>`;
-        html += `<h2>תהילים - אותיות נשמה</h2>`;
+        html += `<div class="pdf-divider">✦</div>`;
+        html += `<h2 class="pdf-section-title">תהילים - אותיות נשמה</h2>`;
         CONFIG.neshamaLetters.forEach(letter => {
             if (PSALM_119[letter] && !seen.has(letter)) {
                 seen.add(letter);
-                html += `<h2>${PSALM_119[letter].title}</h2>`;
-                html += `<div class="prayer-text">${PSALM_119[letter].verses}</div>`;
+                html += `<h3 class="pdf-letter-title">${PSALM_119[letter].title}</h3>`;
+                html += `<p class="pdf-prayer">${PSALM_119[letter].verses}</p>`;
             }
         });
     }
@@ -479,37 +561,24 @@ function generateQuickPdf() {
 
     if (checkedItems.includes('kaddish')) html += buildPrayerSection(PRAYERS.kaddish);
 
-    html += `<div class="separator">✦ ✦ ✦</div>`;
-    html += `<p style="text-align:center; font-size:1.3rem;">ת.נ.צ.ב.ה</p>`;
-    html += `</div>`;
+    html += `<div class="pdf-divider">✦ ✦ ✦</div>`;
+    html += `<p class="pdf-footer">ת.נ.צ.ב.ה</p>`;
 
-    pdfDiv.innerHTML = html;
-
-    html2pdf().set({
-        margin: 10,
-        filename: `seder_azkara_${azkara.forPerson}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    }).from(pdfDiv).save().then(() => pdfDiv.classList.add('hidden'));
+    openPdfWindow(html, `סדר אזכרה - ${getPersonTitle(azkara.forPerson)}`);
 }
 
-// Advanced PDF from manage page - uses manually selected letters
+// Advanced PDF from manage page
 function generateAdvancedPdf() {
     const azkara = state.azkara;
     const checkedItems = [];
     document.querySelectorAll('#adv-seder-checklist input:checked').forEach(cb => checkedItems.push(cb.value));
 
-    const pdfDiv = document.getElementById('pdf-content');
-    pdfDiv.classList.remove('hidden');
-
-    let html = `<div class="pdf-page">`;
-    html += `<h1>סדר אזכרה ${azkara.yearLabel}</h1>`;
-    html += `<h1>${getPersonTitle(azkara.forPerson)}</h1>`;
+    let html = `<h1 class="pdf-main-title">סדר אזכרה ${azkara.yearLabel}</h1>`;
+    html += `<h1 class="pdf-sub-title">${getPersonTitle(azkara.forPerson)}</h1>`;
 
     const dateParts = azkara.date.split('-');
-    html += `<p style="text-align:center;">${dateParts[2]}/${dateParts[1]}/${dateParts[0]} | ${azkara.time} | ${azkara.location}</p>`;
-    html += `<div class="separator">✦ ✦ ✦</div>`;
+    html += `<p class="pdf-info">${dateParts[2]}/${dateParts[1]}/${dateParts[0]} | ${azkara.time} | ${azkara.location}</p>`;
+    html += `<div class="pdf-divider">✦ ✦ ✦</div>`;
 
     if (checkedItems.includes('candle')) html += buildPrayerSection(PRAYERS.candle);
 
@@ -529,19 +598,10 @@ function generateAdvancedPdf() {
     if (checkedItems.includes('hashkava_doris')) html += buildPrayerSection(PRAYERS.hashkava_female);
     if (checkedItems.includes('kaddish')) html += buildPrayerSection(PRAYERS.kaddish);
 
-    html += `<div class="separator">✦ ✦ ✦</div>`;
-    html += `<p style="text-align:center; font-size:1.3rem;">ת.נ.צ.ב.ה</p>`;
-    html += `</div>`;
+    html += `<div class="pdf-divider">✦ ✦ ✦</div>`;
+    html += `<p class="pdf-footer">ת.נ.צ.ב.ה</p>`;
 
-    pdfDiv.innerHTML = html;
-
-    html2pdf().set({
-        margin: 10,
-        filename: `seder_azkara_custom.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    }).from(pdfDiv).save().then(() => pdfDiv.classList.add('hidden'));
+    openPdfWindow(html, 'סדר אזכרה מותאם');
 }
 
 // ==================== LOCAL STORAGE ====================

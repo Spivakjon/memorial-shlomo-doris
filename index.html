@@ -5,33 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>לזכר שלמה ודוריס לוי ז"ל</title>
     <link rel="stylesheet" href="css/style.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 
-    <!-- Login Screen -->
-    <div id="login-screen">
-        <div class="login-box">
-            <div class="memorial-candle">
-                <div class="candle-container">
-                    <div class="candle-glow"></div>
-                    <div class="candle-flame-outer"></div>
-                    <div class="candle-flame-inner"></div>
-                    <div class="candle-wick"></div>
-                    <div class="candle-body"></div>
-                    <div class="candle-holder"></div>
-                </div>
-            </div>
-            <h1>לזכר שלמה ודוריס לוי ז"ל</h1>
-            <p>אתר משפחתי להנצחה</p>
-            <input type="password" id="password-input" placeholder="סיסמה">
-            <button id="login-btn">כניסה</button>
-            <p id="login-error" class="error hidden">סיסמה שגויה</p>
-        </div>
-    </div>
-
     <!-- Main App -->
-    <div id="app" class="hidden">
+    <div id="app">
         <!-- Navigation - 2 tabs -->
         <nav id="main-nav">
             <a href="#" class="nav-link active" data-section="main">דף הנצחה</a>
@@ -79,6 +57,11 @@
                 <!-- Filled by JS -->
             </div>
 
+            <!-- Calendar -->
+            <div class="calendar-section">
+                <button id="quick-calendar-btn" class="btn-secondary btn-full">הוסף אזכרה ליומן</button>
+            </div>
+
             <!-- Quick PDF Download -->
             <div class="quick-pdf-section" id="quick-pdf-section">
                 <h3>הורדת סדר אזכרה</h3>
@@ -94,7 +77,6 @@
                     <label><input type="checkbox" value="kaddish" checked> קדיש יתום</label>
                 </div>
 
-                <button id="quick-calendar-btn" class="btn-secondary">הוסף ליומן</button>
                 <button id="quick-pdf-btn">הורד PDF לאזכרה</button>
             </div>
 
@@ -232,9 +214,6 @@
             </div>
         </section>
     </div>
-
-    <!-- Hidden PDF content -->
-    <div id="pdf-content" class="hidden"></div>
 
     <script src="js/prayers.js"></script>
     <script src="js/app.js"></script>
