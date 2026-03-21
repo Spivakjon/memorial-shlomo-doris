@@ -10,8 +10,8 @@ var FAMILY_DATA = {
             info: 'שרית 10.11.1959',
             level: 'child',
             children: [
-                { name: 'שגיא לוי', info: '03.07.1991', level: 'gc', spouse: 'נועה' },
-                { name: 'יניב לוי', info: '', level: 'gc', spouse: 'אנטוניו' }
+                { name: 'שגיא ונועה לוי', info: 'שגיא 03.07.1991', level: 'gc' },
+                { name: 'יניב ואנטוניו לוי', info: '', level: 'gc' }
             ]
         },
         {

@@ -1097,7 +1097,7 @@ hr {
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 1.5rem 0.5rem 2rem;
+    padding: 2.5rem 0.5rem 2rem;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
     overflow-x: auto;
     overflow-y: visible;
@@ -1238,6 +1238,12 @@ hr {
     pointer-events: none;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     line-height: 1.6;
+}
+
+/* Root tooltip: show below to avoid being cut off at top */
+.ft-root .ft-tooltip {
+    bottom: auto;
+    top: calc(100% + 8px);
 }
 
 @media (max-width: 768px) {
