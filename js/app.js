@@ -662,28 +662,35 @@ function saveSelectedLetters() {
 // ==================== INIT ====================
 
 function initApp() {
-    initDarkMode();
-    initNav();
-    initLetters();
-    initAzkaraAdmin();
-    initMembers();
-    updateElapsedTimes();
-    updateMemorialAzkara();
+    try { initDarkMode(); } catch(e) { console.error('darkMode:', e); }
+    try { initNav(); } catch(e) { console.error('nav:', e); }
+    try { initLetters(); } catch(e) { console.error('letters:', e); }
+    try { initAzkaraAdmin(); } catch(e) { console.error('azkaraAdmin:', e); }
+    try { initMembers(); } catch(e) { console.error('members:', e); }
+    try { updateElapsedTimes(); } catch(e) { console.error('elapsed:', e); }
+    try { updateMemorialAzkara(); } catch(e) { console.error('memAzkara:', e); }
 
     // Main page buttons
-    document.getElementById('quick-pdf-btn').addEventListener('click', generateQuickPdf);
-
-    // Manage page button
-    document.getElementById('download-pdf-btn').addEventListener('click', generateAdvancedPdf);
-
-    // Gallery
-    initGallery();
+    try {
+        document.getElementById('quick-pdf-btn').addEventListener('click', generateQuickPdf);
+        document.getElementById('download-pdf-btn').addEventListener('click', generateAdvancedPdf);
+    } catch(e) { console.error('buttons:', e); }
 
     // Family tree
-    renderFamilyTree();
+    try { renderFamilyTree(); } catch(e) { console.error('tree:', e); }
 
-    // Static photos context menu (right-click / long-press)
-    initStaticPhotoMenu();
+    // Gallery
+    try { initGallery(); } catch(e) { console.error('gallery:', e); }
+
+    // Static photos context menu
+    try { initStaticPhotoMenu(); } catch(e) { console.error('photoMenu:', e); }
+
+    // File input change listener (backup - label handles click)
+    try {
+        document.getElementById('file-input').addEventListener('change', handleFileSelect);
+        document.getElementById('upload-submit-btn').addEventListener('click', submitUpload);
+        document.getElementById('upload-cancel-btn').addEventListener('click', cancelUpload);
+    } catch(e) { console.error('uploadBtns:', e); }
 }
 
 document.addEventListener('DOMContentLoaded', initAuth);

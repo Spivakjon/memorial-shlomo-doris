@@ -7,18 +7,12 @@ var pendingFiles = [];
 
 function initGallery() {
     if (!APPS_SCRIPT_URL) {
-        document.getElementById('gallery-status').textContent = 'גלריה ממתינה להגדרה';
+        var s = document.getElementById('gallery-status');
+        if (s) s.textContent = 'גלריה ממתינה להגדרה';
         return;
     }
 
     loadGallery();
-
-    document.getElementById('upload-btn').addEventListener('click', function() {
-        document.getElementById('file-input').click();
-    });
-    document.getElementById('file-input').addEventListener('change', handleFileSelect);
-    document.getElementById('upload-submit-btn').addEventListener('click', submitUpload);
-    document.getElementById('upload-cancel-btn').addEventListener('click', cancelUpload);
 }
 
 function handleFileSelect(e) {
