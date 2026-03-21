@@ -1715,22 +1715,29 @@ hr {
 
 /* Tag Panel */
 .tag-panel {
-    background: #222;
-    border-radius: 12px;
-    padding: 1rem;
-    margin-top: 0.75rem;
-    max-width: 400px;
-    width: 95vw;
-    max-height: 60vh;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #1a1a1f;
+    border-radius: 16px;
+    padding: 1.5rem;
+    width: 90vw;
+    max-width: 550px;
+    max-height: 85vh;
     overflow-y: auto;
     direction: rtl;
+    z-index: 2100;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255,255,255,0.1);
 }
 
 .tag-header h4 {
     color: #fff;
     text-align: center;
-    margin-bottom: 0.75rem;
+    margin-bottom: 1rem;
     font-weight: 500;
+    font-size: 1.2rem;
 }
 
 .tag-groups {
@@ -1741,15 +1748,15 @@ hr {
 
 .tag-group {
     background: rgba(255,255,255,0.05);
-    border-radius: 8px;
-    padding: 0.5rem 0.75rem;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
 }
 
 .tag-group-label {
     color: var(--accent);
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     font-weight: 600;
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.5rem;
 }
 
 .tag-group-members {
@@ -1759,16 +1766,17 @@ hr {
 }
 
 .tag-member-btn {
-    padding: 0.35rem 0.7rem;
-    font-size: 0.8rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
     background: rgba(255,255,255,0.1);
     border: 1.5px solid rgba(255,255,255,0.2);
     color: #ccc;
-    border-radius: 16px;
+    border-radius: 20px;
     cursor: pointer;
     font-family: inherit;
     transition: all 0.15s;
     margin: 0;
+    min-height: 40px;
 }
 
 .tag-member-btn:hover {
@@ -1791,24 +1799,25 @@ hr {
 
 .tag-save-btn {
     flex: 1;
-    padding: 0.6rem;
+    padding: 0.75rem;
     background: var(--accent);
     border: none;
     color: #fff;
-    border-radius: 8px;
-    font-size: 0.95rem;
+    border-radius: 10px;
+    font-size: 1.05rem;
     cursor: pointer;
     font-family: inherit;
+    font-weight: 600;
 }
 
 .tag-cancel-btn {
     flex: 1;
-    padding: 0.6rem;
+    padding: 0.75rem;
     background: rgba(255,255,255,0.1);
     border: 1px solid rgba(255,255,255,0.2);
     color: #aaa;
-    border-radius: 8px;
-    font-size: 0.95rem;
+    border-radius: 10px;
+    font-size: 1.05rem;
     cursor: pointer;
     font-family: inherit;
 }
