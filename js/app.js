@@ -303,35 +303,78 @@ function renderMembers() {
 // ==================== CALENDAR ====================
 
 function downloadCalendarEvent() {
-    const azkara = state.azkara;
-    const title = `אזכרה ${azkara.yearLabel} - ${getPersonTitle(azkara.forPerson)}`;
+    try {
+        const azkara = state.azkara;
+        const title = 'אזכרה ' + azkara.yearLabel + ' - ' + getPersonTitle(azkara.forPerson);
+        const description = title + ' | ' + azkara.location;
 
-    const startDate = new Date(azkara.date + 'T' + azkara.time + ':00');
-    const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
+        const dateStr = azkara.date.replace(/-/g, '');
+        const timeStr = azkara.time.replace(':', '') + '00';
+        const startDate = new Date(azkara.date + 'T' + azkara.time + ':00');
+        const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
+        const endTimeStr = endDate.getHours().toString().padStart(2, '0') +
+            endDate.getMinutes().toString().padStart(2, '0') + '00';
 
-    function toGCalDate(d) {
-        return d.getFullYear().toString() +
-            (d.getMonth() + 1).toString().padStart(2, '0') +
-            d.getDate().toString().padStart(2, '0') + 'T' +
-            d.getHours().toString().padStart(2, '0') +
-            d.getMinutes().toString().padStart(2, '0') + '00';
+        const now = new Date();
+        const stamp = now.getFullYear().toString() +
+            (now.getMonth() + 1).toString().padStart(2, '0') +
+            now.getDate().toString().padStart(2, '0') + 'T' +
+            now.getHours().toString().padStart(2, '0') +
+            now.getMinutes().toString().padStart(2, '0') +
+            now.getSeconds().toString().padStart(2, '0');
+
+        const lines = [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'PRODID:-//Memorial//Azkara//HE',
+            'CALSCALE:GREGORIAN',
+            'METHOD:PUBLISH',
+            'BEGIN:VEVENT',
+            'UID:azkara-' + dateStr + '@memorial-levi',
+            'DTSTAMP:' + stamp,
+            'DTSTART;TZID=Asia/Jerusalem:' + dateStr + 'T' + timeStr,
+            'DTEND;TZID=Asia/Jerusalem:' + dateStr + 'T' + endTimeStr,
+            'SUMMARY:' + title,
+            'LOCATION:' + azkara.location,
+            'DESCRIPTION:' + description,
+            'BEGIN:VALARM',
+            'TRIGGER:-P7D',
+            'ACTION:DISPLAY',
+            'DESCRIPTION:בעוד שבוע: ' + title,
+            'END:VALARM',
+            'BEGIN:VALARM',
+            'TRIGGER:-P1D',
+            'ACTION:DISPLAY',
+            'DESCRIPTION:מחר: ' + title,
+            'END:VALARM',
+            'END:VEVENT',
+            'END:VCALENDAR'
+        ];
+
+        const icsText = lines.join('\r\n');
+        // Add UTF-8 BOM for Hebrew support
+        const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+        const encoder = new TextEncoder();
+        const body = encoder.encode(icsText);
+        const combined = new Uint8Array(bom.length + body.length);
+        combined.set(bom);
+        combined.set(body, bom.length);
+
+        const blob = new Blob([combined], { type: 'text/calendar;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'azkara.ics';
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function() {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }, 1000);
+    } catch (e) {
+        alert('שגיאה ביצירת אירוע יומן: ' + e.message);
     }
-
-    const gcalUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
-        '&text=' + encodeURIComponent(title) +
-        '&dates=' + toGCalDate(startDate) + '/' + toGCalDate(endDate) +
-        '&location=' + encodeURIComponent(azkara.location) +
-        '&details=' + encodeURIComponent(title + '\n' + azkara.location) +
-        '&ctz=Asia/Jerusalem';
-
-    // Use a link click instead of window.open to avoid popup blocker
-    const a = document.createElement('a');
-    a.href = gcalUrl;
-    a.target = '_blank';
-    a.rel = 'noopener';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
 }
 
 // ==================== PDF GENERATION ====================
@@ -380,105 +423,6 @@ function formatDate(dateStr) {
     return `${parts[2]}/${parts[1]}/${parts[0]}`;
 }
 
-// PDF styles that go into the print window
-const PDF_STYLES = `
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-    font-family: 'Segoe UI', 'Arial', 'Tahoma', sans-serif;
-    direction: rtl;
-    text-align: right;
-    line-height: 1.9;
-    letter-spacing: normal;
-    word-spacing: normal;
-    color: #1a1a1a;
-    background: #fff;
-    padding: 10mm 15mm;
-    font-size: 14pt;
-}
-
-h1.pdf-main-title {
-    text-align: center;
-    font-size: 24pt;
-    font-weight: bold;
-    margin-bottom: 6pt;
-    letter-spacing: normal;
-}
-
-h1.pdf-sub-title {
-    text-align: center;
-    font-size: 20pt;
-    font-weight: normal;
-    margin-bottom: 10pt;
-    letter-spacing: normal;
-}
-
-.pdf-info {
-    text-align: center;
-    font-size: 13pt;
-    margin-bottom: 4pt;
-    color: #333;
-}
-
-.pdf-divider {
-    text-align: center;
-    font-size: 14pt;
-    color: #c9a96e;
-    margin: 14pt 0;
-}
-
-h2.pdf-section-title {
-    text-align: center;
-    font-size: 17pt;
-    font-weight: bold;
-    margin: 22pt 0 10pt;
-    padding-bottom: 5pt;
-    border-bottom: 2pt solid #c9a96e;
-    color: #5a4020;
-    page-break-after: avoid;
-    letter-spacing: normal;
-}
-
-h3.pdf-letter-title {
-    text-align: center;
-    font-size: 15pt;
-    font-weight: bold;
-    margin: 16pt 0 8pt;
-    color: #5a4020;
-    page-break-after: avoid;
-    letter-spacing: normal;
-}
-
-.pdf-instruction {
-    text-align: center;
-    font-size: 12pt;
-    color: #666;
-    margin-bottom: 8pt;
-}
-
-.pdf-prayer {
-    font-size: 14pt;
-    line-height: 2;
-    margin-bottom: 10pt;
-    text-align: right;
-    letter-spacing: normal;
-    word-spacing: normal;
-}
-
-.pdf-footer {
-    text-align: center;
-    font-size: 20pt;
-    font-weight: bold;
-    margin-top: 24pt;
-}
-
-@media print {
-    body { padding: 0; font-size: 13pt; }
-    .pdf-prayer { font-size: 13pt; line-height: 1.9; }
-    @page { margin: 15mm; size: A4; }
-}
-`;
-
 function openPdfView(bodyHtml, title) {
     // Create a full-screen overlay with the PDF content for printing
     let overlay = document.getElementById('pdf-overlay');
@@ -516,6 +460,7 @@ function closePdfView() {
 
 // Quick PDF from main page
 function generateQuickPdf() {
+    try {
     const azkara = state.azkara;
     const checkedItems = [];
     document.querySelectorAll('#main-seder-checklist input:checked').forEach(cb => checkedItems.push(cb.value));
@@ -573,11 +518,13 @@ function generateQuickPdf() {
     html += `<div class="pdf-divider">✦ ✦ ✦</div>`;
     html += `<p class="pdf-footer">ת.נ.צ.ב.ה</p>`;
 
-    openPdfView(html, `סדר אזכרה - ${getPersonTitle(azkara.forPerson)}`);
+    openPdfView(html, 'סדר אזכרה');
+    } catch (e) { alert('שגיאה ביצירת PDF: ' + e.message); }
 }
 
 // Advanced PDF from manage page
 function generateAdvancedPdf() {
+    try {
     const azkara = state.azkara;
     const checkedItems = [];
     document.querySelectorAll('#adv-seder-checklist input:checked').forEach(cb => checkedItems.push(cb.value));
@@ -611,6 +558,7 @@ function generateAdvancedPdf() {
     html += `<p class="pdf-footer">ת.נ.צ.ב.ה</p>`;
 
     openPdfView(html, 'סדר אזכרה מותאם');
+    } catch (e) { alert('שגיאה ביצירת PDF: ' + e.message); }
 }
 
 // ==================== LOCAL STORAGE ====================
