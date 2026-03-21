@@ -634,6 +634,9 @@ function initApp() {
 
     // Manage page button
     document.getElementById('download-pdf-btn').addEventListener('click', generateAdvancedPdf);
+
+    // Gallery
+    initGallery();
 }
 
 document.addEventListener('DOMContentLoaded', initAuth);
