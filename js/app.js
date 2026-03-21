@@ -300,39 +300,32 @@ function renderMembers() {
     });
 }
 
-// ==================== CALENDAR (.ics) ====================
+// ==================== CALENDAR ====================
 
 function downloadCalendarEvent() {
     const azkara = state.azkara;
     const title = `אזכרה ${azkara.yearLabel} - ${getPersonTitle(azkara.forPerson)}`;
-    const dateStr = azkara.date.replace(/-/g, '');
-    const timeStr = azkara.time.replace(':', '') + '00';
-    const dtStart = dateStr + 'T' + timeStr;
+
+    // Build Google Calendar URL (works on all devices)
     const startDate = new Date(azkara.date + 'T' + azkara.time + ':00');
     const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
-    const dtEnd = dateStr + 'T' + endDate.getHours().toString().padStart(2, '0') +
-        endDate.getMinutes().toString().padStart(2, '0') + '00';
 
-    const icsContent = [
-        'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Memorial//Azkara//HE',
-        'CALSCALE:GREGORIAN', 'BEGIN:VEVENT',
-        `DTSTART:${dtStart}`, `DTEND:${dtEnd}`,
-        `SUMMARY:${title}`, `LOCATION:${azkara.location}`,
-        `DESCRIPTION:${title}\\n${azkara.location}`,
-        'BEGIN:VALARM', 'TRIGGER:-P7D', 'ACTION:DISPLAY',
-        `DESCRIPTION:תזכורת: ${title} בעוד שבוע`, 'END:VALARM',
-        'BEGIN:VALARM', 'TRIGGER:-P1D', 'ACTION:DISPLAY',
-        `DESCRIPTION:תזכורת: ${title} מחר`, 'END:VALARM',
-        'END:VEVENT', 'END:VCALENDAR'
-    ].join('\r\n');
+    function toGCalDate(d) {
+        return d.getFullYear().toString() +
+            (d.getMonth() + 1).toString().padStart(2, '0') +
+            d.getDate().toString().padStart(2, '0') + 'T' +
+            d.getHours().toString().padStart(2, '0') +
+            d.getMinutes().toString().padStart(2, '0') + '00';
+    }
 
-    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `azkara_${azkara.forPerson}.ics`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const gcalUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
+        '&text=' + encodeURIComponent(title) +
+        '&dates=' + toGCalDate(startDate) + '/' + toGCalDate(endDate) +
+        '&location=' + encodeURIComponent(azkara.location) +
+        '&details=' + encodeURIComponent(title + '\n' + azkara.location) +
+        '&ctz=Asia/Jerusalem';
+
+    window.open(gcalUrl, '_blank');
 }
 
 // ==================== PDF GENERATION ====================
