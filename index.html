@@ -32,15 +32,16 @@
 
     <!-- Main App -->
     <div id="app" class="hidden">
-        <!-- Navigation -->
+        <!-- Navigation - 2 tabs -->
         <nav id="main-nav">
-            <a href="#" class="nav-link active" data-section="memorial">דף הנצחה</a>
-            <a href="#" class="nav-link" data-section="azkara">אזכרה</a>
-            <a href="#" class="nav-link" data-section="admin">ניהול</a>
+            <a href="#" class="nav-link active" data-section="main">דף הנצחה</a>
+            <a href="#" class="nav-link" data-section="manage">ניהול</a>
         </nav>
 
-        <!-- Memorial Section -->
-        <section id="memorial" class="section active">
+        <!-- ========== TAB 1: Main Page ========== -->
+        <section id="main" class="section active">
+
+            <!-- Candle -->
             <div class="memorial-candle">
                 <div class="candle-container">
                     <div class="candle-glow"></div>
@@ -52,20 +53,19 @@
                 </div>
             </div>
 
+            <!-- Header -->
             <div class="memorial-header">
                 <h1>לזכרם האהוב של</h1>
             </div>
 
+            <!-- Person Cards -->
             <div class="person-cards">
-                <!-- Shlomo -->
                 <div class="person-card">
                     <h2>שלמה לוי ז"ל</h2>
                     <p class="dates">נפטר: ט"ז ניסן תשפ"א | 28/03/2021</p>
                     <p class="time-elapsed" id="elapsed-shlomo"></p>
                     <p>בית עלמין קדימה צורן</p>
                 </div>
-
-                <!-- Doris -->
                 <div class="person-card">
                     <h2>דוריס (חנה) לוי ז"ל</h2>
                     <p class="dates">נפטרה: י"ז אייר תשפ"א | 27/04/2021</p>
@@ -74,9 +74,28 @@
                 </div>
             </div>
 
-            <!-- Upcoming Azkara on Memorial Page -->
+            <!-- Upcoming Azkara -->
             <div class="upcoming-azkara" id="memorial-azkara">
                 <!-- Filled by JS -->
+            </div>
+
+            <!-- Quick PDF Download -->
+            <div class="quick-pdf-section" id="quick-pdf-section">
+                <h3>הורדת סדר אזכרה</h3>
+                <p class="info-text">בחר מה לכלול בסדר ולחץ להורדה</p>
+
+                <div class="seder-checklist" id="main-seder-checklist">
+                    <label><input type="checkbox" value="candle" checked> הדלקת נר נשמה</label>
+                    <label><input type="checkbox" value="tehillim" checked> תהילים קי"ט - אותיות השם</label>
+                    <label><input type="checkbox" value="neshama" > תהילים קי"ט - אותיות נשמה</label>
+                    <label><input type="checkbox" value="psalm91" checked> תהילים צ"א (יושב בסתר)</label>
+                    <label><input type="checkbox" value="psalm121" checked> תהילים קכ"א (שיר למעלות)</label>
+                    <label><input type="checkbox" value="hashkava" checked> השכבה</label>
+                    <label><input type="checkbox" value="kaddish" checked> קדיש יתום</label>
+                </div>
+
+                <button id="quick-pdf-btn">הורד PDF לאזכרה</button>
+                <button id="quick-calendar-btn" class="btn-secondary">הוסף ליומן</button>
             </div>
 
             <!-- Photos -->
@@ -103,93 +122,19 @@
             </div>
         </section>
 
-        <!-- Azkara Section -->
-        <section id="azkara" class="section hidden">
-            <h2>אזכרה קרובה</h2>
-
-            <div id="azkara-info">
-                <div class="azkara-details">
-                    <p><strong>אזכרה חמישית</strong></p>
-                    <p><strong>שלמה לוי ז"ל ודוריס (חנה) לוי ז"ל</strong></p>
-                    <p>יום שישי, 10/04/2026 בשעה 09:30</p>
-                    <p>בית עלמין קדימה צורן</p>
-                </div>
-
-                <div class="azkara-actions">
-                    <button id="download-calendar-btn">הוסף ליומן</button>
-                </div>
-            </div>
-
-            <hr>
-
-            <h3>בחירת אותיות תהילים קי"ט ל-PDF</h3>
-            <p class="info-text">בחר אילו אותיות לכלול. ניתן לבחור לפי שם מלא, שם פרטי, או אותיות נשמה</p>
-
-            <!-- Letters for Shlomo -->
-            <div class="letters-section">
-                <h4>שלמה לוי ז"ל</h4>
-                <div class="quick-select-btns">
-                    <button type="button" class="quick-btn" onclick="quickSelect('shlomo', 'all')">הכל</button>
-                    <button type="button" class="quick-btn" onclick="quickSelect('shlomo', 'first')">שלמה</button>
-                    <button type="button" class="quick-btn" onclick="quickSelect('shlomo', 'last')">לוי</button>
-                    <button type="button" class="quick-btn" onclick="quickSelect('shlomo', 'neshama')">נשמה</button>
-                    <button type="button" class="quick-btn" onclick="quickSelect('shlomo', 'none')">נקה</button>
-                </div>
-                <div class="letters-grid" id="letters-shlomo">
-                    <!-- Generated by JS -->
-                </div>
-            </div>
-
-            <!-- Letters for Doris -->
-            <div class="letters-section">
-                <h4>דוריס (חנה) לוי ז"ל</h4>
-                <div class="quick-select-btns">
-                    <button type="button" class="quick-btn" onclick="quickSelect('doris', 'all')">הכל</button>
-                    <button type="button" class="quick-btn" onclick="quickSelect('doris', 'doris')">דוריס</button>
-                    <button type="button" class="quick-btn" onclick="quickSelect('doris', 'chana')">חנה</button>
-                    <button type="button" class="quick-btn" onclick="quickSelect('doris', 'last')">לוי</button>
-                    <button type="button" class="quick-btn" onclick="quickSelect('doris', 'neshama')">נשמה</button>
-                    <button type="button" class="quick-btn" onclick="quickSelect('doris', 'none')">נקה</button>
-                </div>
-                <div class="letters-grid" id="letters-doris">
-                    <!-- Generated by JS -->
-                </div>
-            </div>
-
-            <hr>
-
-            <h3>סדר האזכרה - בחר מה לכלול ב-PDF</h3>
-            <div class="seder-checklist" id="seder-checklist">
-                <label><input type="checkbox" value="candle" checked> הדלקת נר נשמה</label>
-                <label><input type="checkbox" value="tehillim_shlomo" checked> תהילים - שלמה לוי (אותיות שנבחרו)</label>
-                <label><input type="checkbox" value="tehillim_doris" checked> תהילים - דוריס חנה לוי (אותיות שנבחרו)</label>
-                <label><input type="checkbox" value="hashkava_shlomo" checked> השכבה - שלמה</label>
-                <label><input type="checkbox" value="hashkava_doris" checked> השכבה - דוריס</label>
-                <label><input type="checkbox" value="kaddish" checked> קדיש יתום</label>
-                <label><input type="checkbox" value="psalm91" checked> תהילים צ"א (יושב בסתר)</label>
-                <label><input type="checkbox" value="psalm121" checked> תהילים קכ"א (שיר למעלות)</label>
-            </div>
-
-            <button id="download-pdf-btn">הורד PDF עם הסדר</button>
-
-            <!-- Hidden PDF content -->
-            <div id="pdf-content" class="hidden">
-                <!-- Built dynamically by JS -->
-            </div>
-        </section>
-
-        <!-- Admin Section -->
-        <section id="admin" class="section hidden">
+        <!-- ========== TAB 2: Management ========== -->
+        <section id="manage" class="section hidden">
             <h2>ניהול</h2>
 
-            <div class="admin-panel">
-                <h3>ניהול אזכרות</h3>
+            <!-- Azkara Settings -->
+            <div class="manage-block">
+                <h3>הגדרת אזכרה קרובה</h3>
                 <div class="form-group">
                     <label>לזכר:</label>
                     <select id="azkara-for">
-                        <option value="both">שלמה ודוריס לוי ז"ל (משולבת)</option>
                         <option value="shlomo">שלמה לוי ז"ל</option>
                         <option value="doris">דוריס (חנה) לוי ז"ל</option>
+                        <option value="both">שלמה ודוריס לוי ז"ל (משולבת)</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -210,9 +155,61 @@
                 </div>
                 <button id="save-azkara-btn">שמור אזכרה</button>
                 <p id="save-success" class="success hidden">נשמר בהצלחה!</p>
+            </div>
 
-                <hr>
+            <hr>
 
+            <!-- Advanced PDF Builder -->
+            <div class="manage-block">
+                <h3>בניית סידור מותאם אישית</h3>
+                <p class="info-text">בחר אותיות ספציפיות ורכיבים ליצירת PDF מותאם</p>
+
+                <!-- Letters for Shlomo -->
+                <div class="letters-section">
+                    <h4>שלמה לוי ז"ל - בחירת אותיות</h4>
+                    <div class="quick-select-btns">
+                        <button type="button" class="quick-btn" onclick="quickSelect('shlomo', 'all')">הכל</button>
+                        <button type="button" class="quick-btn" onclick="quickSelect('shlomo', 'first')">שלמה</button>
+                        <button type="button" class="quick-btn" onclick="quickSelect('shlomo', 'last')">לוי</button>
+                        <button type="button" class="quick-btn" onclick="quickSelect('shlomo', 'neshama')">+ נשמה</button>
+                        <button type="button" class="quick-btn" onclick="quickSelect('shlomo', 'none')">נקה</button>
+                    </div>
+                    <div class="letters-grid" id="letters-shlomo"></div>
+                </div>
+
+                <!-- Letters for Doris -->
+                <div class="letters-section">
+                    <h4>דוריס (חנה) לוי ז"ל - בחירת אותיות</h4>
+                    <div class="quick-select-btns">
+                        <button type="button" class="quick-btn" onclick="quickSelect('doris', 'all')">הכל</button>
+                        <button type="button" class="quick-btn" onclick="quickSelect('doris', 'doris')">דוריס</button>
+                        <button type="button" class="quick-btn" onclick="quickSelect('doris', 'chana')">חנה</button>
+                        <button type="button" class="quick-btn" onclick="quickSelect('doris', 'last')">לוי</button>
+                        <button type="button" class="quick-btn" onclick="quickSelect('doris', 'neshama')">+ נשמה</button>
+                        <button type="button" class="quick-btn" onclick="quickSelect('doris', 'none')">נקה</button>
+                    </div>
+                    <div class="letters-grid" id="letters-doris"></div>
+                </div>
+
+                <h4>רכיבי הסדר</h4>
+                <div class="seder-checklist" id="adv-seder-checklist">
+                    <label><input type="checkbox" value="candle" checked> הדלקת נר נשמה</label>
+                    <label><input type="checkbox" value="tehillim_shlomo" checked> תהילים - שלמה (אותיות שנבחרו)</label>
+                    <label><input type="checkbox" value="tehillim_doris" checked> תהילים - דוריס (אותיות שנבחרו)</label>
+                    <label><input type="checkbox" value="psalm91" checked> תהילים צ"א (יושב בסתר)</label>
+                    <label><input type="checkbox" value="psalm121" checked> תהילים קכ"א (שיר למעלות)</label>
+                    <label><input type="checkbox" value="hashkava_shlomo" checked> השכבה - שלמה</label>
+                    <label><input type="checkbox" value="hashkava_doris" checked> השכבה - דוריס</label>
+                    <label><input type="checkbox" value="kaddish" checked> קדיש יתום</label>
+                </div>
+
+                <button id="download-pdf-btn">הורד PDF מותאם</button>
+            </div>
+
+            <hr>
+
+            <!-- Members Management -->
+            <div class="manage-block">
                 <h3>ניהול משתתפים</h3>
                 <div class="form-group">
                     <label>שם:</label>
@@ -230,13 +227,14 @@
 
                 <div id="members-list">
                     <h4>משתתפים רשומים</h4>
-                    <ul id="members-ul">
-                        <!-- Generated by JS -->
-                    </ul>
+                    <ul id="members-ul"></ul>
                 </div>
             </div>
         </section>
     </div>
+
+    <!-- Hidden PDF content -->
+    <div id="pdf-content" class="hidden"></div>
 
     <script src="js/prayers.js"></script>
     <script src="js/app.js"></script>

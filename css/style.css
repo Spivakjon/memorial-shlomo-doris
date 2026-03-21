@@ -514,6 +514,73 @@ body {
     margin-top: 0.5rem !important;
 }
 
+/* Quick PDF Section (main page) */
+.quick-pdf-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.quick-pdf-section h3 {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    font-size: 1.15rem;
+}
+
+.quick-pdf-section .info-text {
+    margin-bottom: 1rem;
+}
+
+#quick-pdf-btn {
+    display: block;
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.85rem;
+    font-size: 1.05rem;
+}
+
+#quick-calendar-btn {
+    display: block;
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--accent-dark);
+    border: 1px solid var(--accent);
+}
+
+.btn-secondary:hover {
+    background: var(--accent);
+    color: #fff;
+}
+
+/* Manage blocks */
+.manage-block {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.manage-block h3 {
+    font-weight: 500;
+    margin-bottom: 1rem;
+    font-size: 1.15rem;
+}
+
+.manage-block h4 {
+    font-weight: 500;
+    margin: 1rem 0 0.5rem;
+    font-size: 1.05rem;
+}
+
 /* ===== Seder Checklist ===== */
 .seder-checklist {
     display: flex;
