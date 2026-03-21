@@ -1240,10 +1240,19 @@ hr {
     line-height: 1.6;
 }
 
-/* Root tooltip: show below to avoid being cut off at top */
+/* Root tooltip: fixed center on screen */
 .ft-root .ft-tooltip {
+    position: fixed;
     bottom: auto;
-    top: calc(100% + 8px);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1rem;
+    padding: 16px 24px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    z-index: 500;
 }
 
 @media (max-width: 768px) {
@@ -1275,6 +1284,91 @@ hr {
     background: var(--accent);
     color: #fff;
     border-style: solid;
+}
+
+/* Upload preview */
+.upload-preview {
+    margin: 1rem 0;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg);
+}
+
+.preview-thumbs {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.75rem;
+}
+
+.preview-thumb {
+    width: 70px;
+    text-align: center;
+}
+
+.preview-thumb img {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+}
+
+.preview-thumb span {
+    font-size: 0.65rem;
+    color: var(--text-light);
+    display: block;
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.preview-video-icon {
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #333;
+    color: #fff;
+    border-radius: 6px;
+    font-size: 1.5rem;
+}
+
+.upload-preview .form-group {
+    margin-bottom: 0.75rem;
+}
+
+.upload-preview input[type="text"] {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    font-size: 1rem;
+    font-family: inherit;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-card);
+    color: var(--text);
+}
+
+.upload-submit-btn {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.upload-cancel-btn {
+    width: 100%;
+    padding: 0.6rem;
+    font-size: 0.9rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-light);
+}
+
+.upload-cancel-btn:hover {
+    background: var(--bg);
 }
 
 .gallery-status {

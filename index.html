@@ -145,9 +145,21 @@
                 <h3>גלריה משפחתית</h3>
                 <p class="info-text">שתפו תמונות וסרטונים של סבא וסבתא</p>
 
-                <input type="file" id="file-input" accept="image/*,video/*" multiple hidden>
-                <button id="upload-btn" class="upload-btn">העלו תמונות או סרטונים</button>
-                <p id="gallery-status" class="gallery-status"></p>
+                <div class="upload-form" id="upload-form">
+                    <input type="file" id="file-input" accept="image/*,video/*" multiple hidden>
+                    <button id="upload-btn" class="upload-btn">בחרו תמונות או סרטונים</button>
+
+                    <div id="upload-preview" class="upload-preview hidden">
+                        <div id="preview-thumbs" class="preview-thumbs"></div>
+                        <div class="form-group">
+                            <input type="text" id="upload-description" placeholder="תיאור - איפה צולמה? מתי? (אופציונלי)">
+                        </div>
+                        <button id="upload-submit-btn" class="upload-submit-btn">העלה</button>
+                        <button id="upload-cancel-btn" class="upload-cancel-btn" type="button">ביטול</button>
+                    </div>
+
+                    <p id="gallery-status" class="gallery-status"></p>
+                </div>
 
                 <div class="photo-grid" id="family-gallery-grid">
                     <!-- Loaded from Firebase -->
