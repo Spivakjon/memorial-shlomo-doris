@@ -91,80 +91,62 @@
             <div class="family-tree-section">
                 <h3>עץ המשפחה</h3>
                 <div class="tree">
-                    <!-- Root: Shlomo & Doris -->
-                    <div class="tree-level root-level">
-                        <div class="tree-node root-node">
-                            <span class="node-name">שלמה ודוריס לוי ז"ל</span>
-                        </div>
+                    <!-- דור 1: שורש -->
+                    <div class="tree-row">
+                        <div class="tree-card root-card">שלמה ודוריס לוי ז"ל</div>
                     </div>
-                    <div class="tree-connector-down"></div>
+                    <div class="tree-line"></div>
+                    <div class="tree-hline three-way"></div>
 
-                    <!-- Children level -->
-                    <div class="tree-level children-level">
-                        <!-- Eli -->
-                        <div class="tree-branch">
-                            <div class="tree-node parent-node">
-                                <span class="node-name">אלי</span>
-                                <span class="node-spouse">ושרית</span>
-                            </div>
-                            <div class="tree-connector-down small"></div>
-                            <div class="tree-level grandchildren">
-                                <div class="tree-node leaf">
-                                    <span class="node-name">שגיא</span>
-                                    <span class="node-spouse">ונועה</span>
-                                </div>
-                                <div class="tree-node leaf">
-                                    <span class="node-name">יניב</span>
-                                    <span class="node-spouse">ואנטוניו</span>
-                                </div>
+                    <!-- דור 2: ילדים -->
+                    <div class="tree-row gen2">
+                        <div class="tree-col">
+                            <div class="tree-card child-card">אלי ושרית</div>
+                            <div class="tree-line"></div>
+                            <div class="tree-hline two-way"></div>
+                            <!-- דור 3: נכדים -->
+                            <div class="tree-row gen3">
+                                <div class="tree-card gc-card">שגיא ונועה</div>
+                                <div class="tree-card gc-card">יניב ואנטוניו</div>
                             </div>
                         </div>
 
-                        <!-- Lilach -->
-                        <div class="tree-branch">
-                            <div class="tree-node parent-node">
-                                <span class="node-name">לילך</span>
-                                <span class="node-spouse">ושאולי</span>
-                            </div>
-                            <div class="tree-connector-down small"></div>
-                            <div class="tree-level grandchildren">
-                                <div class="tree-node leaf">
-                                    <span class="node-name">אלי</span>
-                                    <span class="node-spouse">ולילך</span>
-                                    <span class="node-kids">עלמה, עידן</span>
+                        <div class="tree-col">
+                            <div class="tree-card child-card">לילך ושאולי</div>
+                            <div class="tree-line"></div>
+                            <div class="tree-hline four-way"></div>
+                            <!-- דור 3: נכדים -->
+                            <div class="tree-row gen3">
+                                <div class="tree-col-inner">
+                                    <div class="tree-card gc-card">אלי ולילך</div>
+                                    <div class="tree-line small"></div>
+                                    <div class="tree-row gen4">
+                                        <div class="tree-card ggc-card">עלמה</div>
+                                        <div class="tree-card ggc-card">עידן</div>
+                                    </div>
                                 </div>
-                                <div class="tree-node leaf">
-                                    <span class="node-name">יהונתן</span>
-                                    <span class="node-spouse">ועדן</span>
-                                    <span class="node-kids">מיה, ליאו</span>
+                                <div class="tree-col-inner">
+                                    <div class="tree-card gc-card">יהונתן ועדן</div>
+                                    <div class="tree-line small"></div>
+                                    <div class="tree-row gen4">
+                                        <div class="tree-card ggc-card">מיה</div>
+                                        <div class="tree-card ggc-card">ליאו</div>
+                                    </div>
                                 </div>
-                                <div class="tree-node leaf">
-                                    <span class="node-name">דין</span>
-                                    <span class="node-spouse">וים</span>
-                                </div>
-                                <div class="tree-node leaf">
-                                    <span class="node-name">אדם</span>
-                                </div>
+                                <div class="tree-card gc-card">דין וים</div>
+                                <div class="tree-card gc-card">אדם</div>
                             </div>
                         </div>
 
-                        <!-- Gili -->
-                        <div class="tree-branch">
-                            <div class="tree-node parent-node">
-                                <span class="node-name">גילי</span>
-                                <span class="node-spouse">ומיכל</span>
-                            </div>
-                            <div class="tree-connector-down small"></div>
-                            <div class="tree-level grandchildren">
-                                <div class="tree-node leaf">
-                                    <span class="node-name">עומר</span>
-                                </div>
-                                <div class="tree-node leaf">
-                                    <span class="node-name">נועם</span>
-                                </div>
-                                <div class="tree-node leaf">
-                                    <span class="node-name">ליהי</span>
-                                </div>
+                        <div class="tree-col">
+                            <div class="tree-card child-card">גילי ומיכל</div>
+                            <div class="tree-line"></div>
+                            <div class="tree-hline three-way-sm"></div>
+                            <!-- דור 3: נכדים -->
+                            <div class="tree-row gen3">
+                                <div class="tree-card gc-card">עומר</div>
+                                <div class="tree-card gc-card">נועם</div>
+                                <div class="tree-card gc-card">ליהי</div>
                             </div>
                         </div>
                     </div>
@@ -190,6 +172,30 @@
                     <div class="photo-item">
                         <img src="images/doris.jpg" alt="דוריס">
                         <p class="photo-caption">דוריס</p>
+                    </div>
+                    <div class="photo-item">
+                        <img src="images/couple-garden.jpg" alt="שלמה ודוריס בגינה">
+                        <p class="photo-caption">שלמה ודוריס</p>
+                    </div>
+                    <div class="photo-item">
+                        <img src="images/shabbat.jpg" alt="שבת משפחתית">
+                        <p class="photo-caption">לחיים!</p>
+                    </div>
+                    <div class="photo-item">
+                        <img src="images/birthday2.jpg" alt="חגיגת יום הולדת">
+                        <p class="photo-caption">חגיגה משפחתית</p>
+                    </div>
+                    <div class="photo-item">
+                        <img src="images/family-outdoor.jpg" alt="טיול משפחתי">
+                        <p class="photo-caption">טיול משפחתי</p>
+                    </div>
+                    <div class="photo-item">
+                        <img src="images/train1.jpg" alt="ליד הרכבת">
+                        <p class="photo-caption">ליד הרכבת</p>
+                    </div>
+                    <div class="photo-item">
+                        <img src="images/train2.jpg" alt="ליד הרכבת">
+                        <p class="photo-caption">ליד הרכבת</p>
                     </div>
                 </div>
             </div>
