@@ -1306,26 +1306,25 @@ hr {
 
 /* Person tags on photos */
 .photo-people {
-    position: absolute;
-    bottom: 40px;
-    right: 4px;
     display: flex;
     gap: 3px;
     flex-wrap: wrap;
+    justify-content: center;
+    padding: 4px 0 0;
 }
 
 .person-tag {
-    background: rgba(0, 0, 0, 0.6);
+    background: var(--accent);
     color: #fff;
     padding: 2px 8px;
     border-radius: 10px;
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: opacity 0.2s;
 }
 
 .person-tag:hover {
-    background: var(--accent);
+    opacity: 0.8;
 }
 
 /* AI classify button on gallery items */

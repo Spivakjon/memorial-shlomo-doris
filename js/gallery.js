@@ -86,7 +86,7 @@ var STATIC_PHOTOS = [
     }
 ];
 
-var CATEGORIES = ['הכל', 'זוגי', 'משפחה', 'אירועים', 'אישי', 'הועלו ע"י המשפחה'];
+var CATEGORIES = ['הכל', 'זוגי', 'משפחה', 'אירועים', 'אישי', 'הועלו וטרם מוינו', 'ללא תיוג'];
 var activeFilter = 'הכל';
 var activePersonFilter = null;
 var allPhotos = [];
@@ -142,7 +142,7 @@ function loadDrivePhotos() {
                 data.files.forEach(function(f) {
                     var isVideo = f.mimeType && f.mimeType.startsWith('video/');
                     var desc = f.description || '';
-                    var cat = 'הועלו ע"י המשפחה';
+                    var cat = 'הועלו וטרם מוינו';
 
                     // Extract category tag from description
                     var catMatch = desc.match(/\[קטגוריה:([^\]]+)\]/);
@@ -197,6 +197,7 @@ function renderGallery() {
             return p.people && p.people.indexOf(activePersonFilter) !== -1;
         }
         if (activeFilter === 'הכל') return true;
+        if (activeFilter === 'ללא תיוג') return !p.people || p.people.length === 0;
         return p.category === activeFilter;
     });
 
@@ -222,22 +223,22 @@ function renderGallery() {
             div.innerHTML =
                 '<img src="' + imgSrc + '" alt="סרטון" loading="lazy">' +
                 '<div class="play-overlay">▶</div>' +
-                peopleTags +
                 '<div class="gallery-meta">' +
                 (photo.description ? '<p class="gallery-caption">' + photo.description + '</p>' : '') +
                 (photo.period ? '<p class="gallery-period">' + photo.period + '</p>' : '') +
-                '</div>';
+                '</div>' +
+                peopleTags;
             div.onclick = function() {
                 openDriveVideo(photo.fileId, photo.description);
             };
         } else {
             div.innerHTML =
                 '<img src="' + imgSrc + '" alt="' + (photo.description || '') + '" loading="lazy">' +
-                peopleTags +
                 '<div class="gallery-meta">' +
                 (photo.description ? '<p class="gallery-caption">' + photo.description + '</p>' : '') +
                 (photo.period ? '<p class="gallery-period">' + photo.period + '</p>' : '') +
-                '</div>';
+                '</div>' +
+                peopleTags;
             div.onclick = function() {
                 var full = photo.fullSrc || photo.src;
                 var id = photo.fileId || photo.src; // use src as ID for static photos
@@ -246,7 +247,7 @@ function renderGallery() {
         }
 
         // AI classify button for uploaded photos without category
-        if (!photo.isStatic && photo.fileId && photo.category === 'הועלו ע"י המשפחה') {
+        if (!photo.isStatic && photo.fileId && photo.category === 'הועלו וטרם מוינו') {
             var aiBtn = document.createElement('button');
             aiBtn.className = 'gallery-ai-btn';
             aiBtn.textContent = 'סווג AI';
@@ -450,9 +451,9 @@ function cancelUpload() {
 function submitUpload() {
     if (!pendingFiles.length || !APPS_SCRIPT_URL) return;
     var description = document.getElementById('upload-description').value.trim();
-    var category = document.getElementById('upload-category').value || 'הועלו ע"י המשפחה';
+    var category = document.getElementById('upload-category').value || 'הועלו וטרם מוינו';
     // Append category to description as tag
-    if (category && category !== 'הועלו ע"י המשפחה') {
+    if (category && category !== 'הועלו וטרם מוינו') {
         description = description + (description ? ' ' : '') + '[קטגוריה:' + category + ']';
     }
     var status = document.getElementById('gallery-status');
