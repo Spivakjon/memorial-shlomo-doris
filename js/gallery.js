@@ -196,25 +196,48 @@ function showCtxMenu(e, el) {
 }
 
 function closeCtxMenu() {
-    document.getElementById('photo-context-menu').classList.add('hidden');
+    var menu = document.getElementById('photo-context-menu');
+    menu.classList.add('hidden');
+    menu.dataset.isStatic = '';
+    menu.dataset.imgSrc = '';
     ctxTarget = null;
 }
 
 function ctxDownload() {
-    if (!ctxTarget) return;
-    var url = ctxTarget.dataset.url;
-    var a = document.createElement('a');
-    a.href = url;
-    a.download = ctxTarget.dataset.fileName || 'photo';
-    a.target = '_blank';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    var menu = document.getElementById('photo-context-menu');
+    var url = '';
+    if (menu.dataset.isStatic === 'true') {
+        url = menu.dataset.imgSrc;
+    } else if (ctxTarget) {
+        url = ctxTarget.dataset.url;
+    }
+    if (url) {
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'photo';
+        a.target = '_blank';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
     closeCtxMenu();
 }
 
 function ctxDelete() {
-    if (!ctxTarget || !firebaseReady) return;
+    var menu = document.getElementById('photo-context-menu');
+
+    // Static photos can't be deleted (they're in the repo)
+    if (menu.dataset.isStatic === 'true') {
+        alert('לא ניתן למחוק תמונות קבועות מהאתר');
+        closeCtxMenu();
+        return;
+    }
+
+    if (!ctxTarget || !firebaseReady) {
+        closeCtxMenu();
+        return;
+    }
+
     var pass = prompt('הזן סיסמה למחיקה:');
     if (pass !== '2803') {
         alert('סיסמה שגויה');
@@ -224,12 +247,8 @@ function ctxDelete() {
     var key = ctxTarget.dataset.key;
     var url = ctxTarget.dataset.url;
 
-    // Delete from database
     db.ref('media/' + key).remove().then(function() {
-        // Try to delete from storage too
-        try {
-            storage.refFromURL(url).delete();
-        } catch (e) {}
+        try { storage.refFromURL(url).delete(); } catch (e) {}
         closeCtxMenu();
     }).catch(function(err) {
         alert('שגיאה במחיקה: ' + err.message);

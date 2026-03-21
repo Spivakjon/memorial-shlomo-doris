@@ -1114,14 +1114,14 @@ hr {
 /* === Tree core === */
 .ftree {
     width: 100%;
-    min-width: 650px;
+    min-width: 680px;
 }
 
 .ftree ul {
     position: relative;
     list-style: none;
     margin: 0;
-    padding: 24px 0 0 0;
+    padding: 20px 0 0 0;
     display: flex;
     justify-content: center;
 }
@@ -1147,8 +1147,8 @@ hr {
     top: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: 2.5px;
-    height: 24px;
+    width: 2px;
+    height: 20px;
     background: var(--accent);
 }
 
@@ -1159,48 +1159,54 @@ hr {
     top: 0;
     left: 0;
     right: 0;
-    height: 2.5px;
+    height: 2px;
     background: var(--accent);
 }
 
-/* First child: horizontal only right half */
+/* First child: horizontal only from center to right */
 .ftree li:first-child::after {
     left: 50%;
+    right: 0;
 }
 
-/* Last child: horizontal only left half */
+/* Last child: horizontal only from left to center */
 .ftree li:last-child::after {
-    right: 50%;
     left: 0;
+    right: 50%;
 }
 
-/* Only child: no horizontal line */
+/* Only child: just vertical, no horizontal */
 .ftree li:only-child::after {
     display: none;
 }
 
-/* Root node: no lines above */
+/* Root: no lines above */
 .ftree > ul > li::before,
 .ftree > ul > li::after {
     display: none;
 }
 
-/* Vertical line DOWN from parent to children */
-.ftree li > span {
-    position: relative;
-    margin-bottom: 0;
+/* Vertical line DOWN from parent node to children ul */
+.ftree li:has(> ul)::after {
+    /* keep the horizontal line */
 }
 
-/* Line going down from node that has children */
-.ftree li:has(> ul) > span::after {
+/* We need a separate element for the downward line from a parent.
+   Use a padding-based approach: the UL itself draws the line up to the horizontal bar */
+.ftree ul ul::before {
     content: '';
     position: absolute;
-    bottom: -24px;
+    top: -20px;
     left: 50%;
     transform: translateX(-50%);
-    width: 2.5px;
-    height: 24px;
+    width: 2px;
+    height: 20px;
     background: var(--accent);
+}
+
+/* But root > first ul doesn't need the line */
+.ftree > ul::before {
+    display: none;
 }
 
 /* === Node cards === */
@@ -1212,53 +1218,26 @@ hr {
     font-weight: 600;
     white-space: nowrap;
     cursor: default;
+    position: relative;
     transition: transform 0.15s, box-shadow 0.15s;
 }
 
 .ftree span:hover {
-    transform: translateY(-2px);
+    transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* Tooltip for birth dates */
-.ftree span[data-birth]:hover::before {
-    content: attr(data-birth);
-    position: absolute;
-    bottom: calc(100% + 6px);
-    left: 50%;
-    transform: translateX(-50%);
-    background: #333;
-    color: #fff;
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-weight: 400;
-    white-space: nowrap;
-    z-index: 100;
-    pointer-events: none;
-}
-
-.ftree span[data-birth]:hover::after {
+/* Downward line from node to its children */
+.ftree li:has(> ul) > span::after {
     content: '';
     position: absolute;
-    bottom: calc(100% + 2px);
+    bottom: -21px;
     left: 50%;
     transform: translateX(-50%);
-    border: 5px solid transparent;
-    border-top-color: #333;
-    z-index: 100;
-    pointer-events: none;
-}
-
-/* Override the down-line ::after when tooltip is shown */
-.ftree li:has(> ul) > span[data-birth]:hover::after {
-    bottom: calc(100% + 2px);
-    left: 50%;
-    width: auto;
-    height: auto;
-    background: transparent;
-    border: 5px solid transparent;
-    border-top-color: #333;
+    width: 2px;
+    height: 21px;
+    background: var(--accent);
+    z-index: 1;
 }
 
 /* Root */
@@ -1303,8 +1282,8 @@ hr {
     font-weight: 500;
 }
 
-/* Mobile tooltip (tap on mobile) */
-.mobile-tooltip {
+/* Tree tooltip (JS-generated) */
+.tree-tooltip {
     position: absolute;
     bottom: calc(100% + 8px);
     left: 50%;

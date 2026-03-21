@@ -162,6 +162,122 @@ function shareWhatsApp() {
     window.location.href = waUrl;
 }
 
+// ==================== TREE TOOLTIPS ====================
+
+function calcAge(dateStr) {
+    // Parse dd.mm.yyyy
+    var parts = dateStr.split('.');
+    if (parts.length < 3) return null;
+    var d = parseInt(parts[0]), m = parseInt(parts[1]) - 1, y = parseInt(parts[2]);
+    if (y < 100) y += 2000;
+    var birth = new Date(y, m, d);
+    var now = new Date();
+    var age = now.getFullYear() - birth.getFullYear();
+    var mDiff = now.getMonth() - birth.getMonth();
+    if (mDiff < 0 || (mDiff === 0 && now.getDate() < birth.getDate())) age--;
+    return age;
+}
+
+function buildTooltipText(rawData) {
+    // Parse entries like "אלי 03.11.1987 | עדן 01.10.1991 | נישואים 19.10.2017"
+    var parts = rawData.split('|');
+    var lines = [];
+    parts.forEach(function(part) {
+        part = part.trim();
+        // Try to find a date pattern dd.mm.yyyy
+        var dateMatch = part.match(/(\d{2}\.\d{2}\.\d{4})/);
+        if (dateMatch) {
+            var age = calcAge(dateMatch[1]);
+            if (part.indexOf('נישואים') !== -1) {
+                lines.push(part);
+            } else if (age !== null) {
+                lines.push(part + ' (גיל ' + age + ')');
+            } else {
+                lines.push(part);
+            }
+        } else {
+            // Try dd.mm.yy
+            var shortMatch = part.match(/(\d{2}\.\d{2}\.\d{2})$/);
+            if (shortMatch) {
+                var fullDate = shortMatch[1].substring(0, 6) + '19' + shortMatch[1].substring(6);
+                var age2 = calcAge(fullDate);
+                if (age2 !== null) {
+                    lines.push(part + ' (גיל ' + age2 + ')');
+                } else {
+                    lines.push(part);
+                }
+            } else {
+                lines.push(part);
+            }
+        }
+    });
+    return lines.join('\n');
+}
+
+function initTreeTooltips() {
+    document.querySelectorAll('.ftree span[data-birth]').forEach(function(el) {
+        function showTip(e) {
+            e.stopPropagation();
+            // Remove old
+            var old = document.querySelector('.tree-tooltip');
+            if (old) old.remove();
+
+            var text = buildTooltipText(el.dataset.birth);
+            var tip = document.createElement('div');
+            tip.className = 'tree-tooltip';
+            tip.style.whiteSpace = 'pre-line';
+            tip.textContent = text;
+            el.appendChild(tip);
+            setTimeout(function() { if (tip.parentNode) tip.remove(); }, 4000);
+        }
+
+        el.addEventListener('click', showTip);
+        el.addEventListener('mouseenter', showTip);
+        el.addEventListener('mouseleave', function() {
+            var tip = el.querySelector('.tree-tooltip');
+            if (tip) tip.remove();
+        });
+    });
+
+    // Close tooltip on body click
+    document.addEventListener('click', function() {
+        var old = document.querySelector('.tree-tooltip');
+        if (old) old.remove();
+    });
+}
+
+// ==================== STATIC PHOTO MENU ====================
+
+function initStaticPhotoMenu() {
+    document.querySelectorAll('.photos-section .photo-item img').forEach(function(img) {
+        // Right-click
+        img.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            showStaticPhotoMenu(e, this);
+        });
+        // Long press mobile
+        var timer;
+        img.addEventListener('touchstart', function(e) {
+            var el = this;
+            timer = setTimeout(function() { showStaticPhotoMenu(e, el); }, 600);
+        });
+        img.addEventListener('touchend', function() { clearTimeout(timer); });
+        img.addEventListener('touchmove', function() { clearTimeout(timer); });
+    });
+}
+
+function showStaticPhotoMenu(e, imgEl) {
+    var menu = document.getElementById('photo-context-menu');
+    // Store reference
+    menu.dataset.imgSrc = imgEl.src;
+    menu.dataset.isStatic = 'true';
+    menu.classList.remove('hidden');
+    var x = e.clientX || (e.touches && e.touches[0].clientX) || 100;
+    var y = e.clientY || (e.touches && e.touches[0].clientY) || 100;
+    menu.style.left = Math.min(x, window.innerWidth - 180) + 'px';
+    menu.style.top = Math.min(y, window.innerHeight - 150) + 'px';
+}
+
 // ==================== NAVIGATION ====================
 
 function initNav() {
@@ -638,21 +754,11 @@ function initApp() {
     // Gallery
     initGallery();
 
-    // Tree tooltips for mobile (tap to show birth date)
-    document.querySelectorAll('.ftree span[data-birth]').forEach(function(el) {
-        el.addEventListener('click', function(e) {
-            e.stopPropagation();
-            // Remove any existing mobile tooltip
-            var old = document.querySelector('.mobile-tooltip');
-            if (old) old.remove();
-            // Create tooltip
-            var tip = document.createElement('div');
-            tip.className = 'mobile-tooltip';
-            tip.textContent = this.dataset.birth;
-            this.appendChild(tip);
-            setTimeout(function() { tip.remove(); }, 3000);
-        });
-    });
+    // Tree tooltips with age calculation
+    initTreeTooltips();
+
+    // Static photos context menu (right-click / long-press)
+    initStaticPhotoMenu();
 }
 
 document.addEventListener('DOMContentLoaded', initAuth);
