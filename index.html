@@ -93,77 +93,31 @@
                 <div id="family-tree-container"></div>
             </div>
 
-            <!-- Photos -->
-            <div class="photos-section">
-                <h3>תמונות</h3>
-                <div class="photo-grid">
-                    <div class="photo-item">
-                        <img src="images/together.jpg" alt="שלמה ודוריס">
-                        <p class="photo-caption">שלמה ודוריס</p>
-                    </div>
-                    <div class="photo-item">
-                        <img src="images/family1.jpg" alt="תמונה משפחתית">
-                        <p class="photo-caption">תמונה משפחתית</p>
-                    </div>
-                    <div class="photo-item">
-                        <img src="images/family2.jpg" alt="תמונה משפחתית">
-                        <p class="photo-caption">תמונה משפחתית</p>
-                    </div>
-                    <div class="photo-item">
-                        <img src="images/doris.jpg" alt="דוריס">
-                        <p class="photo-caption">דוריס</p>
-                    </div>
-                    <div class="photo-item">
-                        <img src="images/couple-garden.jpg" alt="שלמה ודוריס בגינה">
-                        <p class="photo-caption">שלמה ודוריס</p>
-                    </div>
-                    <div class="photo-item">
-                        <img src="images/shabbat.jpg" alt="שבת משפחתית">
-                        <p class="photo-caption">לחיים!</p>
-                    </div>
-                    <div class="photo-item">
-                        <img src="images/birthday2.jpg" alt="חגיגת יום הולדת">
-                        <p class="photo-caption">חגיגה משפחתית</p>
-                    </div>
-                    <div class="photo-item">
-                        <img src="images/family-outdoor.jpg" alt="טיול משפחתי">
-                        <p class="photo-caption">טיול משפחתי</p>
-                    </div>
-                    <div class="photo-item">
-                        <img src="images/train1.jpg" alt="ליד הרכבת">
-                        <p class="photo-caption">ליד הרכבת</p>
-                    </div>
-                    <div class="photo-item">
-                        <img src="images/train2.jpg" alt="ליד הרכבת">
-                        <p class="photo-caption">ליד הרכבת</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Family Gallery - Upload -->
+            <!-- Unified Gallery -->
             <div class="photos-section" id="gallery-section">
-                <h3>גלריה משפחתית</h3>
-                <p class="info-text">שתפו תמונות וסרטונים של סבא וסבתא</p>
+                <h3>גלריה</h3>
 
-                <div class="upload-form" id="upload-form">
+                <!-- Filters -->
+                <div class="gallery-filters" id="gallery-filters"></div>
+
+                <!-- Upload -->
+                <div class="upload-form">
                     <input type="file" id="file-input" accept="image/*,video/*" multiple style="display:none">
-                    <label for="file-input" class="upload-btn">בחרו תמונות או סרטונים</label>
+                    <label for="file-input" class="upload-btn">העלו תמונות או סרטונים</label>
 
                     <div id="upload-preview" class="upload-preview hidden">
                         <div id="preview-thumbs" class="preview-thumbs"></div>
                         <div class="form-group">
-                            <input type="text" id="upload-description" placeholder="תיאור - איפה צולמה? מתי? (אופציונלי)">
+                            <textarea id="upload-description" rows="2" placeholder="תיאור: איפה צולמה? מתי? מי בתמונה? באיזה אירוע?"></textarea>
                         </div>
                         <button id="upload-submit-btn" class="upload-submit-btn">העלה</button>
                         <button id="upload-cancel-btn" class="upload-cancel-btn" type="button">ביטול</button>
                     </div>
-
                     <p id="gallery-status" class="gallery-status"></p>
                 </div>
 
-                <div class="photo-grid" id="family-gallery-grid">
-                    <!-- Loaded from Firebase -->
-                </div>
+                <!-- Unified Grid -->
+                <div class="photo-grid" id="unified-gallery-grid"></div>
             </div>
         </section>
 

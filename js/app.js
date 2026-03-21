@@ -682,10 +682,7 @@ function initApp() {
     // Gallery
     try { initGallery(); } catch(e) { console.error('gallery:', e); }
 
-    // Static photos context menu
-    try { initStaticPhotoMenu(); } catch(e) { console.error('photoMenu:', e); }
-
-    // File input change listener (backup - label handles click)
+    // File input change listener (label handles click natively)
     try {
         document.getElementById('file-input').addEventListener('change', handleFileSelect);
         document.getElementById('upload-submit-btn').addEventListener('click', submitUpload);

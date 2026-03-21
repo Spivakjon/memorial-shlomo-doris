@@ -1266,6 +1266,89 @@ hr {
 }
 
 /* ===== Gallery ===== */
+
+/* Filter buttons */
+.gallery-filters {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.filter-btn {
+    padding: 0.35rem 0.85rem;
+    font-size: 0.85rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+    margin: 0;
+}
+
+.filter-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent-dark);
+}
+
+.filter-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+
+.filter-btn.person-filter {
+    background: var(--accent-dark);
+    border-color: var(--accent-dark);
+}
+
+/* Person tags on photos */
+.photo-people {
+    position: absolute;
+    bottom: 40px;
+    right: 4px;
+    display: flex;
+    gap: 3px;
+    flex-wrap: wrap;
+}
+
+.person-tag {
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.person-tag:hover {
+    background: var(--accent);
+}
+
+/* Period label */
+.gallery-period {
+    font-size: 0.7rem;
+    color: var(--accent-dark);
+    font-weight: 500;
+}
+
+/* Upload description textarea */
+.upload-preview textarea {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    font-size: 1rem;
+    font-family: inherit;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-card);
+    color: var(--text);
+    resize: vertical;
+    direction: rtl;
+}
+
 .upload-btn {
     display: block;
     width: 100%;
