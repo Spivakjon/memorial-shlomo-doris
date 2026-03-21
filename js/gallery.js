@@ -1,53 +1,31 @@
-// gallery.js - Media gallery with Firebase
+// gallery.js - Media gallery with Google Drive (via Apps Script)
 
-var firebaseReady = false;
-var db = null;
-var storage = null;
+// IMPORTANT: Replace with your Apps Script Web App URL after deployment
+var APPS_SCRIPT_URL = '';
+
 var pendingFiles = [];
 
 function initGallery() {
-    if (!FIREBASE_CONFIG || FIREBASE_CONFIG.apiKey === 'YOUR_API_KEY') {
-        document.getElementById('gallery-section').innerHTML =
-            '<p class="info-text">גלריה משפחתית - ממתין להגדרת Firebase</p>';
+    if (!APPS_SCRIPT_URL) {
+        document.getElementById('gallery-status').textContent = 'גלריה ממתינה להגדרה';
         return;
     }
 
-    try {
-        if (!firebase.apps.length) {
-            firebase.initializeApp(FIREBASE_CONFIG);
-        }
-        db = firebase.database();
-        storage = firebase.storage();
-        firebaseReady = true;
+    loadGallery();
 
-        loadGallery();
-
-        // File select button
-        document.getElementById('upload-btn').addEventListener('click', function() {
-            document.getElementById('file-input').click();
-        });
-
-        // File selected - show preview
-        document.getElementById('file-input').addEventListener('change', handleFileSelect);
-
-        // Submit upload
-        document.getElementById('upload-submit-btn').addEventListener('click', submitUpload);
-
-        // Cancel
-        document.getElementById('upload-cancel-btn').addEventListener('click', cancelUpload);
-
-    } catch (e) {
-        document.getElementById('gallery-status').textContent = 'שגיאה בטעינת הגלריה: ' + e.message;
-    }
+    document.getElementById('upload-btn').addEventListener('click', function() {
+        document.getElementById('file-input').click();
+    });
+    document.getElementById('file-input').addEventListener('change', handleFileSelect);
+    document.getElementById('upload-submit-btn').addEventListener('click', submitUpload);
+    document.getElementById('upload-cancel-btn').addEventListener('click', cancelUpload);
 }
 
 function handleFileSelect(e) {
     var files = e.target.files;
     if (!files.length) return;
-
     pendingFiles = Array.from(files);
 
-    // Show preview
     var preview = document.getElementById('upload-preview');
     var thumbs = document.getElementById('preview-thumbs');
     thumbs.innerHTML = '';
@@ -55,7 +33,6 @@ function handleFileSelect(e) {
     pendingFiles.forEach(function(file) {
         var div = document.createElement('div');
         div.className = 'preview-thumb';
-
         if (file.type.startsWith('image/')) {
             var img = document.createElement('img');
             img.src = URL.createObjectURL(file);
@@ -63,11 +40,9 @@ function handleFileSelect(e) {
         } else {
             div.innerHTML = '<div class="preview-video-icon">▶</div>';
         }
-
         var name = document.createElement('span');
         name.textContent = file.name.substring(0, 15);
         div.appendChild(name);
-
         thumbs.appendChild(div);
     });
 
@@ -84,8 +59,7 @@ function cancelUpload() {
 }
 
 function submitUpload() {
-    if (!pendingFiles.length || !firebaseReady) return;
-
+    if (!pendingFiles.length) return;
     var description = document.getElementById('upload-description').value.trim();
     var status = document.getElementById('gallery-status');
     var total = pendingFiles.length;
@@ -95,7 +69,7 @@ function submitUpload() {
     submitBtn.textContent = 'מעלה...';
 
     pendingFiles.forEach(function(file) {
-        uploadFile(file, description, function(success) {
+        uploadToGDrive(file, description, function(success) {
             uploaded++;
             status.textContent = 'הועלו ' + uploaded + ' מתוך ' + total;
             if (uploaded === total) {
@@ -104,130 +78,119 @@ function submitUpload() {
                     cancelUpload();
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'העלה';
-                }, 1500);
+                    loadGallery();
+                }, 1000);
             }
         });
     });
 }
 
-function uploadFile(file, description, onDone) {
-    var isImage = file.type.startsWith('image/');
-    var isVideo = file.type.startsWith('video/');
-    if (!isImage && !isVideo) {
-        alert('ניתן להעלות רק תמונות או סרטונים');
-        onDone(false);
-        return;
-    }
-
+function uploadToGDrive(file, description, onDone) {
     if (file.size > 50 * 1024 * 1024) {
         alert('הקובץ גדול מדי (מקסימום 50MB)');
         onDone(false);
         return;
     }
 
-    var fileName = Date.now() + '_' + Math.random().toString(36).substring(2, 8);
-    var ext = file.name.split('.').pop();
-    var ref = storage.ref('memorial/' + fileName + '.' + ext);
+    var status = document.getElementById('gallery-status');
+    status.textContent = 'קורא קובץ...';
 
-    var uploadTask = ref.put(file);
+    var reader = new FileReader();
+    reader.onload = function() {
+        var base64 = reader.result.split(',')[1];
+        status.textContent = 'מעלה ל-Google Drive...';
 
-    uploadTask.on('state_changed',
-        function(snapshot) {
-            // Progress
-            var pct = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-            document.getElementById('gallery-status').textContent = 'מעלה... ' + pct + '%';
-        },
-        function(error) {
-            console.error('Upload error:', error);
-            alert('שגיאה בהעלאה: ' + error.message);
-            onDone(false);
-        },
-        function() {
-            // Complete
-            uploadTask.snapshot.ref.getDownloadURL().then(function(url) {
-                return db.ref('media').push().set({
-                    url: url,
-                    type: isImage ? 'image' : 'video',
-                    description: description,
-                    timestamp: Date.now()
-                });
-            }).then(function() {
+        fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                file: base64,
+                fileName: file.name,
+                mimeType: file.type,
+                description: description
+            })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
                 onDone(true);
-            }).catch(function(err) {
-                alert('שגיאה בשמירה: ' + err.message);
+            } else {
+                alert('שגיאה: ' + (data.error || 'לא ידוע'));
                 onDone(false);
-            });
-        }
-    );
+            }
+        })
+        .catch(function(err) {
+            alert('שגיאה בהעלאה: ' + err.message);
+            onDone(false);
+        });
+    };
+    reader.readAsDataURL(file);
 }
 
 function loadGallery() {
     var grid = document.getElementById('family-gallery-grid');
+    grid.innerHTML = '<p class="info-text">טוען גלריה...</p>';
 
-    db.ref('media').orderByChild('timestamp').on('value', function(snapshot) {
-        grid.innerHTML = '';
-        var items = [];
-
-        snapshot.forEach(function(child) {
-            items.push({ key: child.key, data: child.val() });
-        });
-
-        items.reverse();
-
-        if (items.length === 0) {
-            grid.innerHTML = '<p class="info-text">עדיין לא הועלו תמונות. היו הראשונים!</p>';
-            return;
-        }
-
-        items.forEach(function(item) {
-            var d = item.data;
-            var div = document.createElement('div');
-            div.className = 'gallery-item';
-
-            var date = new Date(d.timestamp);
-            var dateStr = date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear();
-
-            if (d.type === 'image') {
-                div.innerHTML =
-                    '<img src="' + d.url + '" alt="' + (d.description || '') + '" loading="lazy" onclick="openMedia(this.src, \'image\')">' +
-                    '<div class="gallery-meta">' +
-                    (d.description ? '<p class="gallery-caption">' + d.description + '</p>' : '') +
-                    '<p class="gallery-uploader">' + dateStr + '</p>' +
-                    '</div>';
-            } else {
-                div.innerHTML =
-                    '<video src="' + d.url + '" preload="metadata" onclick="openMedia(this.src, \'video\')"></video>' +
-                    '<div class="play-overlay">▶</div>' +
-                    '<div class="gallery-meta">' +
-                    (d.description ? '<p class="gallery-caption">' + d.description + '</p>' : '') +
-                    '<p class="gallery-uploader">' + dateStr + '</p>' +
-                    '</div>';
+    fetch(APPS_SCRIPT_URL + '?action=list')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (!data.success) {
+                grid.innerHTML = '<p class="info-text">שגיאה: ' + (data.error || '') + '</p>';
+                return;
             }
 
-            // Context menu
-            div.dataset.key = item.key;
-            div.dataset.url = d.url;
-            div.dataset.type = d.type;
-            div.addEventListener('contextmenu', function(e) {
-                e.preventDefault();
-                showCtxMenu(e, this);
-            });
-            var longPressTimer;
-            div.addEventListener('touchstart', function(e) {
-                var el = this;
-                longPressTimer = setTimeout(function() {
-                    e.preventDefault();
-                    showCtxMenu(e, el);
-                }, 600);
-            });
-            div.addEventListener('touchend', function() { clearTimeout(longPressTimer); });
-            div.addEventListener('touchmove', function() { clearTimeout(longPressTimer); });
+            if (!data.files || data.files.length === 0) {
+                grid.innerHTML = '<p class="info-text">עדיין לא הועלו תמונות. היו הראשונים!</p>';
+                return;
+            }
 
-            grid.appendChild(div);
+            grid.innerHTML = '';
+            data.files.forEach(function(f) {
+                var div = document.createElement('div');
+                div.className = 'gallery-item';
+                var date = new Date(f.timestamp);
+                var dateStr = date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear();
+
+                var isVideo = f.mimeType && f.mimeType.startsWith('video/');
+
+                if (isVideo) {
+                    div.innerHTML =
+                        '<video src="' + f.url + '" preload="metadata" onclick="openMedia(this.src, \'video\')"></video>' +
+                        '<div class="play-overlay">▶</div>' +
+                        '<div class="gallery-meta">' +
+                        (f.description ? '<p class="gallery-caption">' + f.description + '</p>' : '') +
+                        '<p class="gallery-uploader">' + dateStr + '</p>' +
+                        '</div>';
+                } else {
+                    div.innerHTML =
+                        '<img src="' + f.thumbnailUrl + '" alt="' + (f.description || '') + '" loading="lazy" ' +
+                        'onclick="openMedia(\'' + f.url + '\', \'image\')">' +
+                        '<div class="gallery-meta">' +
+                        (f.description ? '<p class="gallery-caption">' + f.description + '</p>' : '') +
+                        '<p class="gallery-uploader">' + dateStr + '</p>' +
+                        '</div>';
+                }
+
+                // Context menu
+                div.dataset.fileId = f.fileId;
+                div.dataset.url = f.url;
+                div.addEventListener('contextmenu', function(e) {
+                    e.preventDefault();
+                    showCtxMenu(e, this);
+                });
+                var timer;
+                div.addEventListener('touchstart', function(e) {
+                    var el = this;
+                    timer = setTimeout(function() { e.preventDefault(); showCtxMenu(e, el); }, 600);
+                });
+                div.addEventListener('touchend', function() { clearTimeout(timer); });
+                div.addEventListener('touchmove', function() { clearTimeout(timer); });
+
+                grid.appendChild(div);
+            });
+        })
+        .catch(function(err) {
+            grid.innerHTML = '<p class="info-text">שגיאה בטעינה: ' + err.message + '</p>';
         });
-    }, function(error) {
-        grid.innerHTML = '<p class="info-text">שגיאה בטעינה: ' + error.message + '</p>';
-    });
 }
 
 // ==================== CONTEXT MENU ====================
@@ -274,7 +237,7 @@ function ctxDelete() {
         closeCtxMenu();
         return;
     }
-    if (!ctxTarget || !firebaseReady) { closeCtxMenu(); return; }
+    if (!ctxTarget) { closeCtxMenu(); return; }
 
     var pass = prompt('הזן סיסמה למחיקה:');
     if (pass !== '2803') {
@@ -283,15 +246,21 @@ function ctxDelete() {
         return;
     }
 
-    var key = ctxTarget.dataset.key;
-    var url = ctxTarget.dataset.url;
-    db.ref('media/' + key).remove().then(function() {
-        try { storage.refFromURL(url).delete(); } catch (e) {}
-        closeCtxMenu();
-    }).catch(function(err) {
-        alert('שגיאה במחיקה: ' + err.message);
-        closeCtxMenu();
-    });
+    var fileId = ctxTarget.dataset.fileId;
+    fetch(APPS_SCRIPT_URL + '?action=delete&fileId=' + fileId + '&pass=' + pass)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                loadGallery();
+            } else {
+                alert(data.error || 'שגיאה במחיקה');
+            }
+            closeCtxMenu();
+        })
+        .catch(function(err) {
+            alert('שגיאה: ' + err.message);
+            closeCtxMenu();
+        });
 }
 
 document.addEventListener('click', function(e) {
