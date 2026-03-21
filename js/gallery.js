@@ -1,7 +1,7 @@
 // gallery.js - Media gallery with Google Drive (via Apps Script)
 
 // IMPORTANT: Replace with your Apps Script Web App URL after deployment
-var APPS_SCRIPT_URL = '';
+var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0aLyFIHBTk-bwSKEAvclwztHgqCcjDQviAF3ThU1huN3rDtsS2EKsaQyqTw-5mSPLIw/exec';
 
 var pendingFiles = [];
 
