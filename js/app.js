@@ -11,7 +11,14 @@ const CONFIG = {
             fatherName: 'חיים',
             deathDateHebrew: 'ט"ז ניסן תשפ"א',
             cemetery: 'בית עלמין קדימה צורן',
-            lettersForTehillim: ['ש', 'ל', 'מ', 'ה', 'ל', 'ו', 'י']
+            lettersForTehillim: ['ש', 'ל', 'מ', 'ה', 'ל', 'ו', 'י'],
+            // Letter groupings for quick-select
+            nameGroups: {
+                all: [0, 1, 2, 3, 4, 5, 6],      // שלמה לוי
+                first: [0, 1, 2, 3],               // שלמה
+                last: [4, 5, 6],                   // לוי
+                neshama: []                        // נשמה letters added dynamically
+            }
         },
         doris: {
             name: 'דוריס (חנה) לוי',
@@ -21,9 +28,17 @@ const CONFIG = {
             fatherName: 'פלורה',
             deathDateHebrew: 'י"ז אייר תשפ"א',
             cemetery: 'בית עלמין קדימה צורן',
-            lettersForTehillim: ['ד', 'ו', 'ר', 'י', 'ס', 'ח', 'נ', 'ה', 'ל', 'ו', 'י']
+            lettersForTehillim: ['ד', 'ו', 'ר', 'י', 'ס', 'ח', 'נ', 'ה', 'ל', 'ו', 'י'],
+            nameGroups: {
+                all: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],  // דוריס חנה לוי
+                doris: [0, 1, 2, 3, 4],                     // דוריס
+                chana: [5, 6, 7],                            // חנה
+                last: [8, 9, 10],                            // לוי
+                neshama: []                                  // added dynamically
+            }
         }
-    }
+    },
+    neshamaLetters: ['נ', 'ש', 'מ', 'ה']
 };
 
 // State
@@ -31,8 +46,84 @@ let state = {
     currentSection: 'memorial',
     azkara: loadAzkara(),
     members: loadMembers(),
-    letterAssignments: loadLetterAssignments()
+    // Track which letters are selected (checked) per person
+    selectedLetters: loadSelectedLetters()
 };
+
+// --- Time Elapsed ---
+function calcElapsed(deathDateStr) {
+    const death = new Date(deathDateStr + 'T00:00:00');
+    const now = new Date();
+
+    let years = now.getFullYear() - death.getFullYear();
+    let months = now.getMonth() - death.getMonth();
+    let days = now.getDate() - death.getDate();
+
+    if (days < 0) {
+        months--;
+        // Days in previous month
+        const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+        days += prevMonth.getDate();
+    }
+    if (months < 0) {
+        years--;
+        months += 12;
+    }
+
+    const parts = [];
+    if (years > 0) parts.push(`${years} ${years === 1 ? 'שנה' : (years < 11 ? 'שנים' : 'שנה')}`);
+    if (months > 0) parts.push(`${months} ${months === 1 ? 'חודש' : 'חודשים'}`);
+    if (days > 0) parts.push(`${days} ${days === 1 ? 'יום' : 'ימים'}`);
+
+    return parts.join(', ');
+}
+
+function updateElapsedTimes() {
+    document.getElementById('elapsed-shlomo').textContent = calcElapsed(CONFIG.people.shlomo.deathDateGregorian);
+    document.getElementById('elapsed-doris').textContent = calcElapsed(CONFIG.people.doris.deathDateGregorian);
+}
+
+// --- Memorial Page Azkara Display ---
+function updateMemorialAzkara() {
+    const azkara = state.azkara;
+    const container = document.getElementById('memorial-azkara');
+
+    const dateObj = new Date(azkara.date + 'T00:00:00');
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    const diffTime = dateObj.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    const days = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+    const dayName = days[dateObj.getDay()];
+    const dateParts = azkara.date.split('-');
+    const formattedDate = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
+
+    let countdownText = '';
+    if (diffDays > 0) {
+        countdownText = `בעוד ${diffDays} ימים`;
+    } else if (diffDays === 0) {
+        countdownText = 'היום!';
+    } else {
+        countdownText = '';
+    }
+
+    if (diffDays < 0) {
+        container.innerHTML = '';
+        return;
+    }
+
+    container.innerHTML = `
+        <div class="azkara-banner">
+            <h3>אזכרה ${azkara.yearLabel} קרובה</h3>
+            <p><strong>${getPersonTitle(azkara.forPerson)}</strong></p>
+            <p>יום ${dayName}, ${formattedDate} בשעה ${azkara.time}</p>
+            <p>${azkara.location}</p>
+            ${countdownText ? `<p class="countdown">${countdownText}</p>` : ''}
+        </div>
+    `;
+}
 
 // --- Auth ---
 function initAuth() {
@@ -40,7 +131,6 @@ function initAuth() {
     const passwordInput = document.getElementById('password-input');
     const loginError = document.getElementById('login-error');
 
-    // Check if already authenticated
     if (sessionStorage.getItem('authenticated') === 'true') {
         showApp();
         return;
@@ -89,57 +179,119 @@ function switchSection(sectionId) {
     document.querySelector(`[data-section="${sectionId}"]`).classList.add('active');
 }
 
-// --- Letters ---
+// --- Letters (checkbox-based selection) ---
 function initLetters() {
-    renderLetters('letters-shlomo', CONFIG.people.shlomo, 'shlomo');
-    renderLetters('letters-doris', CONFIG.people.doris, 'doris');
+    renderLetterCheckboxes('letters-shlomo', CONFIG.people.shlomo, 'shlomo');
+    renderLetterCheckboxes('letters-doris', CONFIG.people.doris, 'doris');
 }
 
-function renderLetters(containerId, person, personKey) {
+function renderLetterCheckboxes(containerId, person, personKey) {
     const container = document.getElementById(containerId);
     container.innerHTML = '';
 
     person.lettersForTehillim.forEach((letter, index) => {
         const key = `${personKey}_${index}`;
-        const assignee = state.letterAssignments[key] || '';
+        const isSelected = state.selectedLetters[key] !== false; // default true
 
         const box = document.createElement('div');
-        box.className = 'letter-box' + (assignee ? ' selected' : '');
+        box.className = 'letter-box' + (isSelected ? ' selected' : '');
+        box.dataset.key = key;
         box.innerHTML = `
             <span class="letter">${letter}</span>
-            <span class="assignee">${assignee || 'פנוי'}</span>
+            <span class="letter-check">${isSelected ? '✓' : ''}</span>
         `;
-        box.addEventListener('click', () => assignLetter(key, letter, box));
+        box.addEventListener('click', () => toggleLetter(key, box));
+        container.appendChild(box);
+    });
+
+    // Also render neshama letters
+    renderNeshamaLetters(containerId, personKey);
+}
+
+function renderNeshamaLetters(containerId, personKey) {
+    const container = document.getElementById(containerId);
+
+    // Add a small separator + label for neshama
+    const neshamaLabel = document.createElement('div');
+    neshamaLabel.className = 'neshama-separator';
+    neshamaLabel.textContent = 'אותיות נשמה:';
+    container.appendChild(neshamaLabel);
+
+    CONFIG.neshamaLetters.forEach((letter, index) => {
+        const key = `${personKey}_neshama_${index}`;
+        const isSelected = state.selectedLetters[key] === true; // default false
+
+        const box = document.createElement('div');
+        box.className = 'letter-box neshama-letter' + (isSelected ? ' selected' : '');
+        box.dataset.key = key;
+        box.innerHTML = `
+            <span class="letter">${letter}</span>
+            <span class="letter-check">${isSelected ? '✓' : ''}</span>
+        `;
+        box.addEventListener('click', () => toggleLetter(key, box));
         container.appendChild(box);
     });
 }
 
-function assignLetter(key, letter, boxElement) {
-    const current = state.letterAssignments[key];
-    let name;
+function toggleLetter(key, boxElement) {
+    const isNeshama = key.includes('_neshama_');
+    const currentlySelected = isNeshama
+        ? state.selectedLetters[key] === true
+        : state.selectedLetters[key] !== false;
 
-    if (current) {
-        const action = prompt(`האות "${letter}" משויכת ל-${current}.\nלהסיר? (הקלד "הסר") או הזן שם חדש:`);
-        if (action === null) return;
-        if (action === 'הסר' || action === '') {
-            delete state.letterAssignments[key];
-            saveLetterAssignments();
-            refreshLetters();
-            return;
-        }
-        name = action;
+    state.selectedLetters[key] = !currentlySelected;
+    saveSelectedLetters();
+
+    // Update visuals
+    if (!currentlySelected) {
+        boxElement.classList.add('selected');
+        boxElement.querySelector('.letter-check').textContent = '✓';
     } else {
-        name = prompt(`הזן את שם המשתתף שייקח את האות "${letter}":`);
-        if (!name) return;
+        boxElement.classList.remove('selected');
+        boxElement.querySelector('.letter-check').textContent = '';
     }
-
-    state.letterAssignments[key] = name;
-    saveLetterAssignments();
-    refreshLetters();
 }
 
-function refreshLetters() {
-    initLetters();
+// Quick select buttons
+function quickSelect(personKey, group) {
+    const person = CONFIG.people[personKey];
+
+    if (group === 'none') {
+        // Uncheck all name letters
+        person.lettersForTehillim.forEach((_, i) => {
+            state.selectedLetters[`${personKey}_${i}`] = false;
+        });
+        // Also uncheck neshama
+        CONFIG.neshamaLetters.forEach((_, i) => {
+            state.selectedLetters[`${personKey}_neshama_${i}`] = false;
+        });
+    } else if (group === 'neshama') {
+        // Toggle neshama letters (select them, don't touch others)
+        CONFIG.neshamaLetters.forEach((_, i) => {
+            state.selectedLetters[`${personKey}_neshama_${i}`] = true;
+        });
+    } else {
+        // First uncheck all
+        person.lettersForTehillim.forEach((_, i) => {
+            state.selectedLetters[`${personKey}_${i}`] = false;
+        });
+        CONFIG.neshamaLetters.forEach((_, i) => {
+            state.selectedLetters[`${personKey}_neshama_${i}`] = false;
+        });
+
+        // Then check the group
+        const indices = person.nameGroups[group] || [];
+        indices.forEach(i => {
+            state.selectedLetters[`${personKey}_${i}`] = true;
+        });
+    }
+
+    saveSelectedLetters();
+    renderLetterCheckboxes(
+        personKey === 'shlomo' ? 'letters-shlomo' : 'letters-doris',
+        person,
+        personKey
+    );
 }
 
 // --- Azkara Management ---
@@ -147,7 +299,6 @@ function initAzkaraAdmin() {
     const saveBtn = document.getElementById('save-azkara-btn');
     saveBtn.addEventListener('click', saveAzkaraFromForm);
 
-    // Load current values
     const azkara = state.azkara;
     if (azkara.date) document.getElementById('azkara-date').value = azkara.date;
     if (azkara.time) document.getElementById('azkara-time').value = azkara.time;
@@ -166,6 +317,7 @@ function saveAzkaraFromForm() {
     };
     localStorage.setItem('azkara', JSON.stringify(state.azkara));
     updateAzkaraDisplay();
+    updateMemorialAzkara();
 
     const msg = document.getElementById('save-success');
     msg.classList.remove('hidden');
@@ -217,7 +369,6 @@ function addMember() {
     state.members.push({ name, email, phone, id: Date.now() });
     localStorage.setItem('members', JSON.stringify(state.members));
 
-    // Clear form
     document.getElementById('member-name').value = '';
     document.getElementById('member-email').value = '';
     document.getElementById('member-phone').value = '';
@@ -263,7 +414,6 @@ function downloadCalendarEvent() {
     const timeStr = azkara.time.replace(':', '') + '00';
     const dtStart = dateStr + 'T' + timeStr;
 
-    // End time: 1 hour later
     const startDate = new Date(azkara.date + 'T' + azkara.time + ':00');
     const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
     const dtEnd = dateStr + 'T' + endDate.getHours().toString().padStart(2, '0') +
@@ -308,19 +458,38 @@ function initPdf() {
     document.getElementById('download-pdf-btn').addEventListener('click', generatePdf);
 }
 
+function getSelectedLettersForPerson(personKey) {
+    const person = CONFIG.people[personKey];
+    const selected = [];
+
+    // Name letters
+    person.lettersForTehillim.forEach((letter, index) => {
+        const key = `${personKey}_${index}`;
+        if (state.selectedLetters[key] !== false) {
+            selected.push(letter);
+        }
+    });
+
+    // Neshama letters
+    CONFIG.neshamaLetters.forEach((letter, index) => {
+        const key = `${personKey}_neshama_${index}`;
+        if (state.selectedLetters[key] === true) {
+            selected.push(letter);
+        }
+    });
+
+    return selected;
+}
+
 function generatePdf() {
     const azkara = state.azkara;
-    const people = [];
-    if (azkara.forPerson === 'both' || azkara.forPerson === 'shlomo') people.push({ data: CONFIG.people.shlomo, key: 'shlomo' });
-    if (azkara.forPerson === 'both' || azkara.forPerson === 'doris') people.push({ data: CONFIG.people.doris, key: 'doris' });
 
-    // Get checked items
+    // Get checked seder items
     const checkedItems = [];
     document.querySelectorAll('#seder-checklist input[type="checkbox"]:checked').forEach(cb => {
         checkedItems.push(cb.value);
     });
 
-    // Build PDF content
     const pdfDiv = document.getElementById('pdf-content');
     pdfDiv.classList.remove('hidden');
 
@@ -328,9 +497,14 @@ function generatePdf() {
     html += `<h1>סדר אזכרה ${azkara.yearLabel}</h1>`;
     html += `<h1>${getPersonTitle(azkara.forPerson)}</h1>`;
 
-    people.forEach(p => {
-        const genderPrefix = p.data.gender === 'male' ? 'נפטר' : 'נפטרה';
-        html += `<p style="text-align:center;">${p.data.name} - ${genderPrefix}: ${p.data.deathDateHebrew} | ${formatDate(p.data.deathDateGregorian)}</p>`;
+    // Show death info for relevant people
+    const showPeople = [];
+    if (azkara.forPerson === 'both' || azkara.forPerson === 'shlomo') showPeople.push(CONFIG.people.shlomo);
+    if (azkara.forPerson === 'both' || azkara.forPerson === 'doris') showPeople.push(CONFIG.people.doris);
+
+    showPeople.forEach(p => {
+        const genderPrefix = p.gender === 'male' ? 'נפטר' : 'נפטרה';
+        html += `<p style="text-align:center;">${p.name} - ${genderPrefix}: ${p.deathDateHebrew} | ${formatDate(p.deathDateGregorian)}</p>`;
     });
 
     const dateParts = azkara.date.split('-');
@@ -343,23 +517,38 @@ function generatePdf() {
         html += buildPrayerSection(PRAYERS.candle);
     }
 
-    // Tehillim by letters - for each person
-    if (checkedItems.includes('tehillim')) {
-        people.forEach(p => {
+    // Tehillim for Shlomo
+    if (checkedItems.includes('tehillim_shlomo')) {
+        const letters = getSelectedLettersForPerson('shlomo');
+        if (letters.length > 0) {
             html += `<div class="separator">✦</div>`;
-            html += `<h2>תהילים לפי אותיות השם - ${p.data.fullNameHebrew}</h2>`;
-
-            p.data.lettersForTehillim.forEach((letter, index) => {
-                const key = `${p.key}_${index}`;
-                const assignee = state.letterAssignments[key] || '';
-
-                if (PSALM_119[letter]) {
-                    const assigneeText = assignee ? ` (${assignee})` : '';
-                    html += `<h2>${PSALM_119[letter].title}${assigneeText}</h2>`;
+            html += `<h2>תהילים לפי אותיות השם - ${CONFIG.people.shlomo.fullNameHebrew}</h2>`;
+            const seen = new Set();
+            letters.forEach(letter => {
+                if (PSALM_119[letter] && !seen.has(letter)) {
+                    seen.add(letter);
+                    html += `<h2>${PSALM_119[letter].title}</h2>`;
                     html += `<div class="prayer-text">${PSALM_119[letter].verses}</div>`;
                 }
             });
-        });
+        }
+    }
+
+    // Tehillim for Doris
+    if (checkedItems.includes('tehillim_doris')) {
+        const letters = getSelectedLettersForPerson('doris');
+        if (letters.length > 0) {
+            html += `<div class="separator">✦</div>`;
+            html += `<h2>תהילים לפי אותיות השם - ${CONFIG.people.doris.fullNameHebrew}</h2>`;
+            const seen = new Set();
+            letters.forEach(letter => {
+                if (PSALM_119[letter] && !seen.has(letter)) {
+                    seen.add(letter);
+                    html += `<h2>${PSALM_119[letter].title}</h2>`;
+                    html += `<div class="prayer-text">${PSALM_119[letter].verses}</div>`;
+                }
+            });
+        }
     }
 
     // Psalm 91
@@ -372,12 +561,14 @@ function generatePdf() {
         html += buildPrayerSection(PRAYERS.psalm121);
     }
 
-    // Hashkava - for each person
-    if (checkedItems.includes('hashkava')) {
-        people.forEach(p => {
-            const hashkava = p.data.gender === 'male' ? PRAYERS.hashkava_male : PRAYERS.hashkava_female;
-            html += buildPrayerSection(hashkava);
-        });
+    // Hashkava Shlomo
+    if (checkedItems.includes('hashkava_shlomo')) {
+        html += buildPrayerSection(PRAYERS.hashkava_male);
+    }
+
+    // Hashkava Doris
+    if (checkedItems.includes('hashkava_doris')) {
+        html += buildPrayerSection(PRAYERS.hashkava_female);
     }
 
     // Kaddish
@@ -391,7 +582,6 @@ function generatePdf() {
 
     pdfDiv.innerHTML = html;
 
-    // Generate PDF
     const opt = {
         margin: 10,
         filename: `seder_azkara_${azkara.forPerson}.pdf`,
@@ -419,7 +609,7 @@ function formatDate(dateStr) {
     return `${parts[2]}/${parts[1]}/${parts[0]}`;
 }
 
-// --- Local Storage Helpers ---
+// --- Local Storage ---
 function loadAzkara() {
     const saved = localStorage.getItem('azkara');
     if (saved) return JSON.parse(saved);
@@ -438,14 +628,14 @@ function loadMembers() {
     return [];
 }
 
-function loadLetterAssignments() {
-    const saved = localStorage.getItem('letterAssignments');
+function loadSelectedLetters() {
+    const saved = localStorage.getItem('selectedLetters');
     if (saved) return JSON.parse(saved);
-    return {};
+    return {}; // empty = all name letters default to true, neshama default to false
 }
 
-function saveLetterAssignments() {
-    localStorage.setItem('letterAssignments', JSON.stringify(state.letterAssignments));
+function saveSelectedLetters() {
+    localStorage.setItem('selectedLetters', JSON.stringify(state.selectedLetters));
 }
 
 // --- Init ---
@@ -457,6 +647,8 @@ function initApp() {
     initAzkaraAdmin();
     initMembers();
     updateAzkaraDisplay();
+    updateElapsedTimes();
+    updateMemorialAzkara();
 }
 
 // Start
