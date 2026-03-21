@@ -93,6 +93,14 @@ var allPhotos = [];
 var pendingFiles = [];
 
 function initGallery() {
+    // Load saved tags for static photos
+    try {
+        var saved = JSON.parse(localStorage.getItem('photoTags') || '{}');
+        STATIC_PHOTOS.forEach(function(p) {
+            if (saved[p.src]) p.people = saved[p.src];
+        });
+    } catch(e) {}
+
     // Build unified gallery
     allPhotos = STATIC_PHOTOS.slice();
 
@@ -232,7 +240,8 @@ function renderGallery() {
                 '</div>';
             div.onclick = function() {
                 var full = photo.fullSrc || photo.src;
-                openMedia(full, 'image', photo.fileId || null, photo.description);
+                var id = photo.fileId || photo.src; // use src as ID for static photos
+                openMedia(full, 'image', id, photo.description);
             };
         }
 
@@ -594,10 +603,18 @@ var currentTagFileId = null;
 var currentTagged = [];
 
 function getTaggedPeople(fileId) {
+    // Check allPhotos first
     var people = [];
     allPhotos.forEach(function(p) {
-        if (p.fileId === fileId && p.people) people = p.people;
+        if ((p.fileId === fileId || p.src === fileId) && p.people) people = p.people;
     });
+    // Also check localStorage for static photo tags
+    if (people.length === 0) {
+        try {
+            var saved = JSON.parse(localStorage.getItem('photoTags') || '{}');
+            if (saved[fileId]) people = saved[fileId];
+        } catch(e) {}
+    }
     return people;
 }
 
@@ -652,43 +669,70 @@ function closeTagPanel() {
 function saveTagging() {
     if (!currentTagFileId) return;
 
-    // Find current description
-    var desc = '';
-    allPhotos.forEach(function(p) {
-        if (p.fileId === currentTagFileId) desc = p.description || '';
-    });
-
-    // Remove old people tag
-    desc = desc.replace(/\[אנשים:[^\]]*\]/g, '').trim();
-
-    // Add new people tag
-    if (currentTagged.length > 0) {
-        desc = desc + (desc ? ' ' : '') + '[אנשים:' + currentTagged.join(',') + ']';
-    }
-
     var btn = document.querySelector('.tag-save-btn');
     if (btn) { btn.textContent = 'שומר...'; btn.disabled = true; }
 
-    fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        body: JSON.stringify({ action: 'updateDesc', fileId: currentTagFileId, desc: desc, pass: '2803' })
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-        if (data.success) {
-            closeTagPanel();
-            closeLightbox();
-            allPhotos = STATIC_PHOTOS.slice();
-            loadDrivePhotos();
-        } else {
-            alert(data.error || 'שגיאה');
-            if (btn) { btn.textContent = 'שמור'; btn.disabled = false; }
-        }
-    })
-    .catch(function(err) {
-        alert('שגיאה: ' + err.message);
-        if (btn) { btn.textContent = 'שמור'; btn.disabled = false; }
+    // Check if this is a Drive photo or static
+    var isDrive = false;
+    allPhotos.forEach(function(p) {
+        if (p.fileId === currentTagFileId && !p.isStatic) isDrive = true;
     });
+
+    if (isDrive) {
+        // Save to Google Drive
+        var desc = '';
+        allPhotos.forEach(function(p) {
+            if (p.fileId === currentTagFileId) desc = p.description || '';
+        });
+        desc = desc.replace(/\[אנשים:[^\]]*\]/g, '').trim();
+        if (currentTagged.length > 0) {
+            desc = desc + (desc ? ' ' : '') + '[אנשים:' + currentTagged.join(',') + ']';
+        }
+
+        fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'updateDesc', fileId: currentTagFileId, desc: desc, pass: '2803' })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                finishTagSave();
+            } else {
+                alert(data.error || 'שגיאה');
+                if (btn) { btn.textContent = 'שמור'; btn.disabled = false; }
+            }
+        })
+        .catch(function(err) {
+            alert('שגיאה: ' + err.message);
+            if (btn) { btn.textContent = 'שמור'; btn.disabled = false; }
+        });
+    } else {
+        // Save to localStorage for static photos
+        try {
+            var saved = JSON.parse(localStorage.getItem('photoTags') || '{}');
+            saved[currentTagFileId] = currentTagged.slice();
+            localStorage.setItem('photoTags', JSON.stringify(saved));
+        } catch(e) {}
+
+        // Update the static photo in allPhotos
+        allPhotos.forEach(function(p) {
+            if (p.src === currentTagFileId) p.people = currentTagged.slice();
+        });
+        // Also update STATIC_PHOTOS
+        STATIC_PHOTOS.forEach(function(p) {
+            if (p.src === currentTagFileId) p.people = currentTagged.slice();
+        });
+
+        finishTagSave();
+    }
+}
+
+function finishTagSave() {
+    closeTagPanel();
+    closeLightbox();
+    allPhotos = STATIC_PHOTOS.slice();
+    if (APPS_SCRIPT_URL) loadDrivePhotos();
+    else renderGallery();
 }
 
 // ==================== DESCRIPTION EDITING ====================
