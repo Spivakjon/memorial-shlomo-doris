@@ -229,6 +229,18 @@ function renderGallery() {
             };
         }
 
+        // AI classify button for uploaded photos without category
+        if (!photo.isStatic && photo.fileId && photo.category === 'הועלו ע"י המשפחה') {
+            var aiBtn = document.createElement('button');
+            aiBtn.className = 'gallery-ai-btn';
+            aiBtn.textContent = 'סווג AI';
+            aiBtn.onclick = function(e) {
+                e.stopPropagation();
+                classifyExistingPhoto(photo, aiBtn);
+            };
+            div.appendChild(aiBtn);
+        }
+
         // Context menu for Drive photos
         if (!photo.isStatic && photo.fileId) {
             div.dataset.fileId = photo.fileId;
@@ -337,6 +349,43 @@ function smartCategorize(desc, fileName) {
     if (familyCount >= 1) return 'משפחה';
 
     return 'משפחה'; // safe default
+}
+
+// Classify an already-uploaded photo
+function classifyExistingPhoto(photo, btnEl) {
+    btnEl.textContent = 'מנתח...';
+    btnEl.classList.add('loading');
+
+    setTimeout(function() {
+        var category = smartCategorize(photo.description || '', '');
+
+        // Save category to description tag
+        var newDesc = photo.description || '';
+        // Remove old category tag if exists
+        newDesc = newDesc.replace(/\[קטגוריה:[^\]]+\]/, '').trim();
+        newDesc = newDesc + (newDesc ? ' ' : '') + '[קטגוריה:' + category + ']';
+
+        fetch(APPS_SCRIPT_URL + '?action=updateDesc&fileId=' + encodeURIComponent(photo.fileId) + '&desc=' + encodeURIComponent(newDesc))
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    btnEl.textContent = category;
+                    btnEl.style.background = '#4a8';
+                    // Reload gallery
+                    setTimeout(function() {
+                        allPhotos = STATIC_PHOTOS.slice();
+                        loadDrivePhotos();
+                    }, 800);
+                } else {
+                    btnEl.textContent = 'שגיאה';
+                    btnEl.classList.remove('loading');
+                }
+            })
+            .catch(function() {
+                btnEl.textContent = 'שגיאה';
+                btnEl.classList.remove('loading');
+            });
+    }, 600);
 }
 
 // Upload handling
