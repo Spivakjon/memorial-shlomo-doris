@@ -383,39 +383,40 @@ function formatDate(dateStr) {
 
 // PDF styles that go into the print window
 const PDF_STYLES = `
-@import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;700&display=swap');
-
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-    font-family: 'Frank Ruhl Libre', 'David', 'Times New Roman', serif;
+    font-family: 'Segoe UI', 'Arial', 'Tahoma', sans-serif;
     direction: rtl;
     text-align: right;
-    line-height: 2;
+    line-height: 1.9;
+    letter-spacing: normal;
+    word-spacing: normal;
     color: #1a1a1a;
     background: #fff;
-    padding: 12mm;
-    max-width: 210mm;
-    margin: 0 auto;
+    padding: 10mm 15mm;
+    font-size: 14pt;
 }
 
 h1.pdf-main-title {
     text-align: center;
-    font-size: 22pt;
-    font-weight: 700;
-    margin-bottom: 4pt;
+    font-size: 24pt;
+    font-weight: bold;
+    margin-bottom: 6pt;
+    letter-spacing: normal;
 }
 
 h1.pdf-sub-title {
     text-align: center;
-    font-size: 18pt;
-    font-weight: 500;
-    margin-bottom: 8pt;
+    font-size: 20pt;
+    font-weight: normal;
+    margin-bottom: 10pt;
+    letter-spacing: normal;
 }
 
 .pdf-info {
     text-align: center;
-    font-size: 12pt;
+    font-size: 13pt;
     margin-bottom: 4pt;
     color: #333;
 }
@@ -424,56 +425,57 @@ h1.pdf-sub-title {
     text-align: center;
     font-size: 14pt;
     color: #c9a96e;
-    letter-spacing: 8px;
-    margin: 16pt 0;
+    margin: 14pt 0;
 }
 
 h2.pdf-section-title {
     text-align: center;
-    font-size: 16pt;
-    font-weight: 700;
-    margin: 20pt 0 8pt;
-    padding-bottom: 4pt;
-    border-bottom: 1.5pt solid #c9a96e;
+    font-size: 17pt;
+    font-weight: bold;
+    margin: 22pt 0 10pt;
+    padding-bottom: 5pt;
+    border-bottom: 2pt solid #c9a96e;
     color: #5a4020;
     page-break-after: avoid;
+    letter-spacing: normal;
 }
 
 h3.pdf-letter-title {
     text-align: center;
-    font-size: 14pt;
-    font-weight: 500;
-    margin: 14pt 0 6pt;
+    font-size: 15pt;
+    font-weight: bold;
+    margin: 16pt 0 8pt;
     color: #5a4020;
     page-break-after: avoid;
+    letter-spacing: normal;
 }
 
 .pdf-instruction {
     text-align: center;
-    font-size: 11pt;
+    font-size: 12pt;
     color: #666;
-    font-style: italic;
-    margin-bottom: 6pt;
+    margin-bottom: 8pt;
 }
 
 .pdf-prayer {
-    font-size: 13pt;
-    line-height: 2.2;
-    white-space: pre-line;
-    margin-bottom: 8pt;
+    font-size: 14pt;
+    line-height: 2;
+    margin-bottom: 10pt;
     text-align: right;
+    letter-spacing: normal;
+    word-spacing: normal;
 }
 
 .pdf-footer {
     text-align: center;
-    font-size: 18pt;
-    font-weight: 700;
-    margin-top: 20pt;
-    letter-spacing: 4px;
+    font-size: 20pt;
+    font-weight: bold;
+    margin-top: 24pt;
 }
 
 @media print {
-    body { padding: 0; }
+    body { padding: 0; font-size: 13pt; }
+    .pdf-prayer { font-size: 13pt; line-height: 1.9; }
     @page { margin: 15mm; size: A4; }
 }
 `;
@@ -495,10 +497,7 @@ function openPdfWindow(bodyHtml, title) {
 <body>
 ${bodyHtml}
 <script>
-// Wait for fonts to load then trigger print
-document.fonts.ready.then(function() {
-    setTimeout(function() { window.print(); }, 400);
-});
+setTimeout(function() { window.print(); }, 300);
 <\/script>
 </body>
 </html>`);
