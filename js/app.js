@@ -360,18 +360,9 @@ function downloadCalendarEvent() {
         combined.set(bom);
         combined.set(body, bom.length);
 
-        const blob = new Blob([combined], { type: 'text/calendar;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'azkara.ics';
-        a.style.display = 'none';
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(function() {
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }, 1000);
+        // Use data URI - works on iOS Safari (opens "Add to Calendar" directly)
+        const dataUrl = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(icsText);
+        window.location.href = dataUrl;
     } catch (e) {
         alert('שגיאה ביצירת אירוע יומן: ' + e.message);
     }
