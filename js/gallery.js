@@ -146,9 +146,15 @@ function loadGallery() {
 
                 var isVideo = f.mimeType && f.mimeType.startsWith('video/');
 
+                // Use lh3 URL for high quality direct image access
+                var directUrl = 'https://lh3.googleusercontent.com/d/' + f.fileId + '=w1200';
+                var thumbUrl = 'https://lh3.googleusercontent.com/d/' + f.fileId + '=w600';
+                var fullUrl = 'https://lh3.googleusercontent.com/d/' + f.fileId + '=w2000';
+
                 if (isVideo) {
+                    var videoViewUrl = 'https://drive.google.com/file/d/' + f.fileId + '/preview';
                     div.innerHTML =
-                        '<video src="' + f.url + '" preload="metadata" onclick="openMedia(this.src, \'video\')"></video>' +
+                        '<img src="' + thumbUrl + '" alt="סרטון" loading="lazy" onclick="openDriveVideo(\'' + f.fileId + '\')">' +
                         '<div class="play-overlay">▶</div>' +
                         '<div class="gallery-meta">' +
                         (f.description ? '<p class="gallery-caption">' + f.description + '</p>' : '') +
@@ -156,8 +162,8 @@ function loadGallery() {
                         '</div>';
                 } else {
                     div.innerHTML =
-                        '<img src="' + f.thumbnailUrl + '" alt="' + (f.description || '') + '" loading="lazy" ' +
-                        'onclick="openMedia(\'' + f.url + '\', \'image\')">' +
+                        '<img src="' + thumbUrl + '" alt="' + (f.description || '') + '" loading="lazy" ' +
+                        'onclick="openMedia(\'' + fullUrl + '\', \'image\')">' +
                         '<div class="gallery-meta">' +
                         (f.description ? '<p class="gallery-caption">' + f.description + '</p>' : '') +
                         '<p class="gallery-uploader">' + dateStr + '</p>' +
@@ -266,9 +272,22 @@ document.addEventListener('click', function(e) {
 function openMedia(src, type) {
     var overlay = document.createElement('div');
     overlay.className = 'media-lightbox';
-    overlay.onclick = function() { document.body.removeChild(overlay); };
-    overlay.innerHTML = type === 'image'
-        ? '<img src="' + src + '">'
-        : '<video src="' + src + '" controls autoplay></video>';
+    overlay.onclick = function(e) {
+        if (e.target === overlay || e.target.tagName === 'IMG') {
+            document.body.removeChild(overlay);
+        }
+    };
+    overlay.innerHTML = '<img src="' + src + '" style="max-width:95vw;max-height:90vh;object-fit:contain;border-radius:4px;">';
+    document.body.appendChild(overlay);
+}
+
+function openDriveVideo(fileId) {
+    var overlay = document.createElement('div');
+    overlay.className = 'media-lightbox';
+    overlay.onclick = function(e) {
+        if (e.target === overlay) document.body.removeChild(overlay);
+    };
+    overlay.innerHTML = '<iframe src="https://drive.google.com/file/d/' + fileId + '/preview" ' +
+        'style="width:90vw;height:80vh;border:none;border-radius:8px;" allowfullscreen></iframe>';
     document.body.appendChild(overlay);
 }
