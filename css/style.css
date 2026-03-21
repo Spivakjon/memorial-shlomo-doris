@@ -1,0 +1,818 @@
+/* Memorial Site - Minimalist Design */
+@import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;700&family=Secular+One&display=swap');
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --bg: #faf8f5;
+    --bg-card: #ffffff;
+    --text: #2c2c2c;
+    --text-light: #6b6b6b;
+    --border: #e0dbd4;
+    --accent: #c9a96e;
+    --accent-dark: #8a6d3b;
+    --flame-yellow: #ffd700;
+    --flame-orange: #ff8c00;
+}
+
+body {
+    font-family: 'Frank Ruhl Libre', 'David', serif;
+    direction: rtl;
+    text-align: right;
+    line-height: 1.8;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ===== Memorial Candle ===== */
+.memorial-candle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 1.5rem auto;
+    position: relative;
+}
+
+.candle-container {
+    position: relative;
+    width: 44px;
+    height: 160px;
+}
+
+.candle-flame-outer {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 46px;
+    background: radial-gradient(ellipse at 50% 90%, var(--flame-yellow) 0%, var(--flame-orange) 50%, transparent 100%);
+    border-radius: 50% 50% 35% 35%;
+    animation: flicker 3s ease-in-out infinite;
+    filter: blur(0.5px);
+}
+
+.candle-flame-inner {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 8px;
+    height: 22px;
+    background: radial-gradient(ellipse at 50% 85%, #fff8e0 0%, var(--flame-yellow) 100%);
+    border-radius: 50% 50% 30% 30%;
+    animation: flicker-inner 2s ease-in-out infinite alternate;
+}
+
+.candle-glow {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 80px;
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.15) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: glow-pulse 4s ease-in-out infinite;
+}
+
+.candle-wick {
+    position: absolute;
+    top: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 14px;
+    background: linear-gradient(to bottom, #333, #555);
+    border-radius: 1px;
+}
+
+.candle-body {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 100px;
+    background: linear-gradient(to right, #e8d8bc, #f5eadb, #f0e4d0, #e8d8bc);
+    border-radius: 3px 3px 5px 5px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.candle-body::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(to right, #dcc9a8, #eedfc8, #dcc9a8);
+    border-radius: 3px 3px 0 0;
+}
+
+.candle-holder {
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 10px;
+    background: linear-gradient(to bottom, var(--accent), var(--accent-dark));
+    border-radius: 0 0 4px 4px;
+}
+
+@keyframes flicker {
+    0%, 100% { transform: translateX(-50%) scale(1) rotate(-1deg); opacity: 0.95; }
+    15% { transform: translateX(-50%) scale(1.04) rotate(1.5deg); opacity: 1; }
+    30% { transform: translateX(-50%) scale(0.97) rotate(-0.5deg); opacity: 0.9; }
+    50% { transform: translateX(-50%) scale(1.02) rotate(1deg); opacity: 0.95; }
+    70% { transform: translateX(-50%) scale(0.98) rotate(-1.5deg); opacity: 1; }
+    85% { transform: translateX(-50%) scale(1.03) rotate(0.5deg); opacity: 0.92; }
+}
+
+@keyframes flicker-inner {
+    0%, 100% { transform: translateX(-50%) scaleY(1); opacity: 0.9; }
+    50% { transform: translateX(-50%) scaleY(1.08); opacity: 1; }
+}
+
+@keyframes glow-pulse {
+    0%, 100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+    50% { opacity: 0.9; transform: translateX(-50%) scale(1.1); }
+}
+
+/* ===== Login ===== */
+#login-screen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: var(--bg);
+}
+
+.login-box {
+    text-align: center;
+    padding: 3rem 2.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.login-box h1 {
+    font-weight: 500;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+}
+
+.login-box > p {
+    color: var(--text-light);
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+}
+
+.login-box input {
+    display: block;
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    font-family: inherit;
+    text-align: center;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    transition: border-color 0.2s;
+}
+
+.login-box input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.login-box button {
+    padding: 0.7rem 3rem;
+    font-size: 1rem;
+}
+
+.error {
+    color: #b44;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+.success {
+    color: #4a8;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+/* ===== Navigation ===== */
+#main-nav {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    background: var(--bg-card);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.nav-link {
+    padding: 1rem 1.5rem;
+    text-decoration: none;
+    color: var(--text-light);
+    font-size: 1rem;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    font-weight: 400;
+}
+
+.nav-link:hover {
+    color: var(--text);
+}
+
+.nav-link.active {
+    border-bottom-color: var(--accent);
+    color: var(--text);
+    font-weight: 500;
+}
+
+/* ===== Sections ===== */
+.section {
+    padding: 2rem;
+    max-width: 850px;
+    margin: 0 auto;
+}
+
+/* ===== Memorial ===== */
+.memorial-header {
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.memorial-header h1 {
+    font-weight: 400;
+    font-size: 1.4rem;
+    color: var(--text-light);
+    letter-spacing: 0.5px;
+}
+
+.person-cards {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 2.5rem;
+}
+
+.person-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    flex: 1;
+    min-width: 260px;
+    max-width: 380px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.person-card h2 {
+    font-weight: 500;
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: var(--text);
+}
+
+.dates {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-bottom: 0.25rem;
+}
+
+.person-card > p:last-child {
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+/* ===== Photos ===== */
+.photos-section {
+    margin-top: 1rem;
+}
+
+.photos-section h3 {
+    margin-bottom: 1rem;
+    font-weight: 400;
+    color: var(--text-light);
+    font-size: 1.1rem;
+}
+
+.photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+.photo-item {
+    text-align: center;
+}
+
+.photo-item img {
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    transition: transform 0.3s;
+}
+
+.photo-item img:hover {
+    transform: scale(1.02);
+}
+
+.photo-caption {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-top: 0.5rem;
+}
+
+/* ===== Azkara ===== */
+.azkara-details {
+    padding: 1.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.azkara-details p {
+    margin: 0.25rem 0;
+}
+
+.azkara-details strong {
+    font-size: 1.15rem;
+}
+
+.azkara-actions {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.info-text {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-bottom: 1rem;
+}
+
+/* ===== Letters Grid ===== */
+.letters-section {
+    margin-bottom: 1.5rem;
+}
+
+.letters-section h4 {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.letters-grid {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+}
+
+.letter-box {
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 0.75rem;
+    text-align: center;
+    min-width: 68px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.letter-box:hover {
+    border-color: var(--accent);
+}
+
+.letter-box.selected {
+    border-color: var(--accent);
+    background: linear-gradient(to bottom, #fdf6e9, var(--bg-card));
+}
+
+.letter-box .letter {
+    font-size: 1.6rem;
+    font-weight: 700;
+    display: block;
+    color: var(--text);
+}
+
+.letter-box .assignee {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    margin-top: 0.25rem;
+    display: block;
+}
+
+/* ===== Seder Checklist ===== */
+.seder-checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.seder-checklist label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    transition: background 0.15s;
+    font-size: 1rem;
+}
+
+.seder-checklist label:hover {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.seder-checklist input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent);
+}
+
+/* ===== Buttons ===== */
+button {
+    padding: 0.65rem 2rem;
+    font-size: 1rem;
+    font-family: inherit;
+    cursor: pointer;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    background: var(--accent);
+    color: #fff;
+    transition: all 0.2s;
+    margin: 0.25rem;
+}
+
+button:hover {
+    background: var(--accent-dark);
+    border-color: var(--accent-dark);
+}
+
+#download-pdf-btn {
+    display: block;
+    margin: 1.5rem auto 0;
+}
+
+#download-calendar-btn {
+    background: transparent;
+    color: var(--accent-dark);
+    border: 1px solid var(--accent);
+}
+
+#download-calendar-btn:hover {
+    background: var(--accent);
+    color: #fff;
+}
+
+/* ===== Admin ===== */
+.admin-panel {
+    max-width: 500px;
+}
+
+.admin-panel h3 {
+    font-weight: 500;
+    margin-bottom: 1rem;
+    font-size: 1.15rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: var(--text-light);
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 0.65rem 0.75rem;
+    font-size: 1rem;
+    font-family: inherit;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+#members-list {
+    margin-top: 1.5rem;
+}
+
+#members-list h4 {
+    font-weight: 500;
+    margin-bottom: 0.75rem;
+}
+
+#members-ul {
+    list-style: none;
+    padding: 0;
+}
+
+#members-ul li {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#members-ul li button {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.75rem;
+    background: transparent;
+    border-color: #c77;
+    color: #c77;
+}
+
+#members-ul li button:hover {
+    background: #c77;
+    color: #fff;
+}
+
+hr {
+    margin: 2rem 0;
+    border: none;
+    border-top: 1px solid var(--border);
+}
+
+/* ===== PDF Styles ===== */
+.pdf-page {
+    direction: rtl;
+    text-align: right;
+    font-family: 'Frank Ruhl Libre', 'David', serif;
+    padding: 2.5rem;
+    line-height: 2;
+    background: #fff;
+    color: #1a1a1a;
+}
+
+.pdf-page h1 {
+    text-align: center;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    font-size: 1.6rem;
+}
+
+.pdf-page h2 {
+    text-align: center;
+    margin: 2rem 0 0.75rem;
+    font-weight: 500;
+    font-size: 1.2rem;
+    border-bottom: 1px solid var(--accent);
+    padding-bottom: 0.3rem;
+    color: var(--accent-dark);
+}
+
+.pdf-page .prayer-text {
+    font-size: 1.1rem;
+    white-space: pre-wrap;
+    margin: 0.5rem 0;
+    line-height: 2;
+}
+
+.pdf-page .instruction {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin: 0.5rem 0;
+    text-align: center;
+}
+
+.pdf-page .separator {
+    text-align: center;
+    margin: 1.5rem 0;
+    color: var(--accent);
+    letter-spacing: 8px;
+}
+
+/* ===== Mobile First Responsive ===== */
+
+/* Touch-friendly: larger tap targets on mobile */
+@media (pointer: coarse) {
+    button, .nav-link, .letter-box, .seder-checklist label {
+        min-height: 44px;
+    }
+
+    .seder-checklist input[type="checkbox"] {
+        width: 22px;
+        height: 22px;
+    }
+
+    .form-group input,
+    .form-group select {
+        font-size: 16px; /* prevents iOS zoom on focus */
+        padding: 0.75rem;
+    }
+
+    .login-box input {
+        font-size: 16px;
+        padding: 0.85rem;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        font-size: 15px;
+    }
+
+    .section {
+        padding: 1.25rem 1rem;
+    }
+
+    .person-cards {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+
+    .person-card {
+        min-width: auto;
+        width: 100%;
+        padding: 1.25rem;
+    }
+
+    .person-card h2 {
+        font-size: 1.3rem;
+    }
+
+    .photo-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+
+    .photo-item img {
+        height: 180px;
+    }
+
+    /* Nav: equal width tabs */
+    #main-nav {
+        padding: 0;
+        justify-content: stretch;
+    }
+
+    .nav-link {
+        flex: 1;
+        text-align: center;
+        padding: 0.85rem 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    /* Azkara */
+    .azkara-details {
+        padding: 1.25rem 1rem;
+    }
+
+    .letters-grid {
+        justify-content: center;
+    }
+
+    .letter-box {
+        min-width: 60px;
+        padding: 0.6rem;
+    }
+
+    .letter-box .letter {
+        font-size: 1.4rem;
+    }
+
+    /* Admin form */
+    .admin-panel {
+        max-width: 100%;
+    }
+
+    /* Buttons full width on mobile */
+    #download-pdf-btn,
+    #download-calendar-btn,
+    #save-azkara-btn,
+    #add-member-btn {
+        width: 100%;
+        padding: 0.85rem;
+    }
+
+    .azkara-actions {
+        text-align: stretch;
+    }
+
+    .azkara-actions button {
+        width: 100%;
+    }
+
+    /* Login */
+    .login-box {
+        padding: 2rem 1.25rem;
+        width: 95%;
+        border-radius: 10px;
+    }
+
+    .login-box h1 {
+        font-size: 1.3rem;
+    }
+
+    .login-box button {
+        width: 100%;
+        padding: 0.85rem;
+    }
+
+    .candle-container {
+        transform: scale(0.8);
+    }
+
+    .memorial-candle {
+        margin: 1rem auto;
+    }
+
+    /* Members list */
+    #members-ul li {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-start;
+        padding: 0.75rem 0.5rem;
+    }
+
+    #members-ul li button {
+        align-self: flex-start;
+    }
+
+    h2 {
+        font-size: 1.3rem;
+    }
+
+    h3 {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 380px) {
+    .photo-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .photo-item img {
+        height: 220px;
+    }
+
+    .nav-link {
+        font-size: 0.82rem;
+        padding: 0.75rem 0.25rem;
+    }
+
+    .letter-box {
+        min-width: 52px;
+        padding: 0.5rem;
+    }
+}
+
+/* Safe area for notch phones */
+@supports (padding: env(safe-area-inset-bottom)) {
+    body {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    #main-nav {
+        padding-top: env(safe-area-inset-top);
+    }
+}
