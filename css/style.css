@@ -626,23 +626,42 @@ body {
     color: #fff;
 }
 
-/* Quick PDF Section (main page) */
+/* Quick PDF Section - Collapsible */
 .quick-pdf-section {
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 1.5rem;
     margin-bottom: 2rem;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
 }
 
-.quick-pdf-section h3 {
+.pdf-summary {
+    padding: 1rem 1.5rem;
+    font-size: 1.1rem;
     font-weight: 500;
-    margin-bottom: 0.25rem;
-    font-size: 1.15rem;
+    cursor: pointer;
+    list-style: none;
+    color: var(--text);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: inherit;
 }
 
-.quick-pdf-section .info-text {
+.pdf-summary::-webkit-details-marker {
+    display: none;
+}
+
+.pdf-summary:hover {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.pdf-details-content {
+    padding: 0 1.5rem 1.5rem;
+}
+
+.pdf-details-content .info-text {
     margin-bottom: 1rem;
 }
 
@@ -652,12 +671,6 @@ body {
     margin-top: 1rem;
     padding: 0.85rem;
     font-size: 1.05rem;
-}
-
-#quick-calendar-btn {
-    display: block;
-    width: 100%;
-    margin-top: 0.5rem;
 }
 
 .btn-secondary {
@@ -1079,14 +1092,21 @@ hr {
 
 /* ===== Family Tree ===== */
 .family-tree-section {
+    display: block !important;
     margin-bottom: 2.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
 }
 
 .family-tree-section h3 {
     margin-bottom: 1.5rem;
-    font-weight: 400;
-    color: var(--text-light);
-    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text);
+    font-size: 1.15rem;
+    text-align: center;
 }
 
 .tree {

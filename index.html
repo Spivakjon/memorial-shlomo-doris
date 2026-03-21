@@ -67,23 +67,25 @@
                 <a href="https://waze.com/ul?q=%D7%91%D7%99%D7%AA%20%D7%A2%D7%9C%D7%9E%D7%99%D7%9F%20%D7%A7%D7%93%D7%99%D7%9E%D7%94%20%D7%A6%D7%95%D7%A8%D7%9F" target="_blank" class="action-btn waze-btn">נווט לבית העלמין (Waze)</a>
             </div>
 
-            <!-- Quick PDF Download -->
-            <div class="quick-pdf-section" id="quick-pdf-section">
-                <h3>הורדת סדר אזכרה</h3>
-                <p class="info-text">בחר מה לכלול בסדר ולחץ להורדה</p>
+            <!-- Quick PDF Download - Collapsible -->
+            <details class="quick-pdf-section" id="quick-pdf-section">
+                <summary class="pdf-summary">הורדת סדר אזכרה ▾</summary>
+                <div class="pdf-details-content">
+                    <p class="info-text">בחר מה לכלול בסדר ולחץ להורדה</p>
 
-                <div class="seder-checklist" id="main-seder-checklist">
-                    <label><input type="checkbox" value="candle" checked> הדלקת נר נשמה</label>
-                    <label><input type="checkbox" value="tehillim" checked> תהילים קי"ט - אותיות שם פרטי</label>
-                    <label><input type="checkbox" value="neshama"> תהילים קי"ט - אותיות נשמה (נ-ש-מ-ה)</label>
-                    <label><input type="checkbox" value="psalm91" checked> תהילים צ"א (יושב בסתר)</label>
-                    <label><input type="checkbox" value="psalm121" checked> תהילים קכ"א (שיר למעלות)</label>
-                    <label><input type="checkbox" value="hashkava" checked> השכבה</label>
-                    <label><input type="checkbox" value="kaddish" checked> קדיש יתום</label>
+                    <div class="seder-checklist" id="main-seder-checklist">
+                        <label><input type="checkbox" value="candle" checked> הדלקת נר נשמה</label>
+                        <label><input type="checkbox" value="tehillim" checked> תהילים קי"ט - אותיות שם פרטי</label>
+                        <label><input type="checkbox" value="neshama"> תהילים קי"ט - אותיות נשמה (נ-ש-מ-ה)</label>
+                        <label><input type="checkbox" value="psalm91" checked> תהילים צ"א (יושב בסתר)</label>
+                        <label><input type="checkbox" value="psalm121" checked> תהילים קכ"א (שיר למעלות)</label>
+                        <label><input type="checkbox" value="hashkava" checked> השכבה</label>
+                        <label><input type="checkbox" value="kaddish" checked> קדיש יתום</label>
+                    </div>
+
+                    <button id="quick-pdf-btn">הורד PDF לאזכרה</button>
                 </div>
-
-                <button id="quick-pdf-btn">הורד PDF לאזכרה</button>
-            </div>
+            </details>
 
             <!-- Family Tree -->
             <div class="family-tree-section">
