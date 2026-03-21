@@ -20,11 +20,11 @@
 //    { "rules": { ".read": true, ".write": true } }
 
 const FIREBASE_CONFIG = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
-    projectId: "YOUR_PROJECT",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyBdBHNVpGj4HmHUTKXaBCrDM7Ap7n_Hdhc",
+    authDomain: "memorial-levi.firebaseapp.com",
+    databaseURL: "https://memorial-levi-default-rtdb.firebaseio.com",
+    projectId: "memorial-levi",
+    storageBucket: "memorial-levi.firebasestorage.app",
+    messagingSenderId: "250090138671",
+    appId: "1:250090138671:web:4bd36dacc6991095c42ada"
 };

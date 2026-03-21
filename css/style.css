@@ -1077,6 +1077,155 @@ hr {
     }
 }
 
+/* ===== Family Tree ===== */
+.family-tree-section {
+    margin-bottom: 2.5rem;
+}
+
+.family-tree-section h3 {
+    margin-bottom: 1.5rem;
+    font-weight: 400;
+    color: var(--text-light);
+    font-size: 1.1rem;
+}
+
+.tree {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: auto;
+    padding: 1rem 0;
+}
+
+.tree-level {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: nowrap;
+}
+
+.children-level {
+    gap: 1.5rem;
+    align-items: flex-start;
+}
+
+.tree-branch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.tree-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.75rem 1.25rem;
+    border-radius: 12px;
+    text-align: center;
+    min-width: 80px;
+}
+
+.root-node {
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: #fff;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 15px rgba(201, 169, 110, 0.3);
+}
+
+.root-node .node-name {
+    font-weight: 700;
+    font-size: 1.15rem;
+}
+
+.parent-node {
+    background: var(--bg-card);
+    border: 2px solid var(--accent);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.parent-node .node-name {
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--text);
+}
+
+.parent-node .node-spouse {
+    font-size: 0.85rem;
+    color: var(--text-light);
+}
+
+.leaf {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 0.5rem 0.75rem;
+    min-width: 65px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.leaf .node-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text);
+}
+
+.leaf .node-spouse {
+    font-size: 0.75rem;
+    color: var(--text-light);
+}
+
+.leaf .node-kids {
+    font-size: 0.7rem;
+    color: var(--accent-dark);
+    margin-top: 2px;
+    font-weight: 500;
+}
+
+.tree-connector-down {
+    width: 2px;
+    height: 20px;
+    background: var(--accent);
+    margin: 0 auto;
+}
+
+.tree-connector-down.small {
+    height: 12px;
+}
+
+.grandchildren {
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 0;
+}
+
+/* Tree mobile */
+@media (max-width: 768px) {
+    .children-level {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .tree-branch {
+        width: 100%;
+        max-width: 320px;
+    }
+
+    .grandchildren {
+        gap: 0.35rem;
+    }
+
+    .leaf {
+        padding: 0.4rem 0.6rem;
+        min-width: 55px;
+    }
+
+    .root-node {
+        padding: 0.75rem 1.5rem;
+    }
+}
+
 /* ===== Gallery ===== */
 .upload-btn {
     display: block;
