@@ -133,6 +133,7 @@ function loadGallery() {
             var date = new Date(d.timestamp);
             var dateStr = date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear();
 
+            var mediaEl;
             if (d.type === 'image') {
                 div.innerHTML =
                     '<img src="' + d.url + '" alt="' + (d.caption || '') + '" loading="lazy" onclick="openMedia(this.src, \'image\')">' +
@@ -150,10 +151,99 @@ function loadGallery() {
                     '</div>';
             }
 
+            // Context menu on long-press / right-click
+            div.dataset.key = item.key;
+            div.dataset.url = d.url;
+            div.dataset.type = d.type;
+            div.dataset.fileName = d.fileName || 'photo';
+            div.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                showCtxMenu(e, this);
+            });
+
+            // Long press for mobile
+            var longPressTimer;
+            div.addEventListener('touchstart', function(e) {
+                var el = this;
+                longPressTimer = setTimeout(function() {
+                    e.preventDefault();
+                    showCtxMenu(e, el);
+                }, 600);
+            });
+            div.addEventListener('touchend', function() { clearTimeout(longPressTimer); });
+            div.addEventListener('touchmove', function() { clearTimeout(longPressTimer); });
+
             grid.appendChild(div);
         });
     });
 }
+
+// ==================== CONTEXT MENU ====================
+var ctxTarget = null;
+
+function showCtxMenu(e, el) {
+    ctxTarget = el;
+    var menu = document.getElementById('photo-context-menu');
+    menu.classList.remove('hidden');
+
+    // Position
+    var x = e.clientX || (e.touches && e.touches[0].clientX) || 100;
+    var y = e.clientY || (e.touches && e.touches[0].clientY) || 100;
+
+    // Keep in viewport
+    menu.style.left = Math.min(x, window.innerWidth - 180) + 'px';
+    menu.style.top = Math.min(y, window.innerHeight - 150) + 'px';
+}
+
+function closeCtxMenu() {
+    document.getElementById('photo-context-menu').classList.add('hidden');
+    ctxTarget = null;
+}
+
+function ctxDownload() {
+    if (!ctxTarget) return;
+    var url = ctxTarget.dataset.url;
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = ctxTarget.dataset.fileName || 'photo';
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    closeCtxMenu();
+}
+
+function ctxDelete() {
+    if (!ctxTarget || !firebaseReady) return;
+    var pass = prompt('הזן סיסמה למחיקה:');
+    if (pass !== '2803') {
+        alert('סיסמה שגויה');
+        closeCtxMenu();
+        return;
+    }
+    var key = ctxTarget.dataset.key;
+    var url = ctxTarget.dataset.url;
+
+    // Delete from database
+    db.ref('media/' + key).remove().then(function() {
+        // Try to delete from storage too
+        try {
+            storage.refFromURL(url).delete();
+        } catch (e) {}
+        closeCtxMenu();
+    }).catch(function(err) {
+        alert('שגיאה במחיקה: ' + err.message);
+        closeCtxMenu();
+    });
+}
+
+// Close context menu on click elsewhere
+document.addEventListener('click', function(e) {
+    var menu = document.getElementById('photo-context-menu');
+    if (menu && !menu.contains(e.target)) {
+        menu.classList.add('hidden');
+    }
+});
 
 // Lightbox for viewing full media
 function openMedia(src, type) {

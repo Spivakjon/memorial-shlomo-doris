@@ -1379,6 +1379,47 @@ hr {
     object-fit: contain;
 }
 
+/* ===== Context Menu ===== */
+.ctx-menu {
+    position: fixed;
+    z-index: 3000;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    padding: 0.4rem;
+    min-width: 160px;
+    display: flex;
+    flex-direction: column;
+}
+
+.ctx-menu button {
+    display: block;
+    width: 100%;
+    padding: 0.7rem 1rem;
+    text-align: right;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.95rem;
+    cursor: pointer;
+    border-radius: 6px;
+    margin: 0;
+}
+
+.ctx-menu button:hover {
+    background: var(--bg);
+}
+
+.ctx-menu .ctx-delete {
+    color: #c55;
+}
+
+.ctx-menu .ctx-delete:hover {
+    background: #fef0f0;
+}
+
 /* ===== PDF Overlay ===== */
 #pdf-overlay {
     display: none;
