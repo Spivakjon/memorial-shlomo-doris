@@ -519,6 +519,26 @@ body {
     margin-bottom: 1.5rem;
 }
 
+.calendar-link {
+    display: block;
+    width: 100%;
+    padding: 0.85rem;
+    font-size: 1.05rem;
+    text-align: center;
+    text-decoration: none;
+    font-family: inherit;
+    background: transparent;
+    color: var(--accent-dark);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.calendar-link:hover {
+    background: var(--accent);
+    color: #fff;
+}
+
 .btn-full {
     width: 100%;
     padding: 0.85rem;

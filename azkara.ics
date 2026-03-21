@@ -1,0 +1,25 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Memorial Levi//Azkara//HE
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:azkara-20260410@memorial-levi
+DTSTAMP:20260321T200000
+DTSTART;TZID=Asia/Jerusalem:20260410T093000
+DTEND;TZID=Asia/Jerusalem:20260410T103000
+SUMMARY:אזכרה חמישית - שלמה לוי ז"ל
+LOCATION:בית עלמין קדימה צורן
+DESCRIPTION:אזכרה חמישית - שלמה לוי ז"ל | בית עלמין קדימה צורן
+BEGIN:VALARM
+TRIGGER:-P7D
+ACTION:DISPLAY
+DESCRIPTION:בעוד שבוע: אזכרה חמישית - שלמה לוי ז"ל
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-P1D
+ACTION:DISPLAY
+DESCRIPTION:מחר: אזכרה חמישית - שלמה לוי ז"ל
+END:VALARM
+END:VEVENT
+END:VCALENDAR

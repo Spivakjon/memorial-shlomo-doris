@@ -594,7 +594,6 @@ function initApp() {
 
     // Main page buttons
     document.getElementById('quick-pdf-btn').addEventListener('click', generateQuickPdf);
-    document.getElementById('quick-calendar-btn').addEventListener('click', downloadCalendarEvent);
 
     // Manage page button
     document.getElementById('download-pdf-btn').addEventListener('click', generateAdvancedPdf);
