@@ -378,8 +378,16 @@ function getSelectedLettersForPerson(personKey) {
     return selected;
 }
 
-function getNameLetters(personKey) {
-    return CONFIG.people[personKey].lettersForTehillim;
+function getFirstNameLetters(personKey) {
+    // Returns only the first name letters (שלמה / דוריס), not family name
+    const person = CONFIG.people[personKey];
+    let indices;
+    if (personKey === 'shlomo') {
+        indices = person.nameGroups.first; // שלמה
+    } else {
+        indices = person.nameGroups.doris; // דוריס
+    }
+    return indices.map(i => person.lettersForTehillim[i]);
 }
 
 function buildTehillimHtml(letters, title) {
@@ -437,11 +445,12 @@ function generateQuickPdf() {
 
     if (checkedItems.includes('candle')) html += buildPrayerSection(PRAYERS.candle);
 
-    // Tehillim - name letters for each person
+    // Tehillim - first name letters only (שלמה / דוריס)
     if (checkedItems.includes('tehillim')) {
         people.forEach(p => {
-            const letters = getNameLetters(p.key);
-            html += buildTehillimHtml(letters, p.data.fullNameHebrew);
+            const letters = getFirstNameLetters(p.key);
+            const firstName = p.key === 'shlomo' ? 'שלמה' : 'דוריס';
+            html += buildTehillimHtml(letters, firstName);
         });
     }
 
