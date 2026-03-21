@@ -126,6 +126,42 @@ function initAuth() {
     initApp();
 }
 
+// ==================== DARK MODE ====================
+
+function initDarkMode() {
+    const toggle = document.getElementById('dark-mode-toggle');
+    if (localStorage.getItem('darkMode') === 'true') {
+        document.body.classList.add('dark-mode');
+        toggle.textContent = '☀️';
+    }
+    toggle.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        localStorage.setItem('darkMode', isDark);
+        toggle.textContent = isDark ? '☀️' : '🌙';
+    });
+}
+
+// ==================== WHATSAPP SHARE ====================
+
+function shareWhatsApp() {
+    var azkara = state.azkara;
+    var title = getPersonTitle(azkara.forPerson);
+    var dateParts = azkara.date.split('-');
+    var formattedDate = dateParts[2] + '/' + dateParts[1] + '/' + dateParts[0];
+
+    var text = 'אזכרה ' + azkara.yearLabel + '\n' +
+        title + '\n' +
+        formattedDate + ' בשעה ' + azkara.time + '\n' +
+        azkara.location + '\n\n' +
+        'לפרטים והורדת סדר האזכרה:\n' +
+        window.location.href;
+
+    var waUrl = 'https://wa.me/?text=' + encodeURIComponent(text);
+    window.location.href = waUrl;
+}
+
 // ==================== NAVIGATION ====================
 
 function initNav() {
@@ -585,6 +621,7 @@ function saveSelectedLetters() {
 // ==================== INIT ====================
 
 function initApp() {
+    initDarkMode();
     initNav();
     initLetters();
     initAzkaraAdmin();

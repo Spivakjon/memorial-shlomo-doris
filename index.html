@@ -10,10 +10,11 @@
 
     <!-- Main App -->
     <div id="app">
-        <!-- Navigation - 2 tabs -->
+        <!-- Navigation -->
         <nav id="main-nav">
             <a href="#" class="nav-link active" data-section="main">דף הנצחה</a>
             <a href="#" class="nav-link" data-section="manage">ניהול</a>
+            <button id="dark-mode-toggle" class="dark-toggle" title="מצב כהה">🌙</button>
         </nav>
 
         <!-- ========== TAB 1: Main Page ========== -->
@@ -40,12 +41,14 @@
             <div class="person-cards">
                 <div class="person-card">
                     <h2>שלמה לוי ז"ל</h2>
+                    <p class="life-years">1928 - 2021</p>
                     <p class="dates">נפטר: ט"ז ניסן תשפ"א | 28/03/2021</p>
                     <p class="time-elapsed" id="elapsed-shlomo"></p>
                     <p>בית עלמין קדימה צורן</p>
                 </div>
                 <div class="person-card">
                     <h2>דוריס (חנה) לוי ז"ל</h2>
+                    <p class="life-years">1933 - 2021</p>
                     <p class="dates">נפטרה: י"ז אייר תשפ"א | 27/04/2021</p>
                     <p class="time-elapsed" id="elapsed-doris"></p>
                     <p>בית עלמין קדימה צורן</p>
@@ -57,9 +60,11 @@
                 <!-- Filled by JS -->
             </div>
 
-            <!-- Calendar -->
-            <div class="calendar-section">
-                <a href="azkara.ics" class="calendar-link">הוסף אזכרה ליומן</a>
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a href="azkara.ics" class="action-btn">הוסף אזכרה ליומן</a>
+                <button id="whatsapp-share-btn" class="action-btn whatsapp-btn" onclick="shareWhatsApp()">שתף בוואטסאפ</button>
+                <a href="https://waze.com/ul?q=%D7%91%D7%99%D7%AA%20%D7%A2%D7%9C%D7%9E%D7%99%D7%9F%20%D7%A7%D7%93%D7%99%D7%9E%D7%94%20%D7%A6%D7%95%D7%A8%D7%9F" target="_blank" class="action-btn waze-btn">נווט לבית העלמין (Waze)</a>
             </div>
 
             <!-- Quick PDF Download -->
