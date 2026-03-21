@@ -1335,6 +1335,42 @@ hr {
     font-weight: 500;
 }
 
+/* AI button */
+.ai-btn {
+    margin-top: 0.4rem;
+    padding: 0.4rem 1rem;
+    font-size: 0.85rem;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border: none;
+    color: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    width: 100%;
+}
+
+.ai-btn:hover {
+    opacity: 0.9;
+}
+
+.ai-btn.loading {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+/* Upload category select */
+.upload-preview select {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    font-size: 1rem;
+    font-family: inherit;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-card);
+    color: var(--text);
+    direction: rtl;
+}
+
 /* Upload description textarea */
 .upload-preview textarea {
     width: 100%;

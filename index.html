@@ -110,6 +110,16 @@
                         <div class="form-group">
                             <textarea id="upload-description" rows="2" placeholder="תיאור: איפה צולמה? מתי? מי בתמונה? באיזה אירוע?"></textarea>
                         </div>
+                        <div class="form-group">
+                            <select id="upload-category">
+                                <option value="">בחר קטגוריה (או לחץ סיווג AI)</option>
+                                <option value="זוגי">זוגי - שלמה ודוריס</option>
+                                <option value="משפחה">משפחה</option>
+                                <option value="אירועים">אירועים (ימי הולדת, חגים...)</option>
+                                <option value="אישי">אישי</option>
+                            </select>
+                            <button type="button" id="ai-category-btn" class="ai-btn" onclick="aiCategorize()">סיווג AI</button>
+                        </div>
                         <button id="upload-submit-btn" class="upload-submit-btn">העלה</button>
                         <button id="upload-cancel-btn" class="upload-cancel-btn" type="button">ביטול</button>
                     </div>

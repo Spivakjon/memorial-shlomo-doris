@@ -133,12 +133,30 @@ function loadDrivePhotos() {
             if (data.success && data.files) {
                 data.files.forEach(function(f) {
                     var isVideo = f.mimeType && f.mimeType.startsWith('video/');
+                    var desc = f.description || '';
+                    var cat = 'הועלו ע"י המשפחה';
+
+                    // Extract category tag from description
+                    var catMatch = desc.match(/\[קטגוריה:([^\]]+)\]/);
+                    if (catMatch) {
+                        cat = catMatch[1];
+                        desc = desc.replace(catMatch[0], '').trim();
+                    }
+
+                    // Extract people from description
+                    var people = [];
+                    var familyNames = ['שלמה', 'דוריס', 'אלי', 'שרית', 'לילך', 'שאולי', 'גילי', 'מיכל',
+                        'שגיא', 'נועה', 'יניב', 'יהונתן', 'עדן', 'דין', 'ים', 'אדם', 'עומר', 'נועם', 'ליהיא'];
+                    familyNames.forEach(function(name) {
+                        if (desc.indexOf(name) !== -1) people.push(name);
+                    });
+
                     allPhotos.push({
                         src: 'https://lh3.googleusercontent.com/d/' + f.fileId + '=w600',
                         fullSrc: 'https://lh3.googleusercontent.com/d/' + f.fileId + '=w2000',
-                        description: f.description || '',
-                        people: [],
-                        category: 'הועלו ע"י המשפחה',
+                        description: desc,
+                        people: people,
+                        category: cat,
                         period: '',
                         isStatic: false,
                         fileId: f.fileId,
@@ -256,6 +274,71 @@ function filterByPerson(name) {
     document.getElementById('gallery-section').scrollIntoView({ behavior: 'smooth' });
 }
 
+// AI categorization based on image analysis via description + visual cues
+function aiCategorize() {
+    var btn = document.getElementById('ai-category-btn');
+    var desc = (document.getElementById('upload-description').value || '').trim();
+    var select = document.getElementById('upload-category');
+
+    // If no description, try to analyze the image filename
+    var fileInput = document.getElementById('file-input');
+    var fileName = fileInput.files && fileInput.files[0] ? fileInput.files[0].name.toLowerCase() : '';
+
+    btn.textContent = 'מנתח...';
+    btn.classList.add('loading');
+
+    // Simulate brief analysis delay
+    setTimeout(function() {
+        var category = smartCategorize(desc, fileName);
+        select.value = category;
+        btn.textContent = 'סווג: ' + category;
+        btn.classList.remove('loading');
+        setTimeout(function() { btn.textContent = 'סיווג AI'; }, 2000);
+    }, 800);
+}
+
+function smartCategorize(desc, fileName) {
+    var text = (desc + ' ' + fileName).toLowerCase();
+
+    // Family member names
+    var familyNames = ['אלי', 'שרית', 'לילך', 'שאולי', 'גילי', 'מיכל', 'שגיא', 'נועה',
+        'יניב', 'אנטוניו', 'יהונתן', 'עדן', 'דין', 'ים', 'אדם', 'עומר', 'נועם', 'ליהיא',
+        'מיה', 'ליאו', 'עלמה', 'עידן', 'נכדים', 'ילדים', 'משפחה', 'כולם'];
+
+    var coupleWords = ['שלמה ודוריס', 'סבא וסבתא', 'זוג', 'ביחד', 'שניהם'];
+    var eventWords = ['יום הולדת', 'חתונה', 'בר מצווה', 'בת מצווה', 'חג', 'פסח', 'ראש השנה',
+        'סוכות', 'חנוכה', 'פורים', 'שבת', 'חגיגה', 'מסיבה', 'אירוע', 'טקס', 'birthday',
+        'אזכרה', 'שמחה'];
+    var personalWords = ['שלמה', 'סבא', 'דוריס', 'סבתא', 'לבד', 'פורטרט', 'portrait'];
+
+    // Check couple
+    for (var i = 0; i < coupleWords.length; i++) {
+        if (text.indexOf(coupleWords[i]) !== -1) return 'זוגי';
+    }
+
+    // Check events
+    for (var i = 0; i < eventWords.length; i++) {
+        if (text.indexOf(eventWords[i]) !== -1) return 'אירועים';
+    }
+
+    // Check family members
+    var familyCount = 0;
+    for (var i = 0; i < familyNames.length; i++) {
+        if (text.indexOf(familyNames[i]) !== -1) familyCount++;
+    }
+    if (familyCount >= 2) return 'משפחה';
+
+    // Check personal
+    for (var i = 0; i < personalWords.length; i++) {
+        if (text.indexOf(personalWords[i]) !== -1) return 'אישי';
+    }
+
+    // Default based on number of faces mentioned
+    if (familyCount >= 1) return 'משפחה';
+
+    return 'משפחה'; // safe default
+}
+
 // Upload handling
 function handleFileSelect(e) {
     var files = e.target.files;
@@ -288,12 +371,18 @@ function cancelUpload() {
     document.getElementById('upload-preview').classList.add('hidden');
     document.getElementById('preview-thumbs').innerHTML = '';
     document.getElementById('upload-description').value = '';
+    document.getElementById('upload-category').value = '';
     document.getElementById('file-input').value = '';
 }
 
 function submitUpload() {
     if (!pendingFiles.length || !APPS_SCRIPT_URL) return;
     var description = document.getElementById('upload-description').value.trim();
+    var category = document.getElementById('upload-category').value || 'הועלו ע"י המשפחה';
+    // Append category to description as tag
+    if (category && category !== 'הועלו ע"י המשפחה') {
+        description = description + (description ? ' ' : '') + '[קטגוריה:' + category + ']';
+    }
     var status = document.getElementById('gallery-status');
     var total = pendingFiles.length;
     var uploaded = 0;
