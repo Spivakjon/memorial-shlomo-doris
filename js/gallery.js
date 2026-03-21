@@ -359,30 +359,37 @@ function classifyExistingPhoto(photo, btnEl) {
     setTimeout(function() {
         var category = smartCategorize(photo.description || '', '');
 
-        // Save category to description tag
-        var newDesc = photo.description || '';
-        // Remove old category tag if exists
-        newDesc = newDesc.replace(/\[קטגוריה:[^\]]+\]/, '').trim();
+        // Build new description: keep original, just add/replace category tag
+        var origDesc = photo.description || '';
+        var newDesc = origDesc.replace(/\[קטגוריה:[^\]]+\]/g, '').trim();
         newDesc = newDesc + (newDesc ? ' ' : '') + '[קטגוריה:' + category + ']';
 
-        fetch(APPS_SCRIPT_URL + '?action=updateDesc&fileId=' + encodeURIComponent(photo.fileId) + '&desc=' + encodeURIComponent(newDesc) + '&pass=2803')
+        // Use POST to avoid URL encoding issues with special characters
+        fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                action: 'updateDesc',
+                fileId: photo.fileId,
+                desc: newDesc,
+                pass: '2803'
+            })
+        })
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 if (data.success) {
                     btnEl.textContent = category;
                     btnEl.style.background = '#4a8';
-                    // Reload gallery
                     setTimeout(function() {
                         allPhotos = STATIC_PHOTOS.slice();
                         loadDrivePhotos();
                     }, 800);
                 } else {
-                    btnEl.textContent = 'שגיאה';
+                    btnEl.textContent = 'נסה שוב';
                     btnEl.classList.remove('loading');
                 }
             })
-            .catch(function() {
-                btnEl.textContent = 'שגיאה';
+            .catch(function(err) {
+                btnEl.textContent = 'נסה שוב';
                 btnEl.classList.remove('loading');
             });
     }, 600);
@@ -560,7 +567,10 @@ function editDescription(fileId) {
     // Save previous for undo
     lastDescriptions[fileId] = currentDesc;
 
-    fetch(APPS_SCRIPT_URL + '?action=updateDesc&fileId=' + encodeURIComponent(fileId) + '&desc=' + encodeURIComponent(newDesc) + '&pass=2803')
+    fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'updateDesc', fileId: fileId, desc: newDesc, pass: '2803' })
+    })
         .then(function(r) { return r.json(); })
         .then(function(data) {
             if (data.success) {
@@ -581,7 +591,10 @@ function undoDescription(fileId) {
         return;
     }
 
-    fetch(APPS_SCRIPT_URL + '?action=updateDesc&fileId=' + encodeURIComponent(fileId) + '&desc=' + encodeURIComponent(prevDesc) + '&pass=2803')
+    fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'updateDesc', fileId: fileId, desc: prevDesc, pass: '2803' })
+    })
         .then(function(r) { return r.json(); })
         .then(function(data) {
             if (data.success) {

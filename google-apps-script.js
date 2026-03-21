@@ -16,8 +16,21 @@ function getOrCreateFolder() {
 
 function doPost(e) {
   try {
-    var folder = getOrCreateFolder();
     var data = JSON.parse(e.postData.contents);
+
+    // Handle updateDesc via POST (avoids URL encoding issues)
+    if (data.action === 'updateDesc') {
+      var file = DriveApp.getFileById(data.fileId);
+      var meta = {};
+      try { meta = JSON.parse(file.getDescription()); } catch (x) {}
+      meta.description = data.desc || '';
+      file.setDescription(JSON.stringify(meta));
+      return ContentService.createTextOutput(JSON.stringify({
+        success: true
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    var folder = getOrCreateFolder();
     var fileData = Utilities.base64Decode(data.file);
     var blob = Utilities.newBlob(fileData, data.mimeType, data.fileName);
     var file = folder.createFile(blob);
