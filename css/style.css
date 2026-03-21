@@ -1210,7 +1210,7 @@ hr {
 .ft-kids-row {
     display: flex;
     justify-content: center;
-    gap: 6px;
+    gap: 10px;
 }
 
 .ft-kid-col {
@@ -1242,11 +1242,12 @@ hr {
 
 @media (max-width: 768px) {
     .ft-root { font-size: 0.88rem; padding: 0.55rem 1rem; }
-    .ft-child { font-size: 0.78rem; padding: 0.4rem 0.65rem; }
-    .ft-gc { font-size: 0.68rem; padding: 0.3rem 0.45rem; }
-    .ft-ggc { font-size: 0.62rem; padding: 0.22rem 0.4rem; }
+    .ft-child { font-size: 0.78rem; padding: 0.4rem 0.75rem; }
+    .ft-gc { font-size: 0.7rem; padding: 0.32rem 0.55rem; }
+    .ft-ggc { font-size: 0.65rem; padding: 0.25rem 0.45rem; }
     .ft-vline, .ft-vline-up { height: 12px; }
-    .ft-kids-row { gap: 3px; }
+    .ft-kids-row { gap: 6px; }
+    .ft-kid-col { padding: 0 2px; }
 }
 
 /* ===== Gallery ===== */
