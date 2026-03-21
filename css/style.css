@@ -1634,6 +1634,28 @@ hr {
     background: rgba(255,255,255,0.25);
 }
 
+.lb-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.lb-undo-btn {
+    background: rgba(255,100,100,0.2);
+    border: 1px solid rgba(255,100,100,0.4);
+    color: #faa;
+    padding: 0.4rem 1.2rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.lb-undo-btn:hover {
+    background: rgba(255,100,100,0.35);
+}
+
 @media (max-width: 768px) {
     .lb-content img {
         max-height: 60vh;

@@ -453,12 +453,13 @@ function openMedia(src, type, fileId, currentDesc) {
     var descText = currentDesc || '';
     var descHtml = descText ? '<p class="lb-desc">' + descText + '</p>' : '<p class="lb-desc lb-empty">לחצו להוסיף תיאור</p>';
     var editBtn = fileId ? '<button class="lb-edit-btn" onclick="editDescription(\'' + fileId + '\')">ערוך תיאור</button>' : '';
+    var undoBtn = (fileId && lastDescriptions[fileId] !== undefined) ? '<button class="lb-undo-btn" onclick="undoDescription(\'' + fileId + '\')">החזר תיאור קודם</button>' : '';
 
     overlay.innerHTML =
         '<div class="lb-close" onclick="closeLightbox()">✕</div>' +
         '<div class="lb-content">' +
             '<img src="' + src + '">' +
-            '<div class="lb-bottom">' + descHtml + editBtn + '</div>' +
+            '<div class="lb-bottom">' + descHtml + '<div class="lb-buttons">' + editBtn + undoBtn + '</div></div>' +
         '</div>';
 
     document.body.appendChild(overlay);
@@ -472,13 +473,15 @@ function openDriveVideo(fileId, currentDesc) {
     overlay.className = 'media-lightbox';
     overlay.id = 'active-lightbox';
 
+    var undoBtn2 = lastDescriptions[fileId] !== undefined ? '<button class="lb-undo-btn" onclick="undoDescription(\'' + fileId + '\')">החזר תיאור קודם</button>' : '';
+
     overlay.innerHTML =
         '<div class="lb-close" onclick="closeLightbox()">✕</div>' +
         '<div class="lb-content">' +
             '<iframe src="https://drive.google.com/file/d/' + fileId + '/preview" allowfullscreen></iframe>' +
             '<div class="lb-bottom">' +
                 (currentDesc ? '<p class="lb-desc">' + currentDesc + '</p>' : '') +
-                '<button class="lb-edit-btn" onclick="editDescription(\'' + fileId + '\')">ערוך תיאור</button>' +
+                '<div class="lb-buttons"><button class="lb-edit-btn" onclick="editDescription(\'' + fileId + '\')">ערוך תיאור</button>' + undoBtn2 + '</div>' +
             '</div>' +
         '</div>';
 
@@ -493,19 +496,47 @@ function closeLightbox() {
     if (lb) lb.remove();
 }
 
-function editDescription(fileId) {
-    var pass = prompt('הזן סיסמה לעריכה:');
-    if (pass !== '2803') {
-        if (pass !== null) alert('סיסמה שגויה');
-        return;
-    }
-    var newDesc = prompt('תיאור התמונה (מקום, תאריך, אירוע):');
-    if (newDesc === null) return;
+var lastDescriptions = {}; // fileId -> previous description (for undo)
 
-    fetch(APPS_SCRIPT_URL + '?action=updateDesc&fileId=' + encodeURIComponent(fileId) + '&desc=' + encodeURIComponent(newDesc) + '&pass=' + pass)
+function editDescription(fileId) {
+    // Find current description
+    var currentDesc = '';
+    allPhotos.forEach(function(p) {
+        if (p.fileId === fileId) currentDesc = p.description || '';
+    });
+
+    var newDesc = prompt('תיאור התמונה (מקום, תאריך, אירוע):', currentDesc);
+    if (newDesc === null || newDesc === currentDesc) return;
+
+    // Save previous for undo
+    lastDescriptions[fileId] = currentDesc;
+
+    fetch(APPS_SCRIPT_URL + '?action=updateDesc&fileId=' + encodeURIComponent(fileId) + '&desc=' + encodeURIComponent(newDesc) + '&pass=2803')
         .then(function(r) { return r.json(); })
         .then(function(data) {
             if (data.success) {
+                closeLightbox();
+                allPhotos = STATIC_PHOTOS.slice();
+                loadDrivePhotos();
+            } else {
+                alert(data.error || 'שגיאה');
+            }
+        })
+        .catch(function(err) { alert('שגיאה: ' + err.message); });
+}
+
+function undoDescription(fileId) {
+    var prevDesc = lastDescriptions[fileId];
+    if (prevDesc === undefined) {
+        alert('אין תיאור קודם להחזרה');
+        return;
+    }
+
+    fetch(APPS_SCRIPT_URL + '?action=updateDesc&fileId=' + encodeURIComponent(fileId) + '&desc=' + encodeURIComponent(prevDesc) + '&pass=2803')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                delete lastDescriptions[fileId];
                 closeLightbox();
                 allPhotos = STATIC_PHOTOS.slice();
                 loadDrivePhotos();
