@@ -365,7 +365,7 @@ function classifyExistingPhoto(photo, btnEl) {
         newDesc = newDesc.replace(/\[קטגוריה:[^\]]+\]/, '').trim();
         newDesc = newDesc + (newDesc ? ' ' : '') + '[קטגוריה:' + category + ']';
 
-        fetch(APPS_SCRIPT_URL + '?action=updateDesc&fileId=' + encodeURIComponent(photo.fileId) + '&desc=' + encodeURIComponent(newDesc))
+        fetch(APPS_SCRIPT_URL + '?action=updateDesc&fileId=' + encodeURIComponent(photo.fileId) + '&desc=' + encodeURIComponent(newDesc) + '&pass=2803')
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 if (data.success) {
