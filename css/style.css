@@ -1097,9 +1097,10 @@ hr {
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 1.5rem 1rem;
+    padding: 1.5rem 0.5rem 2rem;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .family-tree-section h3 {
@@ -1110,216 +1111,172 @@ hr {
     text-align: center;
 }
 
-.tree {
+/* Tree structure using UL/LI */
+.ftree {
+    width: 100%;
+}
+
+.ftree ul {
+    padding-top: 20px;
+    position: relative;
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    padding-left: 0;
+}
+
+.ftree li {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: fit-content;
-    padding: 0.5rem 0;
+    padding: 0 6px;
 }
 
-/* Rows */
-.tree-row {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
+/* Vertical line down from parent */
+.ftree li::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 2px;
+    height: 20px;
+    background: var(--accent);
 }
 
-.gen2 {
-    gap: 2rem;
-    align-items: flex-start;
+/* Horizontal line connecting siblings */
+.ftree li::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--accent);
 }
 
-.gen3 {
-    gap: 0.4rem;
-    flex-wrap: wrap;
-    justify-content: center;
+/* Remove left line from first child */
+.ftree li:first-child::after {
+    width: 50%;
+    left: 50%;
 }
 
-.gen4 {
-    gap: 0.3rem;
-    justify-content: center;
+/* Remove right line from last child */
+.ftree li:last-child::after {
+    width: 50%;
+    right: 50%;
+    left: auto;
 }
 
-/* Columns */
-.tree-col {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+/* Remove lines from root (single child of root ul) */
+.ftree > ul > li::before,
+.ftree > ul > li::after {
+    display: none;
 }
 
-.tree-col-inner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+/* Vertical line down to children */
+.ftree ul ul {
+    padding-top: 20px;
 }
 
-/* Cards */
-.tree-card {
-    padding: 0.6rem 1rem;
+/* Node styles */
+.ftree span {
+    display: inline-block;
+    padding: 0.5rem 0.9rem;
     border-radius: 10px;
     text-align: center;
     font-weight: 600;
     white-space: nowrap;
+    position: relative;
+    margin-bottom: 2px;
+    font-size: 0.85rem;
 }
 
-.root-card {
+/* Line from node down to its children */
+.ftree li > span::after {
+    content: '';
+    position: absolute;
+    bottom: -22px;
+    left: 50%;
+    width: 2px;
+    height: 22px;
+    background: var(--accent);
+}
+
+/* Hide bottom line if no children */
+.ftree li:not(:has(ul)) > span::after {
+    display: none;
+}
+
+/* Root */
+.ft-root {
     background: linear-gradient(135deg, var(--accent), var(--accent-dark));
     color: #fff;
-    padding: 0.9rem 2rem;
+    padding: 0.8rem 1.8rem;
     font-size: 1.15rem;
     font-weight: 700;
     border-radius: 14px;
     box-shadow: 0 4px 15px rgba(201, 169, 110, 0.3);
 }
 
-.child-card {
+/* Children (gen 2) */
+.ft-child {
     background: var(--bg-card);
     border: 2.5px solid var(--accent);
     color: var(--text);
-    font-size: 1rem;
+    font-size: 0.95rem;
+    padding: 0.55rem 1rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-.gc-card {
+/* Grandchildren (gen 3) */
+.ft-gc {
     background: var(--bg);
     border: 1.5px solid var(--border);
-    font-size: 0.85rem;
-    padding: 0.45rem 0.7rem;
     color: var(--text);
+    font-size: 0.8rem;
+    padding: 0.4rem 0.65rem;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
-.ggc-card {
+/* Great-grandchildren (gen 4) */
+.ft-ggc {
     background: var(--bg);
-    border: 1px solid var(--accent);
-    font-size: 0.75rem;
-    padding: 0.3rem 0.6rem;
-    border-radius: 8px;
+    border: 1.5px solid var(--accent);
     color: var(--accent-dark);
+    font-size: 0.75rem;
+    padding: 0.3rem 0.55rem;
+    border-radius: 8px;
     font-weight: 500;
 }
 
-/* Connecting Lines */
-.tree-line {
-    width: 2.5px;
-    height: 18px;
-    background: var(--accent);
-    margin: 0 auto;
-}
-
-.tree-line.small {
-    height: 10px;
-    width: 2px;
-}
-
-/* Horizontal connectors */
-.tree-hline {
-    position: relative;
-    height: 18px;
-    margin: 0 auto;
-}
-
-.tree-hline::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    height: 2.5px;
-    background: var(--accent);
-}
-
-.tree-hline::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 50%;
-    width: 2.5px;
-    height: 100%;
-    background: transparent;
-}
-
-/* 3-way: for root to 3 children */
-.three-way {
-    width: 70%;
-    max-width: 500px;
-}
-
-.three-way::before {
-    left: 0;
-    right: 0;
-}
-
-/* 2-way connector */
-.two-way {
-    width: 60%;
-    max-width: 120px;
-}
-
-.two-way::before {
-    left: 0;
-    right: 0;
-}
-
-/* 3-way small */
-.three-way-sm {
-    width: 70%;
-    max-width: 150px;
-}
-
-.three-way-sm::before {
-    left: 0;
-    right: 0;
-}
-
-/* 4-way */
-.four-way {
-    width: 80%;
-    max-width: 250px;
-}
-
-.four-way::before {
-    left: 0;
-    right: 0;
-}
-
-/* Tree mobile */
+/* Mobile: scroll horizontally */
 @media (max-width: 768px) {
-    .gen2 {
-        flex-direction: column;
-        align-items: center;
-        gap: 0.75rem;
+    .family-tree-section {
+        padding: 1rem 0.25rem 1.5rem;
     }
 
-    .tree-hline.three-way {
-        display: none;
+    .ftree {
+        min-width: 600px;
     }
 
-    .tree-col {
-        width: 100%;
-        max-width: 300px;
-        border-right: 3px solid var(--accent);
-        padding-right: 1rem;
-        margin-right: 1rem;
-        padding-bottom: 0.75rem;
-    }
-
-    .tree-col:last-child {
-        border-right: none;
-        padding-right: 0;
-        margin-right: 0;
-    }
-
-    .gen3 {
-        gap: 0.3rem;
-    }
-
-    .root-card {
-        padding: 0.7rem 1.5rem;
+    .ft-root {
         font-size: 1rem;
+        padding: 0.6rem 1.2rem;
     }
 
-    .child-card {
-        font-size: 0.9rem;
+    .ft-child {
+        font-size: 0.85rem;
+        padding: 0.4rem 0.7rem;
+    }
+
+    .ft-gc {
+        font-size: 0.75rem;
+        padding: 0.3rem 0.5rem;
+    }
+
+    .ft-ggc {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.4rem;
     }
 }
 
