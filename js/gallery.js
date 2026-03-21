@@ -143,13 +143,20 @@ function loadDrivePhotos() {
                         desc = desc.replace(catMatch[0], '').trim();
                     }
 
-                    // Extract people from description
+                    // Extract people from tags or description
                     var people = [];
-                    var familyNames = ['שלמה', 'דוריס', 'אלי', 'שרית', 'לילך', 'שאולי', 'גילי', 'מיכל',
-                        'שגיא', 'נועה', 'יניב', 'יהונתן', 'עדן', 'דין', 'ים', 'אדם', 'עומר', 'נועם', 'ליהיא'];
-                    familyNames.forEach(function(name) {
-                        if (desc.indexOf(name) !== -1) people.push(name);
-                    });
+                    var peopleMatch = desc.match(/\[אנשים:([^\]]+)\]/);
+                    if (peopleMatch) {
+                        people = peopleMatch[1].split(',').map(function(s) { return s.trim(); });
+                        desc = desc.replace(peopleMatch[0], '').trim();
+                    } else {
+                        // Fallback: scan description for names
+                        var familyNames = ['שלמה', 'דוריס', 'אלי', 'שרית', 'לילך', 'שאולי', 'גילי', 'מיכל',
+                            'שגיא', 'נועה', 'יניב', 'יהונתן', 'עדן', 'דין', 'ים', 'אדם', 'עומר', 'נועם', 'ליהיא'];
+                        familyNames.forEach(function(name) {
+                            if (desc.indexOf(name) !== -1) people.push(name);
+                        });
+                    }
 
                     allPhotos.push({
                         src: 'https://lh3.googleusercontent.com/d/' + f.fileId + '=w600',
@@ -509,13 +516,19 @@ function openMedia(src, type, fileId, currentDesc) {
     var descText = currentDesc || '';
     var descHtml = descText ? '<p class="lb-desc">' + descText + '</p>' : '<p class="lb-desc lb-empty">לחצו להוסיף תיאור</p>';
     var editBtn = fileId ? '<button class="lb-edit-btn" onclick="editDescription(\'' + fileId + '\')">ערוך תיאור</button>' : '';
-    var undoBtn = (fileId && lastDescriptions[fileId] !== undefined) ? '<button class="lb-undo-btn" onclick="undoDescription(\'' + fileId + '\')">החזר תיאור קודם</button>' : '';
+    var tagBtn = fileId ? '<button class="lb-tag-btn" onclick="openTagPanel(\'' + fileId + '\')">תייג אנשים</button>' : '';
+    var undoBtn = (fileId && lastDescriptions[fileId] !== undefined) ? '<button class="lb-undo-btn" onclick="undoDescription(\'' + fileId + '\')">החזר קודם</button>' : '';
+
+    // Get current tagged people
+    var taggedPeople = getTaggedPeople(fileId);
+    var tagsHtml = taggedPeople.length > 0 ? '<div class="lb-tags">' + taggedPeople.map(function(p) { return '<span class="lb-person-tag">' + p + '</span>'; }).join('') + '</div>' : '';
 
     overlay.innerHTML =
         '<div class="lb-close" onclick="closeLightbox()">✕</div>' +
         '<div class="lb-content">' +
             '<img src="' + src + '">' +
-            '<div class="lb-bottom">' + descHtml + '<div class="lb-buttons">' + editBtn + undoBtn + '</div></div>' +
+            '<div class="lb-bottom">' + tagsHtml + descHtml + '<div class="lb-buttons">' + tagBtn + editBtn + undoBtn + '</div></div>' +
+            '<div class="tag-panel hidden" id="tag-panel"></div>' +
         '</div>';
 
     document.body.appendChild(overlay);
@@ -551,6 +564,134 @@ function closeLightbox() {
     var lb = document.getElementById('active-lightbox');
     if (lb) lb.remove();
 }
+
+// ==================== PEOPLE TAGGING ====================
+
+var FAMILY_GROUPS = [
+    {
+        label: 'סבא וסבתא',
+        members: ['שלמה', 'דוריס']
+    },
+    {
+        label: 'משפחת אלי לוי',
+        members: ['אלי לוי', 'שרית', 'שגיא', 'נועה לוי', 'יניב', 'אנטוניו']
+    },
+    {
+        label: 'משפחת לילך ושאולי ספיבק',
+        members: ['לילך ספיבק', 'שאולי', 'אלי ספיבק', 'לילך ספיבק-אשת אלי', 'יהונתן', 'עדן', 'דין', 'ים', 'אדם']
+    },
+    {
+        label: 'נינים - ספיבק',
+        members: ['עלמה', 'עידן', 'מיה', 'ליאו']
+    },
+    {
+        label: 'משפחת גילי לוי',
+        members: ['גילי', 'מיכל', 'עומר', 'נועם', 'ליהיא']
+    }
+];
+
+var currentTagFileId = null;
+var currentTagged = [];
+
+function getTaggedPeople(fileId) {
+    var people = [];
+    allPhotos.forEach(function(p) {
+        if (p.fileId === fileId && p.people) people = p.people;
+    });
+    return people;
+}
+
+function openTagPanel(fileId) {
+    currentTagFileId = fileId;
+    currentTagged = getTaggedPeople(fileId).slice();
+
+    var panel = document.getElementById('tag-panel');
+    panel.classList.remove('hidden');
+
+    var html = '<div class="tag-header"><h4>תייגו מי בתמונה</h4></div>';
+    html += '<div class="tag-groups">';
+
+    FAMILY_GROUPS.forEach(function(group) {
+        html += '<div class="tag-group">';
+        html += '<p class="tag-group-label">' + group.label + '</p>';
+        html += '<div class="tag-group-members">';
+        group.members.forEach(function(name) {
+            var isTagged = currentTagged.indexOf(name) !== -1;
+            html += '<button class="tag-member-btn' + (isTagged ? ' tagged' : '') + '" onclick="toggleTag(this, \'' + name.replace(/'/g, "\\'") + '\')">' + name + '</button>';
+        });
+        html += '</div></div>';
+    });
+
+    html += '</div>';
+    html += '<div class="tag-actions">';
+    html += '<button class="tag-save-btn" onclick="saveTagging()">שמור</button>';
+    html += '<button class="tag-cancel-btn" onclick="closeTagPanel()">ביטול</button>';
+    html += '</div>';
+
+    panel.innerHTML = html;
+}
+
+function toggleTag(btn, name) {
+    var idx = currentTagged.indexOf(name);
+    if (idx !== -1) {
+        currentTagged.splice(idx, 1);
+        btn.classList.remove('tagged');
+    } else {
+        currentTagged.push(name);
+        btn.classList.add('tagged');
+    }
+}
+
+function closeTagPanel() {
+    var panel = document.getElementById('tag-panel');
+    if (panel) panel.classList.add('hidden');
+    currentTagFileId = null;
+    currentTagged = [];
+}
+
+function saveTagging() {
+    if (!currentTagFileId) return;
+
+    // Find current description
+    var desc = '';
+    allPhotos.forEach(function(p) {
+        if (p.fileId === currentTagFileId) desc = p.description || '';
+    });
+
+    // Remove old people tag
+    desc = desc.replace(/\[אנשים:[^\]]*\]/g, '').trim();
+
+    // Add new people tag
+    if (currentTagged.length > 0) {
+        desc = desc + (desc ? ' ' : '') + '[אנשים:' + currentTagged.join(',') + ']';
+    }
+
+    var btn = document.querySelector('.tag-save-btn');
+    if (btn) { btn.textContent = 'שומר...'; btn.disabled = true; }
+
+    fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'updateDesc', fileId: currentTagFileId, desc: desc, pass: '2803' })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.success) {
+            closeTagPanel();
+            closeLightbox();
+            allPhotos = STATIC_PHOTOS.slice();
+            loadDrivePhotos();
+        } else {
+            alert(data.error || 'שגיאה');
+            if (btn) { btn.textContent = 'שמור'; btn.disabled = false; }
+        }
+    })
+    .catch(function(err) {
+        alert('שגיאה: ' + err.message);
+        if (btn) { btn.textContent = 'שמור'; btn.disabled = false; }
+    });
+}
+
+// ==================== DESCRIPTION EDITING ====================
 
 var lastDescriptions = {}; // fileId -> previous description (for undo)
 

@@ -1682,6 +1682,141 @@ hr {
     background: rgba(255,100,100,0.35);
 }
 
+.lb-tag-btn {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border: none;
+    color: #fff;
+    padding: 0.4rem 1.2rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.lb-tag-btn:hover {
+    opacity: 0.9;
+}
+
+.lb-tags {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+}
+
+.lb-person-tag {
+    background: var(--accent);
+    color: #fff;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+}
+
+/* Tag Panel */
+.tag-panel {
+    background: #222;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-top: 0.75rem;
+    max-width: 400px;
+    width: 95vw;
+    max-height: 60vh;
+    overflow-y: auto;
+    direction: rtl;
+}
+
+.tag-header h4 {
+    color: #fff;
+    text-align: center;
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+}
+
+.tag-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.tag-group {
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+}
+
+.tag-group-label {
+    color: var(--accent);
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+}
+
+.tag-group-members {
+    display: flex;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+}
+
+.tag-member-btn {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.8rem;
+    background: rgba(255,255,255,0.1);
+    border: 1.5px solid rgba(255,255,255,0.2);
+    color: #ccc;
+    border-radius: 16px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+    margin: 0;
+}
+
+.tag-member-btn:hover {
+    border-color: var(--accent);
+    color: #fff;
+}
+
+.tag-member-btn.tagged {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 600;
+}
+
+.tag-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.tag-save-btn {
+    flex: 1;
+    padding: 0.6rem;
+    background: var(--accent);
+    border: none;
+    color: #fff;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.tag-cancel-btn {
+    flex: 1;
+    padding: 0.6rem;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #aaa;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.tag-cancel-btn:hover {
+    background: rgba(255,255,255,0.2);
+}
+
 @media (max-width: 768px) {
     .lb-content img {
         max-height: 60vh;
