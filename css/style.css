@@ -1876,6 +1876,15 @@ hr {
     background: #fef0f0;
 }
 
+/* ===== Footer ===== */
+.site-footer {
+    text-align: center;
+    padding: 1.5rem 1rem;
+    color: var(--text-light);
+    font-size: 0.7rem;
+    opacity: 0.5;
+}
+
 /* ===== PDF Overlay ===== */
 #pdf-overlay {
     display: none;
