@@ -1988,6 +1988,119 @@ hr {
     background: #fef0f0;
 }
 
+/* ===== Duplicate Detection ===== */
+#scan-duplicates-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-family: inherit;
+    margin-bottom: 0.8rem;
+}
+#scan-duplicates-btn:hover { opacity: 0.9; }
+#scan-duplicates-btn:disabled { opacity: 0.5; cursor: default; }
+
+.dup-pair {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.dup-pair-header {
+    padding: 0.5rem 1rem;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dup-similarity {
+    font-weight: 600;
+    color: var(--accent-dark);
+    font-size: 0.9rem;
+}
+
+.dup-pair-photos {
+    display: flex;
+    gap: 0;
+}
+
+.dup-photo {
+    flex: 1;
+    padding: 0.8rem;
+    text-align: center;
+    border-left: 1px solid var(--border);
+}
+
+.dup-photo:first-child {
+    border-left: none;
+}
+
+.dup-photo img {
+    width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+}
+
+.dup-desc {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    margin-bottom: 0.5rem;
+    word-break: break-word;
+}
+
+.dup-delete-btn {
+    background: #e74c3c;
+    color: #fff;
+    border: none;
+    padding: 0.4rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-family: inherit;
+}
+.dup-delete-btn:hover { background: #c0392b; }
+.dup-delete-btn:disabled { opacity: 0.5; cursor: default; }
+
+.dup-deleted {
+    opacity: 0.3;
+    position: relative;
+}
+.dup-deleted::after {
+    content: 'נמחקה';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #e74c3c;
+    background: rgba(255,255,255,0.8);
+    padding: 0.3rem 1rem;
+    border-radius: 4px;
+}
+
+@media (max-width: 600px) {
+    .dup-pair-photos {
+        flex-direction: column;
+    }
+    .dup-photo {
+        border-left: none;
+        border-top: 1px solid var(--border);
+    }
+    .dup-photo:first-child {
+        border-top: none;
+    }
+}
+
 /* ===== Footer ===== */
 .site-footer {
     text-align: center;

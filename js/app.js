@@ -716,6 +716,9 @@ function initApp() {
     // Gallery
     try { initGallery(); } catch(e) { console.error('gallery:', e); }
 
+    // Duplicate scanner (manage tab)
+    try { initDuplicateScanner(); } catch(e) { console.error('dupScanner:', e); }
+
     // File input change listener (label handles click natively)
     try {
         document.getElementById('file-input').addEventListener('change', handleFileSelect);

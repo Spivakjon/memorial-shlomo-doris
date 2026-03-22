@@ -223,7 +223,8 @@ function loadDrivePhotos() {
                         isStatic: false,
                         fileId: f.fileId,
                         isVideo: isVideo,
-                        driveUrl: f.url
+                        driveUrl: f.url,
+                        name: f.name || ''
                     });
                 });
             }
@@ -934,3 +935,203 @@ document.addEventListener('click', function(e) {
     var menu = document.getElementById('photo-context-menu');
     if (menu && !menu.contains(e.target)) menu.classList.add('hidden');
 });
+
+// ==================== DUPLICATE DETECTION ====================
+
+function initDuplicateScanner() {
+    var btn = document.getElementById('scan-duplicates-btn');
+    if (btn) btn.addEventListener('click', scanForDuplicates);
+}
+
+function scanForDuplicates() {
+    var btn = document.getElementById('scan-duplicates-btn');
+    var status = document.getElementById('dup-status');
+    var results = document.getElementById('duplicates-results');
+
+    // Only scan Drive photos (static photos are curated)
+    var drivePhotos = allPhotos.filter(function(p) { return !p.isStatic && p.fileId && !p.isVideo; });
+
+    if (drivePhotos.length < 2) {
+        status.textContent = 'צריך לפחות 2 תמונות מ-Drive כדי לסרוק';
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'סורק...';
+    status.textContent = 'טוען תמונות להשוואה... 0/' + drivePhotos.length;
+    results.innerHTML = '';
+
+    // Load all thumbnails and compute fingerprints
+    var fingerprints = [];
+    var loaded = 0;
+
+    drivePhotos.forEach(function(photo, idx) {
+        var img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = function() {
+            var fp = getImageFingerprint(img);
+            fingerprints.push({ photo: photo, fingerprint: fp, index: idx });
+            loaded++;
+            status.textContent = 'טוען תמונות להשוואה... ' + loaded + '/' + drivePhotos.length;
+            if (loaded === drivePhotos.length) {
+                findDuplicates(fingerprints, results, status, btn);
+            }
+        };
+        img.onerror = function() {
+            loaded++;
+            status.textContent = 'טוען תמונות להשוואה... ' + loaded + '/' + drivePhotos.length;
+            if (loaded === drivePhotos.length) {
+                findDuplicates(fingerprints, results, status, btn);
+            }
+        };
+        img.src = photo.src;
+    });
+}
+
+function getImageFingerprint(img) {
+    var canvas = document.createElement('canvas');
+    var size = 16;
+    canvas.width = size;
+    canvas.height = size;
+    var ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, size, size);
+    try {
+        var data = ctx.getImageData(0, 0, size, size).data;
+        // Convert to grayscale values
+        var grays = [];
+        for (var i = 0; i < data.length; i += 4) {
+            grays.push(Math.round(data[i] * 0.299 + data[i+1] * 0.587 + data[i+2] * 0.114));
+        }
+        return grays;
+    } catch(e) {
+        return null;
+    }
+}
+
+function compareFingerprints(fp1, fp2) {
+    if (!fp1 || !fp2 || fp1.length !== fp2.length) return 0;
+    var totalDiff = 0;
+    for (var i = 0; i < fp1.length; i++) {
+        totalDiff += Math.abs(fp1[i] - fp2[i]);
+    }
+    var maxDiff = 255 * fp1.length;
+    return 1 - (totalDiff / maxDiff);
+}
+
+function findDuplicates(fingerprints, resultsEl, statusEl, btn) {
+    var pairs = [];
+    var threshold = 0.92; // 92% similarity
+
+    // Also check name similarity
+    for (var i = 0; i < fingerprints.length; i++) {
+        for (var j = i + 1; j < fingerprints.length; j++) {
+            var similarity = compareFingerprints(fingerprints[i].fingerprint, fingerprints[j].fingerprint);
+            var nameSim = fileNameSimilarity(fingerprints[i].photo, fingerprints[j].photo);
+
+            if (similarity >= threshold || nameSim >= 0.85) {
+                pairs.push({
+                    a: fingerprints[i].photo,
+                    b: fingerprints[j].photo,
+                    similarity: Math.max(similarity, nameSim),
+                    type: similarity >= threshold ? 'visual' : 'name'
+                });
+            }
+        }
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'סרוק כפולות';
+
+    if (pairs.length === 0) {
+        statusEl.textContent = 'לא נמצאו תמונות כפולות!';
+        resultsEl.innerHTML = '<p class="info-text">נסרקו ' + fingerprints.length + ' תמונות - הכל נקי</p>';
+        return;
+    }
+
+    // Sort by similarity descending
+    pairs.sort(function(a, b) { return b.similarity - a.similarity; });
+
+    statusEl.textContent = 'נמצאו ' + pairs.length + ' זוגות חשודים';
+    resultsEl.innerHTML = '';
+
+    pairs.forEach(function(pair, idx) {
+        var pct = Math.round(pair.similarity * 100);
+        var div = document.createElement('div');
+        div.className = 'dup-pair';
+        div.innerHTML =
+            '<div class="dup-pair-header">' +
+                '<span class="dup-similarity">' + pct + '% דמיון' + (pair.type === 'name' ? ' (שם קובץ)' : '') + '</span>' +
+            '</div>' +
+            '<div class="dup-pair-photos">' +
+                '<div class="dup-photo" id="dup-a-' + idx + '">' +
+                    '<img src="' + pair.a.src + '" alt="">' +
+                    '<p class="dup-desc">' + (pair.a.description || 'ללא תיאור') + '</p>' +
+                    '<button class="dup-delete-btn" onclick="deleteDuplicate(\'' + pair.a.fileId + '\', this)">מחק תמונה זו</button>' +
+                '</div>' +
+                '<div class="dup-photo" id="dup-b-' + idx + '">' +
+                    '<img src="' + pair.b.src + '" alt="">' +
+                    '<p class="dup-desc">' + (pair.b.description || 'ללא תיאור') + '</p>' +
+                    '<button class="dup-delete-btn" onclick="deleteDuplicate(\'' + pair.b.fileId + '\', this)">מחק תמונה זו</button>' +
+                '</div>' +
+            '</div>';
+        resultsEl.appendChild(div);
+    });
+}
+
+function fileNameSimilarity(photoA, photoB) {
+    // Compare original file names from Drive (extracted from description or src)
+    var nameA = extractFileName(photoA);
+    var nameB = extractFileName(photoB);
+    if (!nameA || !nameB) return 0;
+
+    // Strip extension and normalize
+    nameA = nameA.replace(/\.[^.]+$/, '').replace(/[\s_-]+/g, '').toLowerCase();
+    nameB = nameB.replace(/\.[^.]+$/, '').replace(/[\s_-]+/g, '').toLowerCase();
+
+    if (nameA === nameB) return 1;
+
+    // Check if one contains the other (e.g. "photo" vs "photo(1)")
+    var cleanA = nameA.replace(/\(\d+\)$/, '');
+    var cleanB = nameB.replace(/\(\d+\)$/, '');
+    if (cleanA === cleanB) return 0.95;
+
+    return 0;
+}
+
+function extractFileName(photo) {
+    // Try to get file name from the src URL or description
+    if (photo.name) return photo.name;
+    return '';
+}
+
+function deleteDuplicate(fileId, btnEl) {
+    if (!confirm('למחוק את התמונה הזו?')) return;
+
+    btnEl.disabled = true;
+    btnEl.textContent = 'מוחק...';
+
+    fetch(APPS_SCRIPT_URL + '?action=delete&fileId=' + fileId + '&pass=2803')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) {
+                // Mark as deleted visually
+                var photoDiv = btnEl.parentElement;
+                photoDiv.classList.add('dup-deleted');
+                btnEl.textContent = 'נמחקה';
+                btnEl.disabled = true;
+
+                // Refresh gallery data
+                allPhotos = STATIC_PHOTOS.slice();
+                loadDrivePhotos();
+            } else {
+                alert(data.error || 'שגיאה במחיקה');
+                btnEl.disabled = false;
+                btnEl.textContent = 'מחק תמונה זו';
+            }
+        })
+        .catch(function(err) {
+            alert('שגיאה: ' + err.message);
+            btnEl.disabled = false;
+            btnEl.textContent = 'מחק תמונה זו';
+        });
+}
