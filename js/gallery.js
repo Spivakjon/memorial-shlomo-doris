@@ -303,29 +303,6 @@ function filterByPerson(name) {
     document.getElementById('gallery-section').scrollIntoView({ behavior: 'smooth' });
 }
 
-// AI categorization based on image analysis via description + visual cues
-function aiCategorize() {
-    var btn = document.getElementById('ai-category-btn');
-    var desc = (document.getElementById('upload-description').value || '').trim();
-    var select = document.getElementById('upload-category');
-
-    // If no description, try to analyze the image filename
-    var fileInput = document.getElementById('file-input');
-    var fileName = fileInput.files && fileInput.files[0] ? fileInput.files[0].name.toLowerCase() : '';
-
-    btn.textContent = 'מנתח...';
-    btn.classList.add('loading');
-
-    // Simulate brief analysis delay
-    setTimeout(function() {
-        var category = smartCategorize(desc, fileName);
-        select.value = category;
-        btn.textContent = 'סווג: ' + category;
-        btn.classList.remove('loading');
-        setTimeout(function() { btn.textContent = 'סיווג AI'; }, 2000);
-    }, 800);
-}
-
 function smartCategorize(desc, fileName) {
     var text = (desc + ' ' + fileName).toLowerCase();
 
@@ -443,19 +420,12 @@ function cancelUpload() {
     pendingFiles = [];
     document.getElementById('upload-preview').classList.add('hidden');
     document.getElementById('preview-thumbs').innerHTML = '';
-    document.getElementById('upload-description').value = '';
-    document.getElementById('upload-category').value = '';
     document.getElementById('file-input').value = '';
 }
 
 function submitUpload() {
     if (!pendingFiles.length || !APPS_SCRIPT_URL) return;
-    var description = document.getElementById('upload-description').value.trim();
-    var category = document.getElementById('upload-category').value || 'הועלו וטרם מוינו';
-    // Append category to description as tag
-    if (category && category !== 'הועלו וטרם מוינו') {
-        description = description + (description ? ' ' : '') + '[קטגוריה:' + category + ']';
-    }
+    var description = '';
     var status = document.getElementById('gallery-status');
     var total = pendingFiles.length;
     var uploaded = 0;
