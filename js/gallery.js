@@ -254,7 +254,7 @@ function renderGallery() {
         return;
     }
 
-    filtered.forEach(function(photo, idx) {
+    filtered.forEach(function(photo, filteredIdx) {
         var div = document.createElement('div');
         div.className = 'gallery-item';
 
@@ -276,9 +276,7 @@ function renderGallery() {
                 (photo.period ? '<p class="gallery-period">' + photo.period + '</p>' : '') +
                 '</div>' +
                 peopleTags;
-            div.onclick = function() {
-                openDriveVideo(photo.fileId, photo.description);
-            };
+            (function(i) { div.onclick = function() { openMediaByIndex(i); }; })(filteredIdx);
         } else {
             div.innerHTML =
                 '<img src="' + imgSrc + '" alt="' + (photo.description || '') + '" loading="lazy">' +
@@ -287,11 +285,7 @@ function renderGallery() {
                 (photo.period ? '<p class="gallery-period">' + photo.period + '</p>' : '') +
                 '</div>' +
                 peopleTags;
-            div.onclick = function() {
-                var full = photo.fullSrc || photo.src;
-                var id = photo.fileId || photo.src; // use src as ID for static photos
-                openMedia(full, 'image', id, photo.description);
-            };
+            (function(i) { div.onclick = function() { openMediaByIndex(i); }; })(filteredIdx);
         }
 
         // AI classify button for uploaded photos without category
@@ -534,9 +528,39 @@ function uploadToGDrive(file, description, onDone) {
     reader.readAsDataURL(file);
 }
 
-// ==================== LIGHTBOX ====================
+// ==================== LIGHTBOX WITH NAVIGATION ====================
+
+var currentLbIndex = -1;
+var lbFilteredPhotos = [];
+var touchStartX = 0;
+
+function getFilteredPhotos() {
+    return allPhotos.filter(function(p) {
+        if (activePersonFilter) return p.people && p.people.indexOf(activePersonFilter) !== -1;
+        if (activeFilter === 'הכל') return true;
+        if (activeFilter === 'ללא תיוג') return !p.people || p.people.length === 0;
+        return p.category === activeFilter;
+    });
+}
+
+function openMediaByIndex(idx) {
+    lbFilteredPhotos = getFilteredPhotos();
+    if (idx < 0 || idx >= lbFilteredPhotos.length) return;
+    currentLbIndex = idx;
+    var photo = lbFilteredPhotos[idx];
+
+    if (photo.isVideo) {
+        openDriveVideo(photo.fileId, photo.description);
+        return;
+    }
+
+    var src = photo.fullSrc || photo.src;
+    var fileId = photo.fileId || photo.src;
+    openMedia(src, 'image', fileId, photo.description);
+}
 
 function openMedia(src, type, fileId, currentDesc) {
+    closeLightbox();
     var overlay = document.createElement('div');
     overlay.className = 'media-lightbox';
     overlay.id = 'active-lightbox';
@@ -546,37 +570,68 @@ function openMedia(src, type, fileId, currentDesc) {
     var editBtn = fileId ? '<button class="lb-edit-btn" onclick="editDescription(\'' + fileId + '\')">ערוך תיאור</button>' : '';
     var tagBtn = fileId ? '<button class="lb-tag-btn" onclick="openTagPanel(\'' + fileId + '\')">תייג אנשים</button>' : '';
     var undoBtn = (fileId && lastDescriptions[fileId] !== undefined) ? '<button class="lb-undo-btn" onclick="undoDescription(\'' + fileId + '\')">החזר קודם</button>' : '';
-
-    // Get current tagged people
     var taggedPeople = getTaggedPeople(fileId);
     var tagsHtml = taggedPeople.length > 0 ? '<div class="lb-tags">' + taggedPeople.map(function(p) { return '<span class="lb-person-tag">' + p + '</span>'; }).join('') + '</div>' : '';
 
+    var hasNav = lbFilteredPhotos.length > 1;
+    var prevBtn = hasNav ? '<div class="lb-nav lb-prev" onclick="navigateLb(-1)">&#8249;</div>' : '';
+    var nextBtn = hasNav ? '<div class="lb-nav lb-next" onclick="navigateLb(1)">&#8250;</div>' : '';
+    var counter = hasNav ? '<span class="lb-counter">' + (currentLbIndex + 1) + ' / ' + lbFilteredPhotos.length + '</span>' : '';
+
     overlay.innerHTML =
         '<div class="lb-close" onclick="closeLightbox()">✕</div>' +
+        prevBtn + nextBtn +
         '<div class="lb-content">' +
             '<img src="' + src + '">' +
-            '<div class="lb-bottom">' + tagsHtml + descHtml + '<div class="lb-buttons">' + tagBtn + editBtn + undoBtn + '</div></div>' +
+            '<div class="lb-bottom">' + counter + tagsHtml + descHtml + '<div class="lb-buttons">' + tagBtn + editBtn + undoBtn + '</div></div>' +
             '<div class="tag-panel hidden" id="tag-panel"></div>' +
         '</div>';
 
     document.body.appendChild(overlay);
+
+    // Close on background click
     overlay.addEventListener('click', function(e) {
         if (e.target === overlay) closeLightbox();
     });
+
+    // Swipe support for mobile
+    overlay.addEventListener('touchstart', function(e) {
+        touchStartX = e.touches[0].clientX;
+    }, { passive: true });
+
+    overlay.addEventListener('touchend', function(e) {
+        var diff = touchStartX - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 60) {
+            navigateLb(diff > 0 ? 1 : -1);
+        }
+    });
+
+    // Keyboard navigation
+    document.onkeydown = function(e) {
+        if (e.key === 'ArrowLeft') navigateLb(1);   // RTL: left = next
+        if (e.key === 'ArrowRight') navigateLb(-1);  // RTL: right = prev
+        if (e.key === 'Escape') closeLightbox();
+    };
 }
 
 function openDriveVideo(fileId, currentDesc) {
+    closeLightbox();
     var overlay = document.createElement('div');
     overlay.className = 'media-lightbox';
     overlay.id = 'active-lightbox';
 
-    var undoBtn2 = lastDescriptions[fileId] !== undefined ? '<button class="lb-undo-btn" onclick="undoDescription(\'' + fileId + '\')">החזר תיאור קודם</button>' : '';
+    var hasNav = lbFilteredPhotos.length > 1;
+    var prevBtn = hasNav ? '<div class="lb-nav lb-prev" onclick="navigateLb(-1)">&#8249;</div>' : '';
+    var nextBtn = hasNav ? '<div class="lb-nav lb-next" onclick="navigateLb(1)">&#8250;</div>' : '';
+    var counter = hasNav ? '<span class="lb-counter">' + (currentLbIndex + 1) + ' / ' + lbFilteredPhotos.length + '</span>' : '';
+    var undoBtn2 = lastDescriptions[fileId] !== undefined ? '<button class="lb-undo-btn" onclick="undoDescription(\'' + fileId + '\')">החזר קודם</button>' : '';
 
     overlay.innerHTML =
         '<div class="lb-close" onclick="closeLightbox()">✕</div>' +
+        prevBtn + nextBtn +
         '<div class="lb-content">' +
             '<iframe src="https://drive.google.com/file/d/' + fileId + '/preview" allowfullscreen></iframe>' +
-            '<div class="lb-bottom">' +
+            '<div class="lb-bottom">' + counter +
                 (currentDesc ? '<p class="lb-desc">' + currentDesc + '</p>' : '') +
                 '<div class="lb-buttons"><button class="lb-edit-btn" onclick="editDescription(\'' + fileId + '\')">ערוך תיאור</button>' + undoBtn2 + '</div>' +
             '</div>' +
@@ -588,9 +643,17 @@ function openDriveVideo(fileId, currentDesc) {
     });
 }
 
+function navigateLb(dir) {
+    var newIdx = currentLbIndex + dir;
+    if (newIdx < 0) newIdx = lbFilteredPhotos.length - 1;
+    if (newIdx >= lbFilteredPhotos.length) newIdx = 0;
+    openMediaByIndex(newIdx);
+}
+
 function closeLightbox() {
     var lb = document.getElementById('active-lightbox');
     if (lb) lb.remove();
+    document.onkeydown = null;
 }
 
 // ==================== PEOPLE TAGGING ====================
