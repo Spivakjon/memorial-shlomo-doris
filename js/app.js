@@ -203,6 +203,39 @@ function showStaticPhotoMenu(e, imgEl) {
     menu.style.top = Math.min(y, window.innerHeight - 150) + 'px';
 }
 
+// ==================== MANAGE PASSWORD ====================
+
+function initManageLock() {
+    var btn = document.getElementById('manage-unlock-btn');
+    var input = document.getElementById('manage-password');
+    var error = document.getElementById('manage-error');
+
+    if (sessionStorage.getItem('manageUnlocked') === 'true') {
+        unlockManage();
+        return;
+    }
+
+    btn.addEventListener('click', tryUnlock);
+    input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') tryUnlock();
+    });
+
+    function tryUnlock() {
+        if (input.value === '2803') {
+            sessionStorage.setItem('manageUnlocked', 'true');
+            unlockManage();
+        } else {
+            error.classList.remove('hidden');
+            input.value = '';
+        }
+    }
+}
+
+function unlockManage() {
+    document.getElementById('manage-lock').classList.add('hidden');
+    document.getElementById('manage-content').classList.remove('hidden');
+}
+
 // ==================== NAVIGATION ====================
 
 function initNav() {
@@ -663,6 +696,7 @@ function saveSelectedLetters() {
 
 function initApp() {
     try { initDarkMode(); } catch(e) { console.error('darkMode:', e); }
+    try { initManageLock(); } catch(e) { console.error('manageLock:', e); }
     try { initNav(); } catch(e) { console.error('nav:', e); }
     try { initLetters(); } catch(e) { console.error('letters:', e); }
     try { initAzkaraAdmin(); } catch(e) { console.error('azkaraAdmin:', e); }

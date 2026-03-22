@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>לזכר שלמה ודוריס לוי ז"ל</title>
-    <link rel="stylesheet" href="css/style.css?v=20260322b">
+    <link rel="stylesheet" href="css/style.css?v=20260322c">
 </head>
 <body>
 
@@ -60,11 +60,11 @@
                 <!-- Filled by JS -->
             </div>
 
-            <!-- Action Buttons -->
-            <div class="action-buttons">
-                <a href="azkara.ics" class="action-btn">הוסף אזכרה ליומן</a>
-                <button id="whatsapp-share-btn" class="action-btn whatsapp-btn" onclick="shareWhatsApp()">שתף בוואטסאפ</button>
-                <a href="https://waze.com/ul?q=%D7%91%D7%99%D7%AA%20%D7%A2%D7%9C%D7%9E%D7%99%D7%9F%20%D7%A7%D7%93%D7%99%D7%9E%D7%94%20%D7%A6%D7%95%D7%A8%D7%9F" target="_blank" class="action-btn waze-btn">נווט לבית העלמין (Waze)</a>
+            <!-- Action Buttons - Row -->
+            <div class="action-buttons-row">
+                <a href="azkara.ics" class="action-chip">יומן</a>
+                <button class="action-chip whatsapp-chip" onclick="shareWhatsApp()">וואטסאפ</button>
+                <a href="https://waze.com/ul?q=%D7%91%D7%99%D7%AA%20%D7%A2%D7%9C%D7%9E%D7%99%D7%9F%20%D7%A7%D7%93%D7%99%D7%9E%D7%94%20%D7%A6%D7%95%D7%A8%D7%9F" target="_blank" class="action-chip waze-chip">Waze</a>
             </div>
 
             <!-- Quick PDF Download - Collapsible -->
@@ -99,6 +99,8 @@
 
                 <!-- Filters -->
                 <div class="gallery-filters" id="gallery-filters"></div>
+                <!-- People filter -->
+                <div class="people-filter" id="people-filter"></div>
 
                 <!-- Upload -->
                 <div class="upload-form">
@@ -119,8 +121,16 @@
             </div>
         </section>
 
-        <!-- ========== TAB 2: Management ========== -->
+        <!-- ========== TAB 2: Management (password protected) ========== -->
         <section id="manage" class="section hidden">
+            <div id="manage-lock" class="manage-lock">
+                <h2>ניהול</h2>
+                <p class="info-text">הזן סיסמת מנהל</p>
+                <input type="password" id="manage-password" placeholder="סיסמה">
+                <button id="manage-unlock-btn">כניסה</button>
+                <p id="manage-error" class="error hidden">סיסמה שגויה</p>
+            </div>
+            <div id="manage-content" class="hidden">
             <h2>ניהול</h2>
 
             <!-- Azkara Settings -->
@@ -227,6 +237,7 @@
                     <ul id="members-ul"></ul>
                 </div>
             </div>
+            </div>
         </section>
     </div>
 
@@ -235,10 +246,10 @@
         <p>נבנה באהבה ע"י יהונתן ספיבק</p>
     </footer>
 
-    <script src="js/prayers.js?v=20260322b"></script>
-    <script src="js/app.js?v=20260322b"></script>
-    <script src="js/family-tree.js?v=20260322b"></script>
-    <script src="js/gallery.js?v=20260322b"></script>
+    <script src="js/prayers.js?v=20260322c"></script>
+    <script src="js/app.js?v=20260322c"></script>
+    <script src="js/family-tree.js?v=20260322c"></script>
+    <script src="js/gallery.js?v=20260322c"></script>
 
     <!-- Context menu for photos -->
     <div id="photo-context-menu" class="ctx-menu hidden">

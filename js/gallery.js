@@ -106,6 +106,7 @@ function initGallery() {
 
     // Render filter buttons
     renderFilters();
+    renderPeopleFilter();
 
     // Load Google Drive photos and merge
     if (APPS_SCRIPT_URL) {
@@ -122,12 +123,58 @@ function renderFilters() {
 
     CATEGORIES.forEach(function(cat) {
         var btn = document.createElement('button');
-        btn.className = 'filter-btn' + (activeFilter === cat ? ' active' : '');
+        btn.className = 'filter-btn' + (activeFilter === cat && !activePersonFilter ? ' active' : '');
         btn.textContent = cat;
         btn.onclick = function() {
             activeFilter = cat;
             activePersonFilter = null;
             renderFilters();
+            renderPeopleFilter();
+            renderGallery();
+        };
+        container.appendChild(btn);
+    });
+}
+
+function renderPeopleFilter() {
+    var container = document.getElementById('people-filter');
+    if (!container) return;
+    container.innerHTML = '';
+
+    // Collect all tagged people from all photos
+    var allPeople = {};
+    allPhotos.forEach(function(p) {
+        if (p.people) {
+            p.people.forEach(function(name) {
+                allPeople[name] = (allPeople[name] || 0) + 1;
+            });
+        }
+    });
+
+    var names = Object.keys(allPeople);
+    if (names.length === 0) return;
+
+    // "הכל" button
+    var allBtn = document.createElement('button');
+    allBtn.className = 'people-filter-btn' + (!activePersonFilter ? ' active' : '');
+    allBtn.textContent = 'כל האנשים';
+    allBtn.onclick = function() {
+        activePersonFilter = null;
+        renderPeopleFilter();
+        renderGallery();
+    };
+    container.appendChild(allBtn);
+
+    names.sort();
+    names.forEach(function(name) {
+        var btn = document.createElement('button');
+        btn.className = 'people-filter-btn' + (activePersonFilter === name ? ' active' : '');
+        btn.textContent = name + ' (' + allPeople[name] + ')';
+        btn.onclick = function() {
+            activePersonFilter = name;
+            activeFilter = 'הכל';
+            renderFilters();
+            renderPeopleFilter();
             renderGallery();
         };
         container.appendChild(btn);
@@ -180,6 +227,7 @@ function loadDrivePhotos() {
                     });
                 });
             }
+            renderPeopleFilter();
             renderGallery();
         })
         .catch(function() {
