@@ -830,6 +830,39 @@ button:hover {
     color: #fff;
 }
 
+/* ===== Life Editor ===== */
+.life-editor {
+    width: 100%;
+    min-height: 120px;
+    padding: 0.75rem;
+    font-family: inherit;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    resize: vertical;
+    direction: rtl;
+}
+
+.life-editor:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(201, 169, 110, 0.2);
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--text-light);
+    border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+    background: var(--border);
+    color: var(--text);
+}
+
 /* ===== Admin ===== */
 .admin-panel {
     max-width: 500px;

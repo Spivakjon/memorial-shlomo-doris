@@ -692,6 +692,75 @@ function saveSelectedLetters() {
     localStorage.setItem('selectedLetters', JSON.stringify(state.selectedLetters));
 }
 
+// ==================== LIFE STORY EDITOR ====================
+
+var LIFE_SECTIONS = ['shlomo', 'doris', 'aliya'];
+
+function initLifeEditor() {
+    // Load saved content into display
+    LIFE_SECTIONS.forEach(function(key) {
+        var saved = localStorage.getItem('life-' + key);
+        if (saved) {
+            var el = document.getElementById('life-' + key);
+            if (el) el.innerHTML = textToHtml(saved);
+        }
+    });
+
+    // Fill textareas with current content
+    LIFE_SECTIONS.forEach(function(key) {
+        var el = document.getElementById('life-' + key);
+        var textarea = document.getElementById('edit-life-' + key);
+        if (el && textarea) {
+            var saved = localStorage.getItem('life-' + key);
+            textarea.value = saved || htmlToText(el);
+        }
+    });
+
+    document.getElementById('save-life-btn').addEventListener('click', saveLifeStory);
+    document.getElementById('reset-life-btn').addEventListener('click', resetLifeStory);
+}
+
+function htmlToText(el) {
+    var paragraphs = el.querySelectorAll('p');
+    var lines = [];
+    paragraphs.forEach(function(p) { lines.push(p.textContent); });
+    return lines.join('\n');
+}
+
+function textToHtml(text) {
+    return text.split('\n').filter(function(line) { return line.trim(); }).map(function(line) {
+        return '<p>' + escapeHtml(line.trim()) + '</p>';
+    }).join('');
+}
+
+function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+function saveLifeStory() {
+    LIFE_SECTIONS.forEach(function(key) {
+        var textarea = document.getElementById('edit-life-' + key);
+        var display = document.getElementById('life-' + key);
+        if (textarea && display) {
+            localStorage.setItem('life-' + key, textarea.value);
+            display.innerHTML = textToHtml(textarea.value);
+        }
+    });
+    var msg = document.getElementById('life-save-success');
+    msg.classList.remove('hidden');
+    setTimeout(function() { msg.classList.add('hidden'); }, 2000);
+}
+
+function resetLifeStory() {
+    if (!confirm('לאפס את סיפור החיים לטקסט המקורי?')) return;
+    LIFE_SECTIONS.forEach(function(key) {
+        localStorage.removeItem('life-' + key);
+    });
+    location.reload();
+}
+
 // ==================== INIT ====================
 
 function initApp() {
@@ -715,6 +784,9 @@ function initApp() {
 
     // Gallery
     try { initGallery(); } catch(e) { console.error('gallery:', e); }
+
+    // Life story editor
+    try { initLifeEditor(); } catch(e) { console.error('lifeEditor:', e); }
 
     // Duplicate scanner (manage tab)
     try { initDuplicateScanner(); } catch(e) { console.error('dupScanner:', e); }
