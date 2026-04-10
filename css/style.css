@@ -1150,6 +1150,84 @@ hr {
     }
 }
 
+/* ===== Life Story ===== */
+.life-story-section {
+    margin-bottom: 2.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem 1.5rem;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.life-story-section h3 {
+    margin-bottom: 1.2rem;
+    font-weight: 500;
+    color: var(--text);
+    font-size: 1.15rem;
+    text-align: center;
+}
+
+.life-chapter {
+    margin-bottom: 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.life-chapter:last-child {
+    margin-bottom: 0;
+}
+
+.life-chapter summary {
+    padding: 0.9rem 1.2rem;
+    font-family: 'Frank Ruhl Libre', serif;
+    font-weight: 500;
+    font-size: 1.05rem;
+    color: var(--accent-dark);
+    background: var(--bg);
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background 0.2s;
+}
+
+.life-chapter summary::-webkit-details-marker {
+    display: none;
+}
+
+.life-chapter summary::before {
+    content: '◂';
+    font-size: 0.8rem;
+    transition: transform 0.2s;
+}
+
+.life-chapter[open] summary::before {
+    transform: rotate(-90deg);
+}
+
+.life-chapter summary:hover {
+    background: var(--border);
+}
+
+.chapter-content {
+    padding: 1rem 1.2rem;
+    line-height: 1.85;
+    color: var(--text);
+    font-size: 0.95rem;
+}
+
+.chapter-content p {
+    margin-bottom: 0.8rem;
+    text-align: justify;
+}
+
+.chapter-content p:last-child {
+    margin-bottom: 0;
+}
+
 /* ===== Family Tree ===== */
 .family-tree-section {
     display: block !important;
