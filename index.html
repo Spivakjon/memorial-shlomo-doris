@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>לזכר שלמה ודוריס לוי ז"ל</title>
-    <link rel="stylesheet" href="css/style.css?v=20260410a">
+    <link rel="stylesheet" href="css/style.css?v=20260421b">
 </head>
 <body>
 
@@ -69,15 +69,37 @@
                 </div>
             </section>
 
+            <!-- PDF Tool — moved up (directly related to the azkara event) -->
+            <section id="section-pdf" class="page-section">
+                <h2 class="section-title">סדר אזכרה להדפסה</h2>
+                <p class="section-lead">בחר רכיבים והורד PDF מוכן לחלוקה</p>
+                <details class="quick-pdf-section" id="quick-pdf-section" open>
+                    <summary class="pdf-summary">רכיבים לכלול ▾</summary>
+                    <div class="pdf-details-content">
+                        <div class="seder-checklist" id="main-seder-checklist">
+                            <label><input type="checkbox" value="candle" checked> הדלקת נר נשמה</label>
+                            <label><input type="checkbox" value="tehillim" checked> תהילים קי"ט - אותיות שם פרטי</label>
+                            <label><input type="checkbox" value="neshama"> תהילים קי"ט - אותיות נשמה (נ-ש-מ-ה)</label>
+                            <label><input type="checkbox" value="psalm91" checked> תהילים צ"א (יושב בסתר)</label>
+                            <label><input type="checkbox" value="psalm121" checked> תהילים קכ"א (שיר למעלות)</label>
+                            <label><input type="checkbox" value="hashkava" checked> השכבה</label>
+                            <label><input type="checkbox" value="kaddish" checked> קדיש יתום</label>
+                        </div>
+
+                        <button id="quick-pdf-btn">הורד PDF לאזכרה</button>
+                    </div>
+                </details>
+            </section>
+
             <!-- In-page Table of Contents -->
             <nav id="page-toc" class="page-toc" aria-label="ניווט בדף">
+                <a href="#section-pdf" class="toc-chip">סדר אזכרה</a>
                 <a href="#section-story" class="toc-chip">סיפור חיים</a>
                 <a href="#section-quotes" class="toc-chip toc-quotes hidden">ציטוטים</a>
                 <a href="#section-audio" class="toc-chip toc-audio hidden">הקלטות</a>
                 <a href="#section-recipes" class="toc-chip toc-recipes hidden">מתכונים</a>
                 <a href="#section-family" class="toc-chip">עץ משפחה</a>
                 <a href="#section-gallery" class="toc-chip">גלריה</a>
-                <a href="#section-pdf" class="toc-chip">סדר אזכרה</a>
             </nav>
 
             <!-- Life Story -->
@@ -166,29 +188,6 @@
 
                 <!-- Unified Grid -->
                 <div class="photo-grid" id="unified-gallery-grid"></div>
-            </section>
-
-            <!-- PDF Tool (moved to end — it's a tool, not content) -->
-            <section id="section-pdf" class="page-section">
-                <h2 class="section-title">סדר אזכרה להדפסה</h2>
-                <details class="quick-pdf-section" id="quick-pdf-section" open>
-                    <summary class="pdf-summary">בחר רכיבים והורד PDF ▾</summary>
-                    <div class="pdf-details-content">
-                        <p class="info-text">בחר מה לכלול בסדר ולחץ להורדה</p>
-
-                        <div class="seder-checklist" id="main-seder-checklist">
-                            <label><input type="checkbox" value="candle" checked> הדלקת נר נשמה</label>
-                            <label><input type="checkbox" value="tehillim" checked> תהילים קי"ט - אותיות שם פרטי</label>
-                            <label><input type="checkbox" value="neshama"> תהילים קי"ט - אותיות נשמה (נ-ש-מ-ה)</label>
-                            <label><input type="checkbox" value="psalm91" checked> תהילים צ"א (יושב בסתר)</label>
-                            <label><input type="checkbox" value="psalm121" checked> תהילים קכ"א (שיר למעלות)</label>
-                            <label><input type="checkbox" value="hashkava" checked> השכבה</label>
-                            <label><input type="checkbox" value="kaddish" checked> קדיש יתום</label>
-                        </div>
-
-                        <button id="quick-pdf-btn">הורד PDF לאזכרה</button>
-                    </div>
-                </details>
             </section>
         </section>
 
@@ -547,10 +546,10 @@
     </footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="js/prayers.js?v=20260421a"></script>
-    <script src="js/app.js?v=20260421a"></script>
-    <script src="js/family-tree.js?v=20260421a"></script>
-    <script src="js/gallery.js?v=20260421a"></script>
+    <script src="js/prayers.js?v=20260421b"></script>
+    <script src="js/app.js?v=20260421b"></script>
+    <script src="js/family-tree.js?v=20260421b"></script>
+    <script src="js/gallery.js?v=20260421b"></script>
 
     <!-- Context menu for photos -->
     <div id="photo-context-menu" class="ctx-menu hidden">
@@ -558,5 +557,12 @@
         <button onclick="ctxDelete()" class="ctx-delete">מחק תמונה</button>
         <button onclick="closeCtxMenu()">סגור</button>
     </div>
+
+    <!-- Floating back-to-top button -->
+    <button id="back-to-top" class="back-to-top" aria-label="חזרה לראש העמוד" title="חזרה למעלה">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+            <path d="M12 5l-7 7h4v7h6v-7h4z" fill="currentColor"/>
+        </svg>
+    </button>
 </body>
 </html>

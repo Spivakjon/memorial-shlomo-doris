@@ -834,6 +834,7 @@ function renderQuotes() {
         return;
     }
     section.classList.remove('hidden');
+    section.classList.add('is-visible');
     if (tocChip) tocChip.classList.remove('hidden');
 
     list.innerHTML = quotes.map(q =>
@@ -932,6 +933,7 @@ function renderAudio() {
         return;
     }
     section.classList.remove('hidden');
+    section.classList.add('is-visible');
     if (tocChip) tocChip.classList.remove('hidden');
 
     list.innerHTML = items.map(a => `
@@ -1046,6 +1048,7 @@ function renderRecipes() {
         return;
     }
     section.classList.remove('hidden');
+    section.classList.add('is-visible');
     if (tocChip) tocChip.classList.remove('hidden');
 
     list.innerHTML = items.map(r => `
@@ -1360,6 +1363,57 @@ function initMemoryBookAdmin() {
     btn.addEventListener('click', generateMemoryBook);
 }
 
+// ==================== BACK TO TOP ====================
+
+function initBackToTop() {
+    const btn = document.getElementById('back-to-top');
+    if (!btn) return;
+    const threshold = 400;
+    let ticking = false;
+
+    function update() {
+        ticking = false;
+        if (window.scrollY > threshold) btn.classList.add('visible');
+        else btn.classList.remove('visible');
+    }
+
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            window.requestAnimationFrame(update);
+            ticking = true;
+        }
+    }, { passive: true });
+
+    btn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    update();
+}
+
+// ==================== REVEAL ON SCROLL ====================
+
+function initRevealOnScroll() {
+    const targets = document.querySelectorAll('.page-section');
+    if (!targets.length) return;
+
+    if (!('IntersectionObserver' in window)) {
+        targets.forEach(t => t.classList.add('is-visible'));
+        return;
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+    targets.forEach(t => observer.observe(t));
+}
+
 // ==================== TOC SCROLLSPY ====================
 
 function initTocScrollspy() {
@@ -1558,6 +1612,12 @@ function initApp() {
 
     // Table-of-contents scrollspy
     try { initTocScrollspy(); } catch(e) { console.error('tocSpy:', e); }
+
+    // Floating back-to-top button
+    try { initBackToTop(); } catch(e) { console.error('backTop:', e); }
+
+    // Reveal sections on scroll
+    try { initRevealOnScroll(); } catch(e) { console.error('reveal:', e); }
 
     // File input change listener (label handles click natively)
     try {
