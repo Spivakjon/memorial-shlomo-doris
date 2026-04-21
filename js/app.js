@@ -234,6 +234,28 @@ function initManageLock() {
 function unlockManage() {
     document.getElementById('manage-lock').classList.add('hidden');
     document.getElementById('manage-content').classList.remove('hidden');
+    try { updateAdminDashboard(); } catch (e) {}
+}
+
+function lockManage() {
+    sessionStorage.removeItem('manageUnlocked');
+    document.getElementById('manage-content').classList.add('hidden');
+    document.getElementById('manage-lock').classList.remove('hidden');
+    const pw = document.getElementById('manage-password');
+    if (pw) pw.value = '';
+    const err = document.getElementById('manage-error');
+    if (err) err.classList.add('hidden');
+}
+
+function initAdminLogout() {
+    const btn = document.getElementById('admin-logout-btn');
+    if (!btn) return;
+    btn.addEventListener('click', async () => {
+        const ok = await confirmDialog('לצאת מממשק הניהול?', 'יציאה');
+        if (!ok) return;
+        lockManage();
+        showToast('יצאת מממשק הניהול', 'info');
+    });
 }
 
 // ==================== NAVIGATION ====================
@@ -360,10 +382,8 @@ function saveAzkaraFromForm() {
     };
     localStorage.setItem('azkara', JSON.stringify(state.azkara));
     updateMemorialAzkara();
-
-    const msg = document.getElementById('save-success');
-    msg.classList.remove('hidden');
-    setTimeout(() => msg.classList.add('hidden'), 2000);
+    try { updateAdminDashboard(); } catch (e) {}
+    try { showToast('פרטי האזכרה נשמרו', 'success'); } catch (e) {}
 }
 
 // ==================== MEMBERS ====================
@@ -377,7 +397,7 @@ function addMember() {
     const name = document.getElementById('member-name').value.trim();
     const email = document.getElementById('member-email').value.trim();
     const phone = normalizeIsraeliPhone(document.getElementById('member-phone').value);
-    if (!name) { alert('נא להזין שם'); return; }
+    if (!name) { showToast('נא להזין שם', 'error'); return; }
 
     state.members.push({ name, email, phone, id: Date.now() });
     localStorage.setItem('members', JSON.stringify(state.members));
@@ -385,12 +405,20 @@ function addMember() {
     document.getElementById('member-email').value = '';
     document.getElementById('member-phone').value = '';
     renderMembers();
+    try { updateAdminDashboard(); } catch (e) {}
+    showToast('המשתתף נוסף', 'success');
 }
 
-function removeMember(id) {
+async function removeMember(id) {
+    const member = state.members.find(m => m.id === id);
+    if (!member) return;
+    const ok = await confirmDialog('להסיר את ' + member.name + ' מרשימת המשתתפים?');
+    if (!ok) return;
     state.members = state.members.filter(m => m.id !== id);
     localStorage.setItem('members', JSON.stringify(state.members));
     renderMembers();
+    try { updateAdminDashboard(); } catch (e) {}
+    showToast('המשתתף הוסר', 'success');
 }
 
 function renderMembers() {
@@ -783,13 +811,12 @@ function saveLifeStory() {
             display.innerHTML = textToHtml(textarea.value);
         }
     });
-    var msg = document.getElementById('life-save-success');
-    msg.classList.remove('hidden');
-    setTimeout(function() { msg.classList.add('hidden'); }, 2000);
+    try { showToast('סיפור החיים נשמר', 'success'); } catch (e) {}
 }
 
-function resetLifeStory() {
-    if (!confirm('לאפס את סיפור החיים לטקסט המקורי?')) return;
+async function resetLifeStory() {
+    const ok = await confirmDialog('לאפס את סיפור החיים לטקסט המקורי? הפעולה תטען מחדש את העמוד.', 'איפוס סיפור החיים');
+    if (!ok) return;
     LIFE_SECTIONS.forEach(function(key) {
         localStorage.removeItem('life-' + key);
     });
@@ -855,13 +882,16 @@ function renderQuotesAdmin() {
          <button type="button" class="btn-secondary" data-del="${i}">מחק</button></li>`
     ).join('');
     ul.querySelectorAll('button[data-del]').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', async () => {
+            if (!(await confirmDialog('למחוק את הציטוט?'))) return;
             const idx = parseInt(btn.getAttribute('data-del'), 10);
             const list = loadQuotes();
             list.splice(idx, 1);
             saveQuotes(list);
             renderQuotesAdmin();
             renderQuotes();
+            updateAdminDashboard();
+            showToast('הציטוט נמחק', 'success');
         });
     });
 }
@@ -873,13 +903,15 @@ function initQuotesAdmin() {
         const textEl = document.getElementById('quote-text');
         const authorEl = document.getElementById('quote-author');
         const text = (textEl.value || '').trim();
-        if (!text) return;
+        if (!text) { showToast('נדרש טקסט ציטוט', 'error'); return; }
         const quotes = loadQuotes();
         quotes.push({ text, author: authorEl.value });
         saveQuotes(quotes);
         textEl.value = '';
         renderQuotesAdmin();
         renderQuotes();
+        updateAdminDashboard();
+        showToast('הציטוט נוסף', 'success');
     });
     renderQuotesAdmin();
 }
@@ -965,13 +997,16 @@ function renderAudioAdmin() {
             <button type="button" class="btn-secondary" data-del="${i}">מחק</button>
         </li>`).join('');
     ul.querySelectorAll('button[data-del]').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', async () => {
+            if (!(await confirmDialog('למחוק את ההקלטה?'))) return;
             const idx = parseInt(btn.getAttribute('data-del'), 10);
             const list = loadAudio();
             list.splice(idx, 1);
             saveAudio(list);
             renderAudioAdmin();
             renderAudio();
+            updateAdminDashboard();
+            showToast('ההקלטה נמחקה', 'success');
         });
     });
 }
@@ -985,7 +1020,7 @@ function initAudioAdmin() {
         const url = normalizeAudioUrl(rawUrl);
         const author = document.getElementById('audio-author').value;
         const description = (document.getElementById('audio-description').value || '').trim();
-        if (!title || !url) { alert('צריך לפחות כותרת וקישור'); return; }
+        if (!title || !url) { showToast('צריך כותרת וקישור', 'error'); return; }
         const items = loadAudio();
         items.push({ title, url, author, description });
         saveAudio(items);
@@ -994,6 +1029,8 @@ function initAudioAdmin() {
         document.getElementById('audio-description').value = '';
         renderAudioAdmin();
         renderAudio();
+        updateAdminDashboard();
+        showToast('ההקלטה נוספה', 'success');
     });
     renderAudioAdmin();
 }
@@ -1081,13 +1118,16 @@ function renderRecipesAdmin() {
             <button type="button" class="btn-secondary" data-del="${i}">מחק</button>
         </li>`).join('');
     ul.querySelectorAll('button[data-del]').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', async () => {
+            if (!(await confirmDialog('למחוק את המתכון?'))) return;
             const idx = parseInt(btn.getAttribute('data-del'), 10);
             const list = loadRecipes();
             list.splice(idx, 1);
             saveRecipes(list);
             renderRecipesAdmin();
             renderRecipes();
+            updateAdminDashboard();
+            showToast('המתכון נמחק', 'success');
         });
     });
 }
@@ -1101,7 +1141,7 @@ function initRecipesAdmin() {
         const author = document.getElementById('recipe-author').value;
         const ingredients = (document.getElementById('recipe-ingredients').value || '').trim();
         const instructions = (document.getElementById('recipe-instructions').value || '').trim();
-        if (!name) { alert('צריך שם למנה'); return; }
+        if (!name) { showToast('צריך שם למנה', 'error'); return; }
         const items = loadRecipes();
         items.push({ name, type, author, ingredients, instructions });
         saveRecipes(items);
@@ -1110,6 +1150,8 @@ function initRecipesAdmin() {
         document.getElementById('recipe-instructions').value = '';
         renderRecipesAdmin();
         renderRecipes();
+        updateAdminDashboard();
+        showToast('המתכון נוסף', 'success');
     });
     renderRecipesAdmin();
 }
@@ -1150,6 +1192,7 @@ function initTelegramAdmin() {
     const tokenEl = document.getElementById('tg-token');
     const chatEl = document.getElementById('tg-chat');
     const saveBtn = document.getElementById('tg-save-btn');
+    const testBtn = document.getElementById('tg-test-btn');
     const sendBtn = document.getElementById('tg-send-btn');
     const statusEl = document.getElementById('tg-status');
     const msgEl = document.getElementById('tg-message');
@@ -1159,19 +1202,52 @@ function initTelegramAdmin() {
     tokenEl.value = cfg.token || '';
     chatEl.value = cfg.chat || '';
 
+    function setStatus(text, type) {
+        statusEl.textContent = text;
+        statusEl.className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info-text';
+    }
+
     saveBtn.addEventListener('click', () => {
         saveTelegramConfig({ token: tokenEl.value.trim(), chat: chatEl.value.trim() });
-        statusEl.textContent = 'הגדרות נשמרו';
-        statusEl.className = 'success';
-        setTimeout(() => { statusEl.textContent = ''; statusEl.className = 'info-text'; }, 2000);
+        updateAdminDashboard();
+        showToast('ההגדרות נשמרו', 'success');
+    });
+
+    testBtn.addEventListener('click', async () => {
+        const token = tokenEl.value.trim();
+        const chat = chatEl.value.trim();
+        if (!token || !chat) { showToast('מלא Token ו-Chat ID לפני הבדיקה', 'error'); return; }
+        setStatus('בודק חיבור...', 'info');
+        try {
+            const meResp = await fetch(`https://api.telegram.org/bot${encodeURIComponent(token)}/getMe`);
+            const meData = await meResp.json();
+            if (!meData.ok) { setStatus('Token לא תקין: ' + (meData.description || ''), 'error'); showToast('Token לא תקין', 'error'); return; }
+            const botName = meData.result.username ? '@' + meData.result.username : meData.result.first_name;
+            const sendResp = await fetch(`https://api.telegram.org/bot${encodeURIComponent(token)}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: chat, text: `✅ בדיקת חיבור הצליחה (${botName})`, disable_notification: true })
+            });
+            const sendData = await sendResp.json();
+            if (sendData.ok) {
+                setStatus('✓ חיבור תקין — הודעת בדיקה נשלחה (' + botName + ')', 'success');
+                showToast('החיבור תקין', 'success');
+            } else {
+                setStatus('הבוט תקין אבל שליחה נכשלה: ' + (sendData.description || ''), 'error');
+                showToast('שליחה נכשלה — בדוק Chat ID', 'error');
+            }
+        } catch (e) {
+            setStatus('שגיאת רשת: ' + e.message, 'error');
+            showToast('שגיאת רשת', 'error');
+        }
     });
 
     sendBtn.addEventListener('click', async () => {
         const cfg = loadTelegramConfig();
-        if (!cfg.token || !cfg.chat) { alert('צריך להגדיר Token ו-Chat ID קודם'); return; }
+        if (!cfg.token || !cfg.chat) { showToast('הגדר Token ו-Chat ID קודם', 'error'); return; }
         const text = msgEl.value.trim() || buildReminderText();
-        statusEl.textContent = 'שולח...';
-        statusEl.className = 'info-text';
+        if (!(await confirmDialog('לשלוח את התזכורת עכשיו לכל הקבוצה?', 'שליחת תזכורת'))) return;
+        setStatus('שולח...', 'info');
         try {
             const resp = await fetch(`https://api.telegram.org/bot${encodeURIComponent(cfg.token)}/sendMessage`, {
                 method: 'POST',
@@ -1180,15 +1256,15 @@ function initTelegramAdmin() {
             });
             const data = await resp.json();
             if (data.ok) {
-                statusEl.textContent = '✓ נשלח בהצלחה';
-                statusEl.className = 'success';
+                setStatus('✓ נשלח בהצלחה', 'success');
+                showToast('התזכורת נשלחה', 'success');
             } else {
-                statusEl.textContent = 'שגיאה: ' + (data.description || 'לא ידוע');
-                statusEl.className = 'error';
+                setStatus('שגיאה: ' + (data.description || 'לא ידוע'), 'error');
+                showToast('השליחה נכשלה', 'error');
             }
         } catch (e) {
-            statusEl.textContent = 'שגיאת רשת: ' + e.message;
-            statusEl.className = 'error';
+            setStatus('שגיאת רשת: ' + e.message, 'error');
+            showToast('שגיאת רשת', 'error');
         }
     });
 }
@@ -1246,7 +1322,8 @@ function initYahrzeitAdmin() {
                     if (dateInput) {
                         dateInput.value = iso;
                         dateInput.dispatchEvent(new Event('change'));
-                        alert('התאריך הועתק לשדה. אל תשכח ללחוץ "שמור אזכרה".');
+                        dateInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        showToast('התאריך הועתק — לחץ "שמור אזכרה"', 'info');
                     }
                 });
             });
@@ -1361,6 +1438,124 @@ function initMemoryBookAdmin() {
     const btn = document.getElementById('memory-book-btn');
     if (!btn) return;
     btn.addEventListener('click', generateMemoryBook);
+}
+
+// ==================== TOASTS ====================
+
+function showToast(message, type) {
+    const container = document.getElementById('toast-container');
+    if (!container) { console.log('[toast]', type, message); return; }
+    type = type || 'info';
+    const el = document.createElement('div');
+    el.className = 'toast toast--' + type;
+    const icon = type === 'success' ? '✓' : type === 'error' ? '!' : 'i';
+    el.innerHTML = `<span class="toast-icon">${icon}</span><div class="toast-body">${escapeHtml(message)}</div>`;
+    container.appendChild(el);
+    setTimeout(() => {
+        el.classList.add('toast--out');
+        setTimeout(() => el.remove(), 320);
+    }, 2800);
+}
+
+// ==================== CONFIRM DIALOG ====================
+
+function confirmDialog(message, title) {
+    return new Promise((resolve) => {
+        const dlg = document.getElementById('confirm-dialog');
+        if (!dlg) { resolve(window.confirm(message)); return; }
+        document.getElementById('confirm-title').textContent = title || 'אישור פעולה';
+        document.getElementById('confirm-message').textContent = message;
+        dlg.classList.remove('hidden');
+        const ok = document.getElementById('confirm-ok-btn');
+        const cancel = document.getElementById('confirm-cancel-btn');
+        const backdrop = dlg.querySelector('.confirm-backdrop');
+
+        const close = (result) => {
+            dlg.classList.add('hidden');
+            ok.removeEventListener('click', onOk);
+            cancel.removeEventListener('click', onCancel);
+            backdrop.removeEventListener('click', onCancel);
+            document.removeEventListener('keydown', onKey);
+            resolve(result);
+        };
+        const onOk = () => close(true);
+        const onCancel = () => close(false);
+        const onKey = (e) => {
+            if (e.key === 'Escape') onCancel();
+            else if (e.key === 'Enter') onOk();
+        };
+
+        ok.addEventListener('click', onOk);
+        cancel.addEventListener('click', onCancel);
+        backdrop.addEventListener('click', onCancel);
+        document.addEventListener('keydown', onKey);
+        setTimeout(() => ok.focus(), 50);
+    });
+}
+
+// ==================== ADMIN TABS ====================
+
+function initAdminTabs() {
+    const tabs = document.querySelectorAll('.admin-tab');
+    const panes = document.querySelectorAll('.admin-pane');
+    if (!tabs.length) return;
+
+    function activate(name, userInitiated) {
+        tabs.forEach(t => t.classList.toggle('active', t.getAttribute('data-admin-tab') === name));
+        panes.forEach(p => p.classList.toggle('active', p.getAttribute('data-admin-pane') === name));
+        try { localStorage.setItem('admin-tab', name); } catch (e) {}
+        if (userInitiated) {
+            const nav = document.querySelector('.admin-tabs');
+            if (nav) {
+                const top = nav.getBoundingClientRect().top + window.scrollY - 60;
+                window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+            }
+        }
+    }
+
+    tabs.forEach(t => t.addEventListener('click', () => activate(t.getAttribute('data-admin-tab'), true)));
+
+    let initial = 'azkara';
+    try { initial = localStorage.getItem('admin-tab') || 'azkara'; } catch (e) {}
+    if (![...tabs].some(t => t.getAttribute('data-admin-tab') === initial)) initial = 'azkara';
+    activate(initial);
+}
+
+// ==================== ADMIN DASHBOARD ====================
+
+function updateAdminDashboard() {
+    const dateEl = document.getElementById('dash-azkara-date');
+    const subEl = document.getElementById('dash-azkara-sub');
+    const contentEl = document.getElementById('dash-content-count');
+    const membersEl = document.getElementById('dash-members-count');
+    const tgEl = document.getElementById('dash-telegram-status');
+    if (!dateEl) return;
+
+    const azkara = state.azkara;
+    if (azkara && azkara.date) {
+        const parts = azkara.date.split('-');
+        dateEl.textContent = `${parts[2]}/${parts[1]}/${parts[0]}`;
+        const dObj = new Date(azkara.date + 'T' + (azkara.time || '09:00') + ':00');
+        const days = Math.ceil((dObj - new Date()) / (1000 * 60 * 60 * 24));
+        subEl.textContent = days > 0 ? `בעוד ${days} ימים · ${azkara.time || ''}` : days === 0 ? 'היום' : `לפני ${Math.abs(days)} ימים`;
+    } else {
+        dateEl.textContent = '—';
+        subEl.textContent = 'לא הוגדר';
+    }
+
+    const contentCount = loadQuotes().length + loadAudio().length + loadRecipes().length;
+    contentEl.textContent = String(contentCount);
+
+    membersEl.textContent = String((state.members || []).length);
+
+    const tg = loadTelegramConfig();
+    if (tg.token && tg.chat) {
+        tgEl.textContent = 'מחובר';
+        tgEl.classList.add('connected');
+    } else {
+        tgEl.textContent = 'לא מוגדר';
+        tgEl.classList.remove('connected');
+    }
 }
 
 // ==================== BACK TO TOP ====================
@@ -1618,6 +1813,11 @@ function initApp() {
 
     // Reveal sections on scroll
     try { initRevealOnScroll(); } catch(e) { console.error('reveal:', e); }
+
+    // Admin sub-tabs & dashboard
+    try { initAdminTabs(); } catch(e) { console.error('adminTabs:', e); }
+    try { updateAdminDashboard(); } catch(e) { console.error('adminDash:', e); }
+    try { initAdminLogout(); } catch(e) { console.error('adminLogout:', e); }
 
     // File input change listener (label handles click natively)
     try {

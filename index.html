@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>לזכר שלמה ודוריס לוי ז"ל</title>
-    <link rel="stylesheet" href="css/style.css?v=20260421b">
+    <link rel="stylesheet" href="css/style.css?v=20260421c">
 </head>
 <body>
 
@@ -193,349 +193,440 @@
 
         <!-- ========== TAB 2: Management (password protected) ========== -->
         <section id="manage" class="section hidden">
+            <!-- Lock screen -->
             <div id="manage-lock" class="manage-lock">
-                <h2>ניהול</h2>
-                <p class="info-text">הזן סיסמת מנהל</p>
-                <input type="password" id="manage-password" placeholder="סיסמה">
-                <button id="manage-unlock-btn">כניסה</button>
-                <p id="manage-error" class="error hidden">סיסמה שגויה</p>
-            </div>
-            <div id="manage-content" class="hidden">
-            <h2>ניהול</h2>
-
-            <!-- Azkara Settings -->
-            <div class="manage-block">
-                <h3>הגדרת אזכרה קרובה</h3>
-                <div class="form-group">
-                    <label>לזכר:</label>
-                    <select id="azkara-for">
-                        <option value="shlomo">שלמה לוי ז"ל</option>
-                        <option value="doris">דוריס (חנה) לוי ז"ל</option>
-                        <option value="both">שלמה ודוריס לוי ז"ל (משולבת)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>תאריך:</label>
-                    <input type="date" id="azkara-date" value="2026-04-10">
-                </div>
-                <div class="form-group">
-                    <label>שעה:</label>
-                    <input type="time" id="azkara-time" value="09:30">
-                </div>
-                <div class="form-group">
-                    <label>מיקום:</label>
-                    <input type="text" id="azkara-location" value="בית עלמין קדימה צורן">
-                </div>
-                <div class="form-group">
-                    <label>שנת אזכרה:</label>
-                    <input type="text" id="azkara-year-label" value="חמישית">
-                </div>
-                <button id="save-azkara-btn">שמור אזכרה</button>
-                <p id="save-success" class="success hidden">נשמר בהצלחה!</p>
-            </div>
-
-            <hr>
-
-            <!-- Advanced PDF Builder -->
-            <div class="manage-block">
-                <h3>בניית סידור מותאם אישית</h3>
-                <p class="info-text">בחר אותיות ספציפיות ורכיבים ליצירת PDF מותאם</p>
-
-                <!-- Letters for Shlomo -->
-                <div class="letters-section">
-                    <h4>שלמה לוי ז"ל - בחירת אותיות</h4>
-                    <div class="quick-select-btns">
-                        <button type="button" class="quick-btn" onclick="quickSelect('shlomo', 'all')">הכל</button>
-                        <button type="button" class="quick-btn" onclick="quickSelect('shlomo', 'first')">שלמה</button>
-                        <button type="button" class="quick-btn" onclick="quickSelect('shlomo', 'last')">לוי</button>
-                        <button type="button" class="quick-btn" onclick="quickSelect('shlomo', 'neshama')">+ נשמה</button>
-                        <button type="button" class="quick-btn" onclick="quickSelect('shlomo', 'none')">נקה</button>
+                <div class="lock-card">
+                    <div class="lock-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="28" height="28"><path fill="currentColor" d="M12 2a5 5 0 015 5v3h1a2 2 0 012 2v9a2 2 0 01-2 2H6a2 2 0 01-2-2v-9a2 2 0 012-2h1V7a5 5 0 015-5zm0 2a3 3 0 00-3 3v3h6V7a3 3 0 00-3-3z"/></svg>
                     </div>
-                    <div class="letters-grid" id="letters-shlomo"></div>
+                    <h2>ממשק ניהול</h2>
+                    <p class="lock-hint">הזן סיסמת מנהל להמשך</p>
+                    <input type="password" id="manage-password" placeholder="סיסמה" autocomplete="current-password">
+                    <button id="manage-unlock-btn" class="btn-primary btn-block">כניסה</button>
+                    <p id="manage-error" class="error hidden">סיסמה שגויה</p>
                 </div>
+            </div>
 
-                <!-- Letters for Doris -->
-                <div class="letters-section">
-                    <h4>דוריס (חנה) לוי ז"ל - בחירת אותיות</h4>
-                    <div class="quick-select-btns">
-                        <button type="button" class="quick-btn" onclick="quickSelect('doris', 'all')">הכל</button>
-                        <button type="button" class="quick-btn" onclick="quickSelect('doris', 'doris')">דוריס</button>
-                        <button type="button" class="quick-btn" onclick="quickSelect('doris', 'chana')">חנה</button>
-                        <button type="button" class="quick-btn" onclick="quickSelect('doris', 'last')">לוי</button>
-                        <button type="button" class="quick-btn" onclick="quickSelect('doris', 'neshama')">+ נשמה</button>
-                        <button type="button" class="quick-btn" onclick="quickSelect('doris', 'none')">נקה</button>
+            <!-- Admin content (after unlock) -->
+            <div id="manage-content" class="hidden admin-shell">
+
+                <!-- Admin header -->
+                <header class="admin-header">
+                    <div class="admin-title">
+                        <h2>ממשק ניהול</h2>
+                        <p class="admin-subtitle">ניהול תוכן, אזכרה ותקשורת משפחתית</p>
                     </div>
-                    <div class="letters-grid" id="letters-doris"></div>
-                </div>
+                    <button type="button" id="admin-logout-btn" class="btn-ghost" title="יציאה מניהול">
+                        <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M10 17l5-5-5-5v3H3v4h7v3zm2-15a9 9 0 11-9 9h2a7 7 0 107-7V2z"/></svg>
+                        יציאה
+                    </button>
+                </header>
 
-                <h4>רכיבי הסדר</h4>
-                <div class="seder-checklist" id="adv-seder-checklist">
-                    <label><input type="checkbox" value="candle" checked> הדלקת נר נשמה</label>
-                    <label><input type="checkbox" value="tehillim_shlomo" checked> תהילים - שלמה (אותיות שנבחרו)</label>
-                    <label><input type="checkbox" value="tehillim_doris" checked> תהילים - דוריס (אותיות שנבחרו)</label>
-                    <label><input type="checkbox" value="psalm91" checked> תהילים צ"א (יושב בסתר)</label>
-                    <label><input type="checkbox" value="psalm121" checked> תהילים קכ"א (שיר למעלות)</label>
-                    <label><input type="checkbox" value="hashkava_shlomo" checked> השכבה - שלמה</label>
-                    <label><input type="checkbox" value="hashkava_doris" checked> השכבה - דוריס</label>
-                    <label><input type="checkbox" value="kaddish" checked> קדיש יתום</label>
-                </div>
-
-                <button id="download-pdf-btn">הורד PDF מותאם</button>
-            </div>
-
-            <hr>
-
-            <!-- Life Story Editor -->
-            <div class="manage-block">
-                <h3>עריכת סיפור חיים</h3>
-                <p class="info-text">כל פסקה בשורה נפרדת. שורה ריקה = רווח בין פסקאות.</p>
-
-                <div class="form-group">
-                    <label>סבא שלמה:</label>
-                    <textarea id="edit-life-shlomo" rows="8" class="life-editor"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>סבתא דוריס:</label>
-                    <textarea id="edit-life-doris" rows="8" class="life-editor"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>העלייה ארצה:</label>
-                    <textarea id="edit-life-aliya" rows="8" class="life-editor"></textarea>
-                </div>
-                <button id="save-life-btn">שמור סיפור חיים</button>
-                <button id="reset-life-btn" class="btn-secondary">אפס לברירת מחדל</button>
-                <p id="life-save-success" class="success hidden">נשמר בהצלחה!</p>
-            </div>
-
-            <hr>
-
-            <!-- Hebcal Yahrzeit Helper -->
-            <div class="manage-block">
-                <h3>חישוב יארצייט עברי (עזר)</h3>
-                <p class="info-text">מחשב את תאריך היארצייט הבא לפי תאריך הפטירה. לא מחליף את שדה התאריך אוטומטית — אתה בוחר מהרשימה.</p>
-                <div class="yahrzeit-btns">
-                    <button type="button" id="yahrzeit-shlomo-btn">חשב יארצייט לשלמה</button>
-                    <button type="button" id="yahrzeit-doris-btn">חשב יארצייט לדוריס</button>
-                </div>
-                <div id="yahrzeit-results" class="yahrzeit-results"></div>
-            </div>
-
-            <hr>
-
-            <!-- Memory Book PDF Export -->
-            <div class="manage-block">
-                <h3>ספר זיכרון — יצוא PDF מלא</h3>
-                <p class="info-text">מייצר PDF מקיף של הדף: סיפור חיים, ציטוטים, מתכונים, הקלטות (כרשימה), עם QR של האתר בסוף. מושלם לחלוקה פיזית באירועים משפחתיים.</p>
-                <div class="form-group">
-                    <label>רכיבים לכלול:</label>
-                    <div class="seder-checklist" id="book-checklist">
-                        <label><input type="checkbox" value="cover" checked> עמוד שער</label>
-                        <label><input type="checkbox" value="life" checked> סיפור חיים</label>
-                        <label><input type="checkbox" value="quotes" checked> ציטוטים</label>
-                        <label><input type="checkbox" value="recipes" checked> מתכונים ומאכלים</label>
-                        <label><input type="checkbox" value="audio" checked> רשימת הקלטות</label>
-                        <label><input type="checkbox" value="qr" checked> עמוד QR לאתר</label>
+                <!-- Dashboard -->
+                <div class="admin-dashboard">
+                    <div class="dash-card dash-azkara">
+                        <div class="dash-label">האזכרה הקרובה</div>
+                        <div class="dash-value" id="dash-azkara-date">—</div>
+                        <div class="dash-sub" id="dash-azkara-sub">לא הוגדר</div>
+                    </div>
+                    <div class="dash-card">
+                        <div class="dash-label">תוכן</div>
+                        <div class="dash-value" id="dash-content-count">0</div>
+                        <div class="dash-sub">ציטוטים · הקלטות · מתכונים</div>
+                    </div>
+                    <div class="dash-card">
+                        <div class="dash-label">משפחה רשומה</div>
+                        <div class="dash-value" id="dash-members-count">0</div>
+                        <div class="dash-sub">משתתפים עם פרטי קשר</div>
+                    </div>
+                    <div class="dash-card dash-telegram">
+                        <div class="dash-label">טלגרם</div>
+                        <div class="dash-value" id="dash-telegram-status">לא מוגדר</div>
+                        <div class="dash-sub">בוט משפחתי לתזכורות</div>
                     </div>
                 </div>
-                <button type="button" id="memory-book-btn">הפק ספר זיכרון</button>
-            </div>
 
-            <hr>
+                <!-- Admin sub-nav -->
+                <nav class="admin-tabs" role="tablist" aria-label="ניווט בניהול">
+                    <button type="button" class="admin-tab active" data-admin-tab="azkara" role="tab">
+                        <span class="admin-tab-icon" aria-hidden="true">📅</span>אזכרה
+                    </button>
+                    <button type="button" class="admin-tab" data-admin-tab="content" role="tab">
+                        <span class="admin-tab-icon" aria-hidden="true">📖</span>תוכן
+                    </button>
+                    <button type="button" class="admin-tab" data-admin-tab="family" role="tab">
+                        <span class="admin-tab-icon" aria-hidden="true">👥</span>משפחה
+                    </button>
+                    <button type="button" class="admin-tab" data-admin-tab="tools" role="tab">
+                        <span class="admin-tab-icon" aria-hidden="true">🛠</span>כלים
+                    </button>
+                </nav>
 
-            <!-- Audio Recordings Manager -->
-            <div class="manage-block">
-                <h3>הקלטות קוליות</h3>
-                <p class="info-text">הוסף הקלטות של סבא וסבתא — סיפורים, שירים, שיחות. העלה קובץ ל-Google Drive (שיתוף: "כל מי שיש את הקישור"), קח את מזהה הקובץ והדבק כאן. הסקשן יוצג בדף רק אם יש לפחות הקלטה אחת.</p>
+                <!-- ============ PANE: AZKARA ============ -->
+                <div class="admin-pane active" data-admin-pane="azkara" role="tabpanel">
 
-                <div class="form-group">
-                    <label>כותרת:</label>
-                    <input type="text" id="audio-title" placeholder="לדוגמה: סיפור על העלייה מבגדד">
-                </div>
-                <div class="form-group">
-                    <label>קישור לקובץ האודיו:</label>
-                    <input type="url" id="audio-url" placeholder="URL ישיר או Drive file ID">
-                    <p class="info-text" style="font-size:0.82rem">אפשר להדביק Drive file ID בלבד (מופיע ב-URL אחרי <code>/d/</code>) או URL מלא של mp3/m4a/ogg.</p>
-                </div>
-                <div class="form-group">
-                    <label>דובר:</label>
-                    <select id="audio-author">
-                        <option value="shlomo">סבא שלמה</option>
-                        <option value="doris">סבתא דוריס</option>
-                        <option value="both">שניהם</option>
-                        <option value="family">משפחה</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>תיאור (אופציונלי):</label>
-                    <textarea id="audio-description" rows="2" placeholder="הקשר, שנה, מי הקליט..."></textarea>
-                </div>
-                <button type="button" id="audio-add-btn">הוסף הקלטה</button>
+                    <div class="manage-block">
+                        <header class="block-header">
+                            <h3>הגדרת אזכרה קרובה</h3>
+                            <p>הפרטים מוצגים בדף הבית ומשמשים לתזכורות.</p>
+                        </header>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>לזכר:</label>
+                                <select id="azkara-for">
+                                    <option value="shlomo">שלמה לוי ז"ל</option>
+                                    <option value="doris">דוריס (חנה) לוי ז"ל</option>
+                                    <option value="both">שלמה ודוריס לוי ז"ל (משולבת)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>שנת אזכרה:</label>
+                                <input type="text" id="azkara-year-label" value="חמישית">
+                            </div>
+                            <div class="form-group">
+                                <label>תאריך:</label>
+                                <input type="date" id="azkara-date" value="2026-04-10">
+                            </div>
+                            <div class="form-group">
+                                <label>שעה:</label>
+                                <input type="time" id="azkara-time" value="09:30">
+                            </div>
+                            <div class="form-group form-group--wide">
+                                <label>מיקום:</label>
+                                <input type="text" id="azkara-location" value="בית עלמין קדימה צורן">
+                            </div>
+                        </div>
+                        <div class="block-actions">
+                            <button id="save-azkara-btn" class="btn-primary">שמור אזכרה</button>
+                        </div>
+                        <p id="save-success" class="success hidden">נשמר בהצלחה!</p>
+                    </div>
 
-                <ul id="audio-admin-list" class="admin-list"></ul>
-            </div>
+                    <div class="manage-block">
+                        <header class="block-header">
+                            <h3>חישוב יארצייט עברי</h3>
+                            <p>עזר בלבד. בחר תאריך מהרשימה — הוא יועתק לשדה התאריך למעלה.</p>
+                        </header>
+                        <div class="yahrzeit-btns">
+                            <button type="button" id="yahrzeit-shlomo-btn" class="btn-secondary">חשב יארצייט לשלמה</button>
+                            <button type="button" id="yahrzeit-doris-btn" class="btn-secondary">חשב יארצייט לדוריס</button>
+                        </div>
+                        <div id="yahrzeit-results" class="yahrzeit-results"></div>
+                    </div>
 
-            <hr>
+                    <div class="manage-block">
+                        <header class="block-header">
+                            <h3>בניית סידור מותאם אישית</h3>
+                            <p>בחר אותיות ספציפיות לכל אחד ורכיבים לסדר.</p>
+                        </header>
 
-            <!-- Recipes Manager -->
-            <div class="manage-block">
-                <h3>מתכונים ומאכלים אהובים</h3>
-                <p class="info-text">מתכונים של סבתא או מאכלים שסבא וסבתא אהבו. הסקשן יוצג בדף רק אם יש לפחות פריט אחד.</p>
+                        <div class="letters-section">
+                            <h4>שלמה לוי ז"ל — בחירת אותיות</h4>
+                            <div class="quick-select-btns">
+                                <button type="button" class="quick-btn" onclick="quickSelect('shlomo', 'all')">הכל</button>
+                                <button type="button" class="quick-btn" onclick="quickSelect('shlomo', 'first')">שלמה</button>
+                                <button type="button" class="quick-btn" onclick="quickSelect('shlomo', 'last')">לוי</button>
+                                <button type="button" class="quick-btn" onclick="quickSelect('shlomo', 'neshama')">+ נשמה</button>
+                                <button type="button" class="quick-btn" onclick="quickSelect('shlomo', 'none')">נקה</button>
+                            </div>
+                            <div class="letters-grid" id="letters-shlomo"></div>
+                        </div>
 
-                <div class="form-group">
-                    <label>שם המנה:</label>
-                    <input type="text" id="recipe-name" placeholder="לדוגמה: קובה במרק סלק">
-                </div>
-                <div class="form-group">
-                    <label>סוג:</label>
-                    <select id="recipe-type">
-                        <option value="recipe">מתכון</option>
-                        <option value="loved">מאכל אהוב</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>שייך ל:</label>
-                    <select id="recipe-author">
-                        <option value="doris">סבתא דוריס</option>
-                        <option value="shlomo">סבא שלמה</option>
-                        <option value="both">שניהם</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>רכיבים (אופציונלי):</label>
-                    <textarea id="recipe-ingredients" rows="3" placeholder="כל רכיב בשורה חדשה"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>הוראות / תיאור (אופציונלי):</label>
-                    <textarea id="recipe-instructions" rows="4" placeholder="אופן הכנה או זיכרון אישי מהמאכל"></textarea>
-                </div>
-                <button type="button" id="recipe-add-btn">הוסף מתכון / מאכל</button>
+                        <div class="letters-section">
+                            <h4>דוריס (חנה) לוי ז"ל — בחירת אותיות</h4>
+                            <div class="quick-select-btns">
+                                <button type="button" class="quick-btn" onclick="quickSelect('doris', 'all')">הכל</button>
+                                <button type="button" class="quick-btn" onclick="quickSelect('doris', 'doris')">דוריס</button>
+                                <button type="button" class="quick-btn" onclick="quickSelect('doris', 'chana')">חנה</button>
+                                <button type="button" class="quick-btn" onclick="quickSelect('doris', 'last')">לוי</button>
+                                <button type="button" class="quick-btn" onclick="quickSelect('doris', 'neshama')">+ נשמה</button>
+                                <button type="button" class="quick-btn" onclick="quickSelect('doris', 'none')">נקה</button>
+                            </div>
+                            <div class="letters-grid" id="letters-doris"></div>
+                        </div>
 
-                <ul id="recipes-admin-list" class="admin-list"></ul>
-            </div>
+                        <h4>רכיבי הסדר</h4>
+                        <div class="seder-checklist" id="adv-seder-checklist">
+                            <label><input type="checkbox" value="candle" checked> הדלקת נר נשמה</label>
+                            <label><input type="checkbox" value="tehillim_shlomo" checked> תהילים — שלמה (אותיות שנבחרו)</label>
+                            <label><input type="checkbox" value="tehillim_doris" checked> תהילים — דוריס (אותיות שנבחרו)</label>
+                            <label><input type="checkbox" value="psalm91" checked> תהילים צ"א (יושב בסתר)</label>
+                            <label><input type="checkbox" value="psalm121" checked> תהילים קכ"א (שיר למעלות)</label>
+                            <label><input type="checkbox" value="hashkava_shlomo" checked> השכבה — שלמה</label>
+                            <label><input type="checkbox" value="hashkava_doris" checked> השכבה — דוריס</label>
+                            <label><input type="checkbox" value="kaddish" checked> קדיש יתום</label>
+                        </div>
 
-            <hr>
-
-            <!-- Telegram Reminders -->
-            <div class="manage-block">
-                <h3>תזכורות בטלגרם</h3>
-                <p class="info-text">הגדר בוט טלגרם משפחתי לשליחת תזכורות לאזכרה. צריך: בוט (נוצר דרך @BotFather), טוקן, וצ'אט ID של הקבוצה.</p>
-
-                <div class="form-group">
-                    <label>Bot Token:</label>
-                    <input type="password" id="tg-token" placeholder="123456:ABC-DEF1234...">
-                </div>
-                <div class="form-group">
-                    <label>Chat ID (קבוצה או ערוץ):</label>
-                    <input type="text" id="tg-chat" placeholder="-1001234567890 או @channelname">
-                </div>
-                <button type="button" id="tg-save-btn">שמור הגדרות</button>
-
-                <h4 style="margin-top:1.5rem">שליחת תזכורת</h4>
-                <div class="form-group">
-                    <label>טקסט (ברירת מחדל: פרטי האזכרה הנוכחית):</label>
-                    <textarea id="tg-message" rows="5" placeholder="ישתף אוטומטית לפי פרטי האזכרה אם ריק"></textarea>
-                </div>
-                <button type="button" id="tg-send-btn">שלח תזכורת לקבוצה</button>
-                <p id="tg-status" class="info-text"></p>
-
-                <p class="info-text" style="margin-top:1rem">
-                    <strong>WhatsApp ממספר ייעודי:</strong> יתווסף בעתיד אם המיזם יגדל (דורש WhatsApp Business API, חשבון עסקי ותשתית שרת).
-                </p>
-            </div>
-
-            <hr>
-
-            <!-- Quotes Manager -->
-            <div class="manage-block">
-                <h3>ציטוטים ואמרות</h3>
-                <p class="info-text">אמרות, משפטים או בדיחות שהם נהגו לומר. הסקשן יוצג בדף ההנצחה רק אם יש לפחות ציטוט אחד.</p>
-
-                <div class="form-group">
-                    <label>ציטוט:</label>
-                    <textarea id="quote-text" rows="3" placeholder="מה הם נהגו לומר..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label>מי אמר:</label>
-                    <select id="quote-author">
-                        <option value="shlomo">סבא שלמה</option>
-                        <option value="doris">סבתא דוריס</option>
-                        <option value="both">שניהם</option>
-                    </select>
-                </div>
-                <button type="button" id="quote-add-btn">הוסף ציטוט</button>
-
-                <ul id="quotes-admin-list" class="quotes-admin-list"></ul>
-            </div>
-
-            <hr>
-
-            <!-- QR Code for Gravestone / Print -->
-            <div class="manage-block">
-                <h3>קוד QR להדפסה / מצבה</h3>
-                <p class="info-text">מייצר קוד QR שמוביל לאתר. ניתן להדפיס על לוחית למצבה, מדבקה, הזמנה לאזכרה או על גבי ה-PDF.</p>
-
-                <div class="form-group">
-                    <label>כתובת:</label>
-                    <input type="url" id="qr-url" value="">
-                </div>
-                <div class="form-group">
-                    <label>הקדשה (אופציונלי):</label>
-                    <select id="qr-for">
-                        <option value="both">שלמה ודוריס לוי ז"ל</option>
-                        <option value="shlomo">שלמה לוי ז"ל</option>
-                        <option value="doris">דוריס (חנה) לוי ז"ל</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>גודל (פיקסלים):</label>
-                    <input type="number" id="qr-size" value="512" min="128" max="1024" step="32">
+                        <div class="block-actions">
+                            <button id="download-pdf-btn" class="btn-primary">הורד PDF מותאם</button>
+                        </div>
+                    </div>
                 </div>
 
-                <div id="qr-preview" class="qr-preview"></div>
+                <!-- ============ PANE: CONTENT ============ -->
+                <div class="admin-pane" data-admin-pane="content" role="tabpanel">
 
-                <div class="qr-actions">
-                    <button type="button" id="qr-refresh-btn">רענן</button>
-                    <button type="button" id="qr-download-btn">הורד PNG</button>
-                    <button type="button" id="qr-print-btn">הדפס לוחית</button>
+                    <div class="manage-block">
+                        <header class="block-header">
+                            <h3>עריכת סיפור חיים</h3>
+                            <p>כל פסקה בשורה נפרדת. שורה ריקה = רווח בין פסקאות.</p>
+                        </header>
+                        <div class="form-group">
+                            <label>סבא שלמה:</label>
+                            <textarea id="edit-life-shlomo" rows="7" class="life-editor"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>סבתא דוריס:</label>
+                            <textarea id="edit-life-doris" rows="7" class="life-editor"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>העלייה ארצה:</label>
+                            <textarea id="edit-life-aliya" rows="7" class="life-editor"></textarea>
+                        </div>
+                        <div class="block-actions">
+                            <button id="save-life-btn" class="btn-primary">שמור סיפור חיים</button>
+                            <button id="reset-life-btn" class="btn-secondary">אפס לברירת מחדל</button>
+                        </div>
+                        <p id="life-save-success" class="success hidden">נשמר בהצלחה!</p>
+                    </div>
+
+                    <div class="manage-block">
+                        <header class="block-header">
+                            <h3>ציטוטים ואמרות</h3>
+                            <p>מוצג בדף רק אם יש לפחות ציטוט אחד.</p>
+                        </header>
+                        <div class="form-grid">
+                            <div class="form-group form-group--wide">
+                                <label>ציטוט:</label>
+                                <textarea id="quote-text" rows="3" placeholder="מה הם נהגו לומר..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>מי אמר:</label>
+                                <select id="quote-author">
+                                    <option value="shlomo">סבא שלמה</option>
+                                    <option value="doris">סבתא דוריס</option>
+                                    <option value="both">שניהם</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="block-actions">
+                            <button type="button" id="quote-add-btn" class="btn-primary">הוסף ציטוט</button>
+                        </div>
+                        <ul id="quotes-admin-list" class="quotes-admin-list admin-list"></ul>
+                    </div>
+
+                    <div class="manage-block">
+                        <header class="block-header">
+                            <h3>הקלטות קוליות</h3>
+                            <p>העלה ל-Google Drive (שיתוף: "כל מי שיש את הקישור"), הדבק Drive file ID או URL ישיר (mp3/m4a/ogg).</p>
+                        </header>
+                        <div class="form-grid">
+                            <div class="form-group form-group--wide">
+                                <label>כותרת:</label>
+                                <input type="text" id="audio-title" placeholder="לדוגמה: סיפור על העלייה מבגדד">
+                            </div>
+                            <div class="form-group form-group--wide">
+                                <label>קישור / Drive ID:</label>
+                                <input type="url" id="audio-url" placeholder="Drive file ID או URL מלא">
+                            </div>
+                            <div class="form-group">
+                                <label>דובר:</label>
+                                <select id="audio-author">
+                                    <option value="shlomo">סבא שלמה</option>
+                                    <option value="doris">סבתא דוריס</option>
+                                    <option value="both">שניהם</option>
+                                    <option value="family">משפחה</option>
+                                </select>
+                            </div>
+                            <div class="form-group form-group--wide">
+                                <label>תיאור (אופציונלי):</label>
+                                <textarea id="audio-description" rows="2" placeholder="הקשר, שנה, מי הקליט..."></textarea>
+                            </div>
+                        </div>
+                        <div class="block-actions">
+                            <button type="button" id="audio-add-btn" class="btn-primary">הוסף הקלטה</button>
+                        </div>
+                        <ul id="audio-admin-list" class="admin-list"></ul>
+                    </div>
+
+                    <div class="manage-block">
+                        <header class="block-header">
+                            <h3>מתכונים ומאכלים אהובים</h3>
+                            <p>מתכונים של סבתא או מאכלים שסבא וסבתא אהבו.</p>
+                        </header>
+                        <div class="form-grid">
+                            <div class="form-group form-group--wide">
+                                <label>שם המנה:</label>
+                                <input type="text" id="recipe-name" placeholder="לדוגמה: קובה במרק סלק">
+                            </div>
+                            <div class="form-group">
+                                <label>סוג:</label>
+                                <select id="recipe-type">
+                                    <option value="recipe">מתכון</option>
+                                    <option value="loved">מאכל אהוב</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>שייך ל:</label>
+                                <select id="recipe-author">
+                                    <option value="doris">סבתא דוריס</option>
+                                    <option value="shlomo">סבא שלמה</option>
+                                    <option value="both">שניהם</option>
+                                </select>
+                            </div>
+                            <div class="form-group form-group--wide">
+                                <label>רכיבים (אופציונלי):</label>
+                                <textarea id="recipe-ingredients" rows="3" placeholder="כל רכיב בשורה חדשה"></textarea>
+                            </div>
+                            <div class="form-group form-group--wide">
+                                <label>הוראות / תיאור (אופציונלי):</label>
+                                <textarea id="recipe-instructions" rows="4" placeholder="אופן הכנה או זיכרון אישי מהמאכל"></textarea>
+                            </div>
+                        </div>
+                        <div class="block-actions">
+                            <button type="button" id="recipe-add-btn" class="btn-primary">הוסף</button>
+                        </div>
+                        <ul id="recipes-admin-list" class="admin-list"></ul>
+                    </div>
                 </div>
-            </div>
 
-            <hr>
+                <!-- ============ PANE: FAMILY ============ -->
+                <div class="admin-pane" data-admin-pane="family" role="tabpanel">
 
-            <!-- Duplicate Detection -->
-            <div class="manage-block">
-                <h3>איתור תמונות כפולות</h3>
-                <p class="info-text">סרוק את הגלריה לאיתור תמונות דומות או כפולות</p>
-                <button id="scan-duplicates-btn">סרוק כפולות</button>
-                <p id="dup-status" class="gallery-status"></p>
-                <div id="duplicates-results"></div>
-            </div>
+                    <div class="manage-block">
+                        <header class="block-header">
+                            <h3>ניהול משתתפים</h3>
+                            <p>פרטי קשר של בני המשפחה לתקשורת ותזכורות.</p>
+                        </header>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>שם:</label>
+                                <input type="text" id="member-name" placeholder="שם מלא">
+                            </div>
+                            <div class="form-group">
+                                <label>מייל:</label>
+                                <input type="email" id="member-email" placeholder="כתובת מייל">
+                            </div>
+                            <div class="form-group">
+                                <label>טלפון:</label>
+                                <input type="tel" id="member-phone" placeholder="05X-XXX-XXXX" inputmode="tel">
+                            </div>
+                        </div>
+                        <p class="form-hint">טלפון יתוקן אוטומטית לפורמט בינלאומי (+972...)</p>
+                        <div class="block-actions">
+                            <button id="add-member-btn" class="btn-primary">הוסף משתתף</button>
+                        </div>
+                        <div id="members-list">
+                            <h4 class="list-heading">משתתפים רשומים</h4>
+                            <ul id="members-ul"></ul>
+                        </div>
+                    </div>
 
-            <hr>
+                    <div class="manage-block">
+                        <header class="block-header">
+                            <h3>תזכורות בטלגרם</h3>
+                            <p>צור בוט דרך <code>@BotFather</code>, הוסף אותו לקבוצת המשפחה, ומלא את הפרטים.</p>
+                        </header>
+                        <div class="form-grid">
+                            <div class="form-group form-group--wide">
+                                <label>Bot Token:</label>
+                                <input type="password" id="tg-token" placeholder="123456:ABC-DEF1234..." autocomplete="off">
+                            </div>
+                            <div class="form-group form-group--wide">
+                                <label>Chat ID:</label>
+                                <input type="text" id="tg-chat" placeholder="-1001234567890 או @channelname">
+                            </div>
+                        </div>
+                        <div class="block-actions">
+                            <button type="button" id="tg-save-btn" class="btn-secondary">שמור הגדרות</button>
+                            <button type="button" id="tg-test-btn" class="btn-secondary">בדיקת חיבור</button>
+                        </div>
 
-            <!-- Members Management -->
-            <div class="manage-block">
-                <h3>ניהול משתתפים</h3>
-                <div class="form-group">
-                    <label>שם:</label>
-                    <input type="text" id="member-name" placeholder="שם מלא">
+                        <hr class="block-divider">
+
+                        <h4 class="list-heading">שליחת תזכורת</h4>
+                        <div class="form-group">
+                            <label>טקסט (אם ריק — נוצר אוטומטית מפרטי האזכרה):</label>
+                            <textarea id="tg-message" rows="5" placeholder="השאר ריק לטקסט ברירת מחדל"></textarea>
+                        </div>
+                        <div class="block-actions">
+                            <button type="button" id="tg-send-btn" class="btn-primary">שלח תזכורת לקבוצה</button>
+                        </div>
+                        <p id="tg-status" class="info-text"></p>
+                        <p class="form-hint" style="margin-top:1rem">
+                            <strong>WhatsApp ממספר ייעודי:</strong> יתווסף בעתיד (דורש WhatsApp Business API ותשתית שרת).
+                        </p>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>מייל:</label>
-                    <input type="email" id="member-email" placeholder="כתובת מייל">
-                </div>
-                <div class="form-group">
-                    <label>טלפון:</label>
-                    <input type="tel" id="member-phone" placeholder="05X-XXX-XXXX" inputmode="tel">
-                    <p class="info-text" style="font-size:0.8rem">יתוקן אוטומטית לפורמט בינלאומי (+972...)</p>
-                </div>
-                <button id="add-member-btn">הוסף משתתף</button>
 
-                <div id="members-list">
-                    <h4>משתתפים רשומים</h4>
-                    <ul id="members-ul"></ul>
+                <!-- ============ PANE: TOOLS ============ -->
+                <div class="admin-pane" data-admin-pane="tools" role="tabpanel">
+
+                    <div class="manage-block">
+                        <header class="block-header">
+                            <h3>קוד QR להדפסה / מצבה</h3>
+                            <p>מייצר QR לכתובת האתר. ניתן להדפיס על לוחית, מדבקה או הזמנה לאזכרה.</p>
+                        </header>
+                        <div class="form-grid">
+                            <div class="form-group form-group--wide">
+                                <label>כתובת:</label>
+                                <input type="url" id="qr-url" value="">
+                            </div>
+                            <div class="form-group">
+                                <label>הקדשה:</label>
+                                <select id="qr-for">
+                                    <option value="both">שלמה ודוריס לוי ז"ל</option>
+                                    <option value="shlomo">שלמה לוי ז"ל</option>
+                                    <option value="doris">דוריס (חנה) לוי ז"ל</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>גודל (פיקסלים):</label>
+                                <input type="number" id="qr-size" value="512" min="128" max="1024" step="32">
+                            </div>
+                        </div>
+                        <div id="qr-preview" class="qr-preview"></div>
+                        <div class="qr-actions">
+                            <button type="button" id="qr-refresh-btn" class="btn-secondary">רענן</button>
+                            <button type="button" id="qr-download-btn" class="btn-secondary">הורד PNG</button>
+                            <button type="button" id="qr-print-btn" class="btn-primary">הדפס לוחית</button>
+                        </div>
+                    </div>
+
+                    <div class="manage-block">
+                        <header class="block-header">
+                            <h3>ספר זיכרון — יצוא PDF מלא</h3>
+                            <p>PDF מקיף: סיפור חיים, ציטוטים, מתכונים, הקלטות ו-QR. מושלם לחלוקה פיזית.</p>
+                        </header>
+                        <div class="form-group">
+                            <label>רכיבים לכלול:</label>
+                            <div class="seder-checklist" id="book-checklist">
+                                <label><input type="checkbox" value="cover" checked> עמוד שער</label>
+                                <label><input type="checkbox" value="life" checked> סיפור חיים</label>
+                                <label><input type="checkbox" value="quotes" checked> ציטוטים</label>
+                                <label><input type="checkbox" value="recipes" checked> מתכונים ומאכלים</label>
+                                <label><input type="checkbox" value="audio" checked> רשימת הקלטות</label>
+                                <label><input type="checkbox" value="qr" checked> עמוד QR לאתר</label>
+                            </div>
+                        </div>
+                        <div class="block-actions">
+                            <button type="button" id="memory-book-btn" class="btn-primary">הפק ספר זיכרון</button>
+                        </div>
+                    </div>
+
+                    <div class="manage-block">
+                        <header class="block-header">
+                            <h3>איתור תמונות כפולות</h3>
+                            <p>סרוק את הגלריה לאיתור תמונות דומות או כפולות.</p>
+                        </header>
+                        <div class="block-actions">
+                            <button id="scan-duplicates-btn" class="btn-secondary">סרוק כפולות</button>
+                        </div>
+                        <p id="dup-status" class="gallery-status"></p>
+                        <div id="duplicates-results"></div>
+                    </div>
                 </div>
-            </div>
+
             </div>
         </section>
     </div>
@@ -546,10 +637,10 @@
     </footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="js/prayers.js?v=20260421b"></script>
-    <script src="js/app.js?v=20260421b"></script>
-    <script src="js/family-tree.js?v=20260421b"></script>
-    <script src="js/gallery.js?v=20260421b"></script>
+    <script src="js/prayers.js?v=20260421c"></script>
+    <script src="js/app.js?v=20260421c"></script>
+    <script src="js/family-tree.js?v=20260421c"></script>
+    <script src="js/gallery.js?v=20260421c"></script>
 
     <!-- Context menu for photos -->
     <div id="photo-context-menu" class="ctx-menu hidden">
@@ -564,5 +655,21 @@
             <path d="M12 5l-7 7h4v7h6v-7h4z" fill="currentColor"/>
         </svg>
     </button>
+
+    <!-- Toast notifications -->
+    <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- Confirm dialog -->
+    <div id="confirm-dialog" class="confirm-dialog hidden" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+        <div class="confirm-backdrop"></div>
+        <div class="confirm-card">
+            <h3 id="confirm-title">אישור פעולה</h3>
+            <p id="confirm-message"></p>
+            <div class="confirm-actions">
+                <button type="button" id="confirm-cancel-btn" class="btn-secondary">ביטול</button>
+                <button type="button" id="confirm-ok-btn" class="btn-primary">אישור</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
