@@ -376,7 +376,7 @@ function initMembers() {
 function addMember() {
     const name = document.getElementById('member-name').value.trim();
     const email = document.getElementById('member-email').value.trim();
-    const phone = document.getElementById('member-phone').value.trim();
+    const phone = normalizeIsraeliPhone(document.getElementById('member-phone').value);
     if (!name) { alert('נא להזין שם'); return; }
 
     state.members.push({ name, email, phone, id: Date.now() });
@@ -402,9 +402,22 @@ function renderMembers() {
     ul.innerHTML = '';
     state.members.forEach(member => {
         const li = document.createElement('li');
+        const phoneDisplay = member.phone ? normalizeIsraeliPhone(member.phone) : '';
+        const waNumber = phoneDisplay.replace(/[^\d]/g, '');
+        const phoneLinks = phoneDisplay ? `
+            <a href="tel:${escapeHtml(phoneDisplay)}" class="member-link">חייג</a>
+            <a href="https://wa.me/${escapeHtml(waNumber)}" target="_blank" rel="noopener" class="member-link">WhatsApp</a>
+        ` : '';
         li.innerHTML = `
-            <span>${member.name} ${member.email ? '(' + member.email + ')' : ''} ${member.phone ? '| ' + member.phone : ''}</span>
-            <button onclick="removeMember(${member.id})">הסר</button>
+            <div class="member-info">
+                <strong>${escapeHtml(member.name)}</strong>
+                ${member.email ? `<span class="member-meta">${escapeHtml(member.email)}</span>` : ''}
+                ${phoneDisplay ? `<span class="member-meta" dir="ltr">${escapeHtml(phoneDisplay)}</span>` : ''}
+            </div>
+            <div class="member-actions">
+                ${phoneLinks}
+                <button onclick="removeMember(${member.id})" class="btn-secondary">הסר</button>
+            </div>
         `;
         ul.appendChild(li);
     });
@@ -415,6 +428,10 @@ function renderMembers() {
 function downloadCalendarEvent() {
     try {
         const azkara = state.azkara;
+        if (!azkara || !azkara.date || !azkara.time) {
+            alert('חסר תאריך או שעה לאזכרה');
+            return;
+        }
         const title = 'אזכרה ' + azkara.yearLabel + ' - ' + getPersonTitle(azkara.forPerson);
         const description = title + ' | ' + azkara.location;
 
@@ -426,12 +443,13 @@ function downloadCalendarEvent() {
             endDate.getMinutes().toString().padStart(2, '0') + '00';
 
         const now = new Date();
-        const stamp = now.getFullYear().toString() +
-            (now.getMonth() + 1).toString().padStart(2, '0') +
-            now.getDate().toString().padStart(2, '0') + 'T' +
-            now.getHours().toString().padStart(2, '0') +
-            now.getMinutes().toString().padStart(2, '0') +
-            now.getSeconds().toString().padStart(2, '0');
+        const pad = n => n.toString().padStart(2, '0');
+        const stamp = now.getUTCFullYear().toString() +
+            pad(now.getUTCMonth() + 1) +
+            pad(now.getUTCDate()) + 'T' +
+            pad(now.getUTCHours()) +
+            pad(now.getUTCMinutes()) +
+            pad(now.getUTCSeconds()) + 'Z';
 
         const lines = [
             'BEGIN:VCALENDAR',
@@ -439,8 +457,25 @@ function downloadCalendarEvent() {
             'PRODID:-//Memorial//Azkara//HE',
             'CALSCALE:GREGORIAN',
             'METHOD:PUBLISH',
+            'BEGIN:VTIMEZONE',
+            'TZID:Asia/Jerusalem',
+            'BEGIN:STANDARD',
+            'DTSTART:19700101T000000',
+            'TZOFFSETFROM:+0300',
+            'TZOFFSETTO:+0200',
+            'TZNAME:IST',
+            'RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU',
+            'END:STANDARD',
+            'BEGIN:DAYLIGHT',
+            'DTSTART:19700101T000000',
+            'TZOFFSETFROM:+0200',
+            'TZOFFSETTO:+0300',
+            'TZNAME:IDT',
+            'RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1FR',
+            'END:DAYLIGHT',
+            'END:VTIMEZONE',
             'BEGIN:VEVENT',
-            'UID:azkara-' + dateStr + '@memorial-levi',
+            'UID:azkara-' + dateStr + '-' + timeStr + '@memorial-levi',
             'DTSTAMP:' + stamp,
             'DTSTART;TZID=Asia/Jerusalem:' + dateStr + 'T' + timeStr,
             'DTEND;TZID=Asia/Jerusalem:' + dateStr + 'T' + endTimeStr,
@@ -462,17 +497,17 @@ function downloadCalendarEvent() {
         ];
 
         const icsText = lines.join('\r\n');
-        // Add UTF-8 BOM for Hebrew support
-        const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
-        const encoder = new TextEncoder();
-        const body = encoder.encode(icsText);
-        const combined = new Uint8Array(bom.length + body.length);
-        combined.set(bom);
-        combined.set(body, bom.length);
+        const filename = 'azkara-' + dateStr + '.ics';
 
-        // Use data URI - works on iOS Safari (opens "Add to Calendar" directly)
-        const dataUrl = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(icsText);
-        window.location.href = dataUrl;
+        const blob = new Blob(['\uFEFF' + icsText], { type: 'text/calendar;charset=utf-8' });
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 1500);
     } catch (e) {
         alert('שגיאה ביצירת אירוע יומן: ' + e.message);
     }
@@ -761,6 +796,712 @@ function resetLifeStory() {
     location.reload();
 }
 
+// ==================== QUOTES ====================
+
+function loadQuotes() {
+    try {
+        const raw = localStorage.getItem('quotes');
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (e) { return []; }
+}
+
+function saveQuotes(quotes) {
+    localStorage.setItem('quotes', JSON.stringify(quotes));
+}
+
+function quoteAuthorLabel(key) {
+    if (key === 'shlomo') return 'סבא שלמה';
+    if (key === 'doris') return 'סבתא דוריס';
+    return 'סבא וסבתא';
+}
+
+function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function renderQuotes() {
+    const quotes = loadQuotes();
+    const section = document.getElementById('section-quotes');
+    const list = document.getElementById('quotes-list');
+    const tocChip = document.querySelector('.toc-quotes');
+    if (!section || !list) return;
+
+    if (!quotes.length) {
+        section.classList.add('hidden');
+        if (tocChip) tocChip.classList.add('hidden');
+        return;
+    }
+    section.classList.remove('hidden');
+    if (tocChip) tocChip.classList.remove('hidden');
+
+    list.innerHTML = quotes.map(q =>
+        `<blockquote class="quote-card">"${escapeHtml(q.text)}"<span class="quote-author">${escapeHtml(quoteAuthorLabel(q.author))}</span></blockquote>`
+    ).join('');
+}
+
+function renderQuotesAdmin() {
+    const quotes = loadQuotes();
+    const ul = document.getElementById('quotes-admin-list');
+    if (!ul) return;
+    if (!quotes.length) {
+        ul.innerHTML = '<li class="info-text" style="border:none;background:transparent">אין ציטוטים שמורים</li>';
+        return;
+    }
+    ul.innerHTML = quotes.map((q, i) =>
+        `<li><div class="qa-text">${escapeHtml(q.text)}<div class="qa-meta">${escapeHtml(quoteAuthorLabel(q.author))}</div></div>
+         <button type="button" class="btn-secondary" data-del="${i}">מחק</button></li>`
+    ).join('');
+    ul.querySelectorAll('button[data-del]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const idx = parseInt(btn.getAttribute('data-del'), 10);
+            const list = loadQuotes();
+            list.splice(idx, 1);
+            saveQuotes(list);
+            renderQuotesAdmin();
+            renderQuotes();
+        });
+    });
+}
+
+function initQuotesAdmin() {
+    const addBtn = document.getElementById('quote-add-btn');
+    if (!addBtn) return;
+    addBtn.addEventListener('click', () => {
+        const textEl = document.getElementById('quote-text');
+        const authorEl = document.getElementById('quote-author');
+        const text = (textEl.value || '').trim();
+        if (!text) return;
+        const quotes = loadQuotes();
+        quotes.push({ text, author: authorEl.value });
+        saveQuotes(quotes);
+        textEl.value = '';
+        renderQuotesAdmin();
+        renderQuotes();
+    });
+    renderQuotesAdmin();
+}
+
+// ==================== AUDIO RECORDINGS ====================
+
+function loadAudio() {
+    try {
+        const raw = localStorage.getItem('audio');
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (e) { return []; }
+}
+
+function saveAudio(items) {
+    localStorage.setItem('audio', JSON.stringify(items));
+}
+
+function audioAuthorLabel(key) {
+    if (key === 'shlomo') return 'סבא שלמה';
+    if (key === 'doris') return 'סבתא דוריס';
+    if (key === 'family') return 'משפחה';
+    return 'סבא וסבתא';
+}
+
+function normalizeAudioUrl(raw) {
+    const v = (raw || '').trim();
+    if (!v) return '';
+    if (/^https?:\/\//i.test(v)) {
+        const m = v.match(/drive\.google\.com\/file\/d\/([^/]+)/);
+        if (m) return 'https://drive.google.com/uc?export=download&id=' + m[1];
+        return v;
+    }
+    if (/^[A-Za-z0-9_-]{15,}$/.test(v)) {
+        return 'https://drive.google.com/uc?export=download&id=' + v;
+    }
+    return v;
+}
+
+function renderAudio() {
+    const items = loadAudio();
+    const section = document.getElementById('section-audio');
+    const list = document.getElementById('audio-list');
+    const tocChip = document.querySelector('.toc-audio');
+    if (!section || !list) return;
+
+    if (!items.length) {
+        section.classList.add('hidden');
+        if (tocChip) tocChip.classList.add('hidden');
+        return;
+    }
+    section.classList.remove('hidden');
+    if (tocChip) tocChip.classList.remove('hidden');
+
+    list.innerHTML = items.map(a => `
+        <div class="audio-card">
+            <div class="audio-head">
+                <h3>${escapeHtml(a.title)}</h3>
+                <span class="audio-meta">${escapeHtml(audioAuthorLabel(a.author))}</span>
+            </div>
+            ${a.description ? `<p class="audio-desc">${escapeHtml(a.description)}</p>` : ''}
+            <audio controls preload="none" src="${escapeHtml(a.url)}"></audio>
+        </div>
+    `).join('');
+}
+
+function renderAudioAdmin() {
+    const items = loadAudio();
+    const ul = document.getElementById('audio-admin-list');
+    if (!ul) return;
+    if (!items.length) {
+        ul.innerHTML = '<li class="info-text" style="border:none;background:transparent">אין הקלטות</li>';
+        return;
+    }
+    ul.innerHTML = items.map((a, i) => `
+        <li>
+            <div class="qa-text">
+                <strong>${escapeHtml(a.title)}</strong>
+                <div class="qa-meta">${escapeHtml(audioAuthorLabel(a.author))}${a.description ? ' · ' + escapeHtml(a.description) : ''}</div>
+            </div>
+            <button type="button" class="btn-secondary" data-del="${i}">מחק</button>
+        </li>`).join('');
+    ul.querySelectorAll('button[data-del]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const idx = parseInt(btn.getAttribute('data-del'), 10);
+            const list = loadAudio();
+            list.splice(idx, 1);
+            saveAudio(list);
+            renderAudioAdmin();
+            renderAudio();
+        });
+    });
+}
+
+function initAudioAdmin() {
+    const addBtn = document.getElementById('audio-add-btn');
+    if (!addBtn) return;
+    addBtn.addEventListener('click', () => {
+        const title = (document.getElementById('audio-title').value || '').trim();
+        const rawUrl = document.getElementById('audio-url').value;
+        const url = normalizeAudioUrl(rawUrl);
+        const author = document.getElementById('audio-author').value;
+        const description = (document.getElementById('audio-description').value || '').trim();
+        if (!title || !url) { alert('צריך לפחות כותרת וקישור'); return; }
+        const items = loadAudio();
+        items.push({ title, url, author, description });
+        saveAudio(items);
+        document.getElementById('audio-title').value = '';
+        document.getElementById('audio-url').value = '';
+        document.getElementById('audio-description').value = '';
+        renderAudioAdmin();
+        renderAudio();
+    });
+    renderAudioAdmin();
+}
+
+// ==================== RECIPES ====================
+
+function loadRecipes() {
+    try {
+        const raw = localStorage.getItem('recipes');
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (e) { return []; }
+}
+
+function saveRecipes(items) {
+    localStorage.setItem('recipes', JSON.stringify(items));
+}
+
+function recipeTypeLabel(type) {
+    return type === 'loved' ? 'מאכל אהוב' : 'מתכון';
+}
+
+function recipeAuthorLabel(key) {
+    if (key === 'shlomo') return 'סבא שלמה';
+    if (key === 'doris') return 'סבתא דוריס';
+    return 'סבא וסבתא';
+}
+
+function ingredientsToHtml(raw) {
+    const lines = (raw || '').split('\n').map(l => l.trim()).filter(Boolean);
+    if (!lines.length) return '';
+    return `<ul class="recipe-ingredients">${lines.map(l => `<li>${escapeHtml(l)}</li>`).join('')}</ul>`;
+}
+
+function instructionsToHtml(raw) {
+    const paragraphs = (raw || '').split('\n').map(l => l.trim()).filter(Boolean);
+    if (!paragraphs.length) return '';
+    return paragraphs.map(p => `<p>${escapeHtml(p)}</p>`).join('');
+}
+
+function renderRecipes() {
+    const items = loadRecipes();
+    const section = document.getElementById('section-recipes');
+    const list = document.getElementById('recipes-list');
+    const tocChip = document.querySelector('.toc-recipes');
+    if (!section || !list) return;
+
+    if (!items.length) {
+        section.classList.add('hidden');
+        if (tocChip) tocChip.classList.add('hidden');
+        return;
+    }
+    section.classList.remove('hidden');
+    if (tocChip) tocChip.classList.remove('hidden');
+
+    list.innerHTML = items.map(r => `
+        <article class="recipe-card">
+            <header>
+                <span class="recipe-badge">${escapeHtml(recipeTypeLabel(r.type))}</span>
+                <h3>${escapeHtml(r.name)}</h3>
+                <span class="recipe-meta">${escapeHtml(recipeAuthorLabel(r.author))}</span>
+            </header>
+            ${ingredientsToHtml(r.ingredients)}
+            ${instructionsToHtml(r.instructions)}
+        </article>
+    `).join('');
+}
+
+function renderRecipesAdmin() {
+    const items = loadRecipes();
+    const ul = document.getElementById('recipes-admin-list');
+    if (!ul) return;
+    if (!items.length) {
+        ul.innerHTML = '<li class="info-text" style="border:none;background:transparent">אין מתכונים</li>';
+        return;
+    }
+    ul.innerHTML = items.map((r, i) => `
+        <li>
+            <div class="qa-text">
+                <strong>${escapeHtml(r.name)}</strong>
+                <div class="qa-meta">${escapeHtml(recipeTypeLabel(r.type))} · ${escapeHtml(recipeAuthorLabel(r.author))}</div>
+            </div>
+            <button type="button" class="btn-secondary" data-del="${i}">מחק</button>
+        </li>`).join('');
+    ul.querySelectorAll('button[data-del]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const idx = parseInt(btn.getAttribute('data-del'), 10);
+            const list = loadRecipes();
+            list.splice(idx, 1);
+            saveRecipes(list);
+            renderRecipesAdmin();
+            renderRecipes();
+        });
+    });
+}
+
+function initRecipesAdmin() {
+    const addBtn = document.getElementById('recipe-add-btn');
+    if (!addBtn) return;
+    addBtn.addEventListener('click', () => {
+        const name = (document.getElementById('recipe-name').value || '').trim();
+        const type = document.getElementById('recipe-type').value;
+        const author = document.getElementById('recipe-author').value;
+        const ingredients = (document.getElementById('recipe-ingredients').value || '').trim();
+        const instructions = (document.getElementById('recipe-instructions').value || '').trim();
+        if (!name) { alert('צריך שם למנה'); return; }
+        const items = loadRecipes();
+        items.push({ name, type, author, ingredients, instructions });
+        saveRecipes(items);
+        document.getElementById('recipe-name').value = '';
+        document.getElementById('recipe-ingredients').value = '';
+        document.getElementById('recipe-instructions').value = '';
+        renderRecipesAdmin();
+        renderRecipes();
+    });
+    renderRecipesAdmin();
+}
+
+// ==================== TELEGRAM BOT REMINDERS ====================
+
+function normalizeIsraeliPhone(raw) {
+    let v = (raw || '').replace(/[^\d+]/g, '');
+    if (!v) return '';
+    if (v.startsWith('+')) return v;
+    if (v.startsWith('00')) return '+' + v.slice(2);
+    if (v.startsWith('972')) return '+' + v;
+    if (v.startsWith('0')) return '+972' + v.slice(1);
+    return v;
+}
+
+function loadTelegramConfig() {
+    try {
+        const raw = localStorage.getItem('telegram');
+        return raw ? JSON.parse(raw) : { token: '', chat: '' };
+    } catch (e) { return { token: '', chat: '' }; }
+}
+
+function saveTelegramConfig(cfg) {
+    localStorage.setItem('telegram', JSON.stringify(cfg));
+}
+
+function buildReminderText() {
+    const a = state.azkara;
+    const title = 'אזכרה ' + a.yearLabel + ' - ' + getPersonTitle(a.forPerson);
+    const parts = a.date.split('-');
+    const dateFmt = parts[2] + '/' + parts[1] + '/' + parts[0];
+    const siteUrl = window.location.origin + window.location.pathname;
+    return `🕯️ *תזכורת אזכרה*\n\n${title}\n📅 ${dateFmt} בשעה ${a.time}\n📍 ${a.location}\n\nפרטים נוספים וסדר אזכרה להדפסה:\n${siteUrl}`;
+}
+
+function initTelegramAdmin() {
+    const tokenEl = document.getElementById('tg-token');
+    const chatEl = document.getElementById('tg-chat');
+    const saveBtn = document.getElementById('tg-save-btn');
+    const sendBtn = document.getElementById('tg-send-btn');
+    const statusEl = document.getElementById('tg-status');
+    const msgEl = document.getElementById('tg-message');
+    if (!saveBtn) return;
+
+    const cfg = loadTelegramConfig();
+    tokenEl.value = cfg.token || '';
+    chatEl.value = cfg.chat || '';
+
+    saveBtn.addEventListener('click', () => {
+        saveTelegramConfig({ token: tokenEl.value.trim(), chat: chatEl.value.trim() });
+        statusEl.textContent = 'הגדרות נשמרו';
+        statusEl.className = 'success';
+        setTimeout(() => { statusEl.textContent = ''; statusEl.className = 'info-text'; }, 2000);
+    });
+
+    sendBtn.addEventListener('click', async () => {
+        const cfg = loadTelegramConfig();
+        if (!cfg.token || !cfg.chat) { alert('צריך להגדיר Token ו-Chat ID קודם'); return; }
+        const text = msgEl.value.trim() || buildReminderText();
+        statusEl.textContent = 'שולח...';
+        statusEl.className = 'info-text';
+        try {
+            const resp = await fetch(`https://api.telegram.org/bot${encodeURIComponent(cfg.token)}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: cfg.chat, text, parse_mode: 'Markdown', disable_web_page_preview: false })
+            });
+            const data = await resp.json();
+            if (data.ok) {
+                statusEl.textContent = '✓ נשלח בהצלחה';
+                statusEl.className = 'success';
+            } else {
+                statusEl.textContent = 'שגיאה: ' + (data.description || 'לא ידוע');
+                statusEl.className = 'error';
+            }
+        } catch (e) {
+            statusEl.textContent = 'שגיאת רשת: ' + e.message;
+            statusEl.className = 'error';
+        }
+    });
+}
+
+// ==================== HEBCAL YAHRZEIT ====================
+
+function formatYahrzeitEvent(ev) {
+    const parts = ev.date.split('-');
+    const dateFmt = parts[2] + '/' + parts[1] + '/' + parts[0];
+    return { iso: ev.date, display: dateFmt, hebrew: ev.hdate || '', title: ev.title || '' };
+}
+
+async function fetchYahrzeitFor(personKey) {
+    const p = CONFIG.people[personKey];
+    if (!p) return [];
+    const parts = p.deathDateGregorian.split('-').map(Number);
+    const params = new URLSearchParams({
+        cfg: 'json', v: 'yahrzeit', years: '10',
+        y1: String(parts[0]), m1: String(parts[1]), d1: String(parts[2]),
+        t1: 'Yahrzeit', n1: p.fullNameHebrew || p.name, hebdate: 'on'
+    });
+    const resp = await fetch('https://www.hebcal.com/yahrzeit?' + params.toString());
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    const items = Array.isArray(data.items) ? data.items : [];
+    const today = new Date().toISOString().slice(0, 10);
+    return items.filter(ev => ev.date >= today).slice(0, 6).map(formatYahrzeitEvent);
+}
+
+function initYahrzeitAdmin() {
+    const resultsEl = document.getElementById('yahrzeit-results');
+    if (!resultsEl) return;
+
+    async function showFor(personKey) {
+        resultsEl.innerHTML = '<p class="info-text">טוען מ-Hebcal...</p>';
+        try {
+            const events = await fetchYahrzeitFor(personKey);
+            if (!events.length) { resultsEl.innerHTML = '<p class="info-text">לא נמצאו תאריכים עתידיים</p>'; return; }
+            resultsEl.innerHTML = `
+                <p class="info-text">לחץ על תאריך כדי להעתיק לשדה התאריך של האזכרה:</p>
+                <ul class="yahrzeit-list">
+                    ${events.map(ev => `
+                        <li>
+                            <button type="button" data-date="${ev.iso}" class="yahrzeit-pick">
+                                <span class="yz-greg">${ev.display}</span>
+                                <span class="yz-heb">${escapeHtml(ev.hebrew)}</span>
+                            </button>
+                        </li>
+                    `).join('')}
+                </ul>`;
+            resultsEl.querySelectorAll('.yahrzeit-pick').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const iso = btn.getAttribute('data-date');
+                    const dateInput = document.getElementById('azkara-date');
+                    if (dateInput) {
+                        dateInput.value = iso;
+                        dateInput.dispatchEvent(new Event('change'));
+                        alert('התאריך הועתק לשדה. אל תשכח ללחוץ "שמור אזכרה".');
+                    }
+                });
+            });
+        } catch (e) {
+            resultsEl.innerHTML = `<p class="error">שגיאה: ${escapeHtml(e.message)}</p>`;
+        }
+    }
+
+    document.getElementById('yahrzeit-shlomo-btn').addEventListener('click', () => showFor('shlomo'));
+    document.getElementById('yahrzeit-doris-btn').addEventListener('click', () => showFor('doris'));
+}
+
+// ==================== MEMORY BOOK PDF ====================
+
+function buildMemoryBookHtml(opts) {
+    const azkara = state.azkara;
+    const parts = [];
+    const siteUrl = window.location.origin + window.location.pathname;
+
+    if (opts.cover) {
+        parts.push(`
+            <section class="book-cover">
+                <h1 class="book-title">לזכרם האהוב של</h1>
+                <h2 class="book-names">שלמה ודוריס לוי ז"ל</h2>
+                <div class="book-divider">✦</div>
+                <p class="book-dates">שלמה: 1928–2021 · ט"ז ניסן תשפ"א</p>
+                <p class="book-dates">דוריס: 1933–2021 · י"ז אייר תשפ"א</p>
+                <p class="book-subtitle">בית עלמין קדימה צורן</p>
+                <p class="book-credit">ספר זיכרון משפחתי</p>
+            </section>`);
+    }
+
+    if (opts.life) {
+        parts.push('<section class="book-chapter"><h2>סיפור חייהם</h2>');
+        [['shlomo', 'סבא שלמה'], ['doris', 'סבתא דוריס'], ['aliya', 'העלייה ארצה']].forEach(([k, t]) => {
+            const el = document.getElementById('life-' + k);
+            if (el) parts.push(`<h3>${t}</h3>${el.innerHTML}`);
+        });
+        parts.push('</section>');
+    }
+
+    if (opts.quotes) {
+        const quotes = loadQuotes();
+        if (quotes.length) {
+            parts.push('<section class="book-chapter"><h2>ציטוטים ואמרות</h2>');
+            quotes.forEach(q => {
+                parts.push(`<blockquote class="book-quote">"${escapeHtml(q.text)}"<footer>— ${escapeHtml(quoteAuthorLabel(q.author))}</footer></blockquote>`);
+            });
+            parts.push('</section>');
+        }
+    }
+
+    if (opts.recipes) {
+        const recipes = loadRecipes();
+        if (recipes.length) {
+            parts.push('<section class="book-chapter"><h2>מתכונים ומאכלים אהובים</h2>');
+            recipes.forEach(r => {
+                parts.push(`<article class="book-recipe">
+                    <h3>${escapeHtml(r.name)}</h3>
+                    <p class="book-recipe-meta">${escapeHtml(recipeTypeLabel(r.type))} · ${escapeHtml(recipeAuthorLabel(r.author))}</p>
+                    ${ingredientsToHtml(r.ingredients)}
+                    ${instructionsToHtml(r.instructions)}
+                </article>`);
+            });
+            parts.push('</section>');
+        }
+    }
+
+    if (opts.audio) {
+        const audios = loadAudio();
+        if (audios.length) {
+            parts.push('<section class="book-chapter"><h2>הקלטות קוליות</h2><p class="info-text">לשמיעה: סרקו את ה-QR בסוף הספר או גשו לאתר.</p><ul class="book-audio-list">');
+            audios.forEach(a => {
+                parts.push(`<li><strong>${escapeHtml(a.title)}</strong> — ${escapeHtml(audioAuthorLabel(a.author))}${a.description ? '<br><span>' + escapeHtml(a.description) + '</span>' : ''}</li>`);
+            });
+            parts.push('</ul></section>');
+        }
+    }
+
+    if (opts.qr) {
+        parts.push(`
+            <section class="book-chapter book-qr-page">
+                <h2>לצפייה מלאה וגלריית תמונות</h2>
+                <p>סרקו את הקוד או גשו לכתובת:</p>
+                <div id="book-qr-holder" class="book-qr-holder"></div>
+                <p class="book-url" dir="ltr">${siteUrl}</p>
+            </section>`);
+    }
+
+    return parts.join('\n');
+}
+
+function generateMemoryBook() {
+    const opts = {};
+    document.querySelectorAll('#book-checklist input').forEach(cb => { opts[cb.value] = cb.checked; });
+    const html = buildMemoryBookHtml(opts);
+    openPdfView(html, 'ספר זיכרון');
+
+    if (opts.qr && typeof QRCode !== 'undefined') {
+        const holder = document.getElementById('book-qr-holder');
+        if (holder) {
+            new QRCode(holder, {
+                text: window.location.origin + window.location.pathname,
+                width: 300, height: 300,
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+    }
+}
+
+function initMemoryBookAdmin() {
+    const btn = document.getElementById('memory-book-btn');
+    if (!btn) return;
+    btn.addEventListener('click', generateMemoryBook);
+}
+
+// ==================== TOC SCROLLSPY ====================
+
+function initTocScrollspy() {
+    const chips = document.querySelectorAll('.page-toc .toc-chip');
+    if (!chips.length) return;
+    const sections = Array.from(chips)
+        .map(c => document.querySelector(c.getAttribute('href')))
+        .filter(Boolean);
+    if (!sections.length) return;
+
+    // Smooth scroll is handled natively by CSS scroll-behavior; we just highlight.
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const id = '#' + entry.target.id;
+                chips.forEach(c => c.classList.toggle('active', c.getAttribute('href') === id));
+            }
+        });
+    }, { rootMargin: '-40% 0px -55% 0px', threshold: 0 });
+
+    sections.forEach(s => observer.observe(s));
+}
+
+// ==================== QR CODE ====================
+
+var qrInstance = null;
+
+function initQrAdmin() {
+    const urlInput = document.getElementById('qr-url');
+    const sizeInput = document.getElementById('qr-size');
+    const forSelect = document.getElementById('qr-for');
+    const preview = document.getElementById('qr-preview');
+    if (!urlInput || !preview) return;
+
+    if (!urlInput.value) {
+        urlInput.value = window.location.origin + window.location.pathname;
+    }
+
+    renderQr();
+
+    document.getElementById('qr-refresh-btn').addEventListener('click', renderQr);
+    document.getElementById('qr-download-btn').addEventListener('click', downloadQrPng);
+    document.getElementById('qr-print-btn').addEventListener('click', printQrPlaque);
+    [urlInput, sizeInput, forSelect].forEach(el => el.addEventListener('change', renderQr));
+}
+
+function renderQr() {
+    if (typeof QRCode === 'undefined') return;
+    const preview = document.getElementById('qr-preview');
+    const url = document.getElementById('qr-url').value.trim();
+    const size = parseInt(document.getElementById('qr-size').value, 10) || 512;
+    if (!url) { preview.innerHTML = '<p class="info-text">הזן כתובת</p>'; return; }
+    preview.innerHTML = '';
+    qrInstance = new QRCode(preview, {
+        text: url,
+        width: Math.min(size, 512),
+        height: Math.min(size, 512),
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+    });
+}
+
+function getQrDataUrl() {
+    const preview = document.getElementById('qr-preview');
+    const canvas = preview.querySelector('canvas');
+    if (canvas) return canvas.toDataURL('image/png');
+    const img = preview.querySelector('img');
+    if (img && img.src) return img.src;
+    return null;
+}
+
+function downloadQrPng() {
+    const dataUrl = getQrDataUrl();
+    if (!dataUrl) { alert('לא הצלחתי ליצור את הקובץ. נסה לרענן.'); return; }
+    const a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = 'memorial-qr.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+
+function qrPlaqueTitle(forKey) {
+    if (forKey === 'shlomo') return 'שלמה לוי ז"ל';
+    if (forKey === 'doris') return 'דוריס (חנה) לוי ז"ל';
+    return 'שלמה ודוריס לוי ז"ל';
+}
+
+function qrPlaqueSubtitle(forKey) {
+    if (forKey === 'shlomo') return '1928 – 2021 · ט"ז ניסן תשפ"א';
+    if (forKey === 'doris') return '1933 – 2021 · י"ז אייר תשפ"א';
+    return 'בית עלמין קדימה צורן';
+}
+
+function printQrPlaque() {
+    const dataUrl = getQrDataUrl();
+    if (!dataUrl) { alert('לא הצלחתי ליצור את הקובץ. נסה לרענן.'); return; }
+    const forKey = document.getElementById('qr-for').value;
+    const url = document.getElementById('qr-url').value.trim();
+    const title = qrPlaqueTitle(forKey);
+    const subtitle = qrPlaqueSubtitle(forKey);
+
+    const html = `<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>${title} – לוחית QR</title>
+<style>
+  @page { size: A6; margin: 8mm; }
+  html, body { margin: 0; padding: 0; background: #fff; color: #111; font-family: 'David', 'Frank Ruehl', 'Times New Roman', serif; }
+  .plaque { box-sizing: border-box; width: 100%; min-height: 100vh; padding: 14mm 10mm; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px solid #111; border-radius: 6mm; }
+  .plaque h1 { font-size: 20pt; margin: 0 0 4mm; font-weight: 700; letter-spacing: 0.5pt; }
+  .plaque .sub { font-size: 11pt; margin: 0 0 8mm; color: #333; }
+  .plaque img { width: 60mm; height: 60mm; display: block; margin: 0 auto 6mm; }
+  .plaque .hint { font-size: 9pt; color: #444; margin: 0; }
+  .plaque .url { font-size: 8pt; color: #555; direction: ltr; margin-top: 3mm; word-break: break-all; }
+  @media print { .noprint { display: none; } body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+  .noprint { position: fixed; top: 10px; left: 10px; }
+  .noprint button { padding: 8px 14px; font-size: 14px; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="noprint"><button onclick="window.print()">הדפס</button></div>
+<div class="plaque">
+  <h1>לזכרם של<br>${title}</h1>
+  <p class="sub">${subtitle}</p>
+  <img src="${dataUrl}" alt="QR">
+  <p class="hint">סרקו לצפייה בדף הנצחה</p>
+  <p class="url">${url}</p>
+</div>
+<script>window.addEventListener('load', function(){ setTimeout(function(){ window.print(); }, 400); });<\/script>
+</body>
+</html>`;
+
+    const w = window.open('', '_blank');
+    if (!w) { alert('חלון הדפדפן חסום. אפשר חלונות קופצים ונסה שוב.'); return; }
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
+}
+
 // ==================== INIT ====================
 
 function initApp() {
@@ -790,6 +1531,33 @@ function initApp() {
 
     // Duplicate scanner (manage tab)
     try { initDuplicateScanner(); } catch(e) { console.error('dupScanner:', e); }
+
+    // QR code for gravestone / print
+    try { initQrAdmin(); } catch(e) { console.error('qrAdmin:', e); }
+
+    // Quotes (main page + admin)
+    try { renderQuotes(); } catch(e) { console.error('quotes:', e); }
+    try { initQuotesAdmin(); } catch(e) { console.error('quotesAdmin:', e); }
+
+    // Audio recordings
+    try { renderAudio(); } catch(e) { console.error('audio:', e); }
+    try { initAudioAdmin(); } catch(e) { console.error('audioAdmin:', e); }
+
+    // Recipes
+    try { renderRecipes(); } catch(e) { console.error('recipes:', e); }
+    try { initRecipesAdmin(); } catch(e) { console.error('recipesAdmin:', e); }
+
+    // Telegram reminders
+    try { initTelegramAdmin(); } catch(e) { console.error('telegram:', e); }
+
+    // Hebcal yahrzeit helper
+    try { initYahrzeitAdmin(); } catch(e) { console.error('yahrzeit:', e); }
+
+    // Memory Book PDF
+    try { initMemoryBookAdmin(); } catch(e) { console.error('memoryBook:', e); }
+
+    // Table-of-contents scrollspy
+    try { initTocScrollspy(); } catch(e) { console.error('tocSpy:', e); }
 
     // File input change listener (label handles click natively)
     try {

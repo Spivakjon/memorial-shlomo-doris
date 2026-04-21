@@ -56,40 +56,33 @@
             </div>
 
             <!-- Upcoming Azkara -->
-            <div class="upcoming-azkara" id="memorial-azkara">
-                <!-- Filled by JS -->
-            </div>
-
-            <!-- Action Buttons - Row -->
-            <div class="action-buttons-row">
-                <a href="azkara.ics" class="action-chip">יומן</a>
-                <button class="action-chip whatsapp-chip" onclick="shareWhatsApp()">וואטסאפ</button>
-                <a href="https://waze.com/ul?q=%D7%91%D7%99%D7%AA%20%D7%A2%D7%9C%D7%9E%D7%99%D7%9F%20%D7%A7%D7%93%D7%99%D7%9E%D7%94%20%D7%A6%D7%95%D7%A8%D7%9F" target="_blank" class="action-chip waze-chip">Waze</a>
-            </div>
-
-            <!-- Quick PDF Download - Collapsible -->
-            <details class="quick-pdf-section" id="quick-pdf-section">
-                <summary class="pdf-summary">הורדת סדר אזכרה ▾</summary>
-                <div class="pdf-details-content">
-                    <p class="info-text">בחר מה לכלול בסדר ולחץ להורדה</p>
-
-                    <div class="seder-checklist" id="main-seder-checklist">
-                        <label><input type="checkbox" value="candle" checked> הדלקת נר נשמה</label>
-                        <label><input type="checkbox" value="tehillim" checked> תהילים קי"ט - אותיות שם פרטי</label>
-                        <label><input type="checkbox" value="neshama"> תהילים קי"ט - אותיות נשמה (נ-ש-מ-ה)</label>
-                        <label><input type="checkbox" value="psalm91" checked> תהילים צ"א (יושב בסתר)</label>
-                        <label><input type="checkbox" value="psalm121" checked> תהילים קכ"א (שיר למעלות)</label>
-                        <label><input type="checkbox" value="hashkava" checked> השכבה</label>
-                        <label><input type="checkbox" value="kaddish" checked> קדיש יתום</label>
-                    </div>
-
-                    <button id="quick-pdf-btn">הורד PDF לאזכרה</button>
+            <section id="section-azkara" class="page-section">
+                <div class="upcoming-azkara" id="memorial-azkara">
+                    <!-- Filled by JS -->
                 </div>
-            </details>
+
+                <!-- Action Buttons - Row -->
+                <div class="action-buttons-row">
+                    <button type="button" class="action-chip" onclick="downloadCalendarEvent()">יומן</button>
+                    <button class="action-chip whatsapp-chip" onclick="shareWhatsApp()">וואטסאפ</button>
+                    <a href="https://waze.com/ul?q=%D7%91%D7%99%D7%AA%20%D7%A2%D7%9C%D7%9E%D7%99%D7%9F%20%D7%A7%D7%93%D7%99%D7%9E%D7%94%20%D7%A6%D7%95%D7%A8%D7%9F" target="_blank" class="action-chip waze-chip">Waze</a>
+                </div>
+            </section>
+
+            <!-- In-page Table of Contents -->
+            <nav id="page-toc" class="page-toc" aria-label="ניווט בדף">
+                <a href="#section-story" class="toc-chip">סיפור חיים</a>
+                <a href="#section-quotes" class="toc-chip toc-quotes hidden">ציטוטים</a>
+                <a href="#section-audio" class="toc-chip toc-audio hidden">הקלטות</a>
+                <a href="#section-recipes" class="toc-chip toc-recipes hidden">מתכונים</a>
+                <a href="#section-family" class="toc-chip">עץ משפחה</a>
+                <a href="#section-gallery" class="toc-chip">גלריה</a>
+                <a href="#section-pdf" class="toc-chip">סדר אזכרה</a>
+            </nav>
 
             <!-- Life Story -->
-            <div class="life-story-section">
-                <h3>סיפור חייהם</h3>
+            <section id="section-story" class="page-section life-story-section">
+                <h2 class="section-title">סיפור חייהם</h2>
 
                 <details class="life-chapter" open>
                     <summary>סבא שלמה</summary>
@@ -120,17 +113,37 @@
                         <p>למרות המעבר הקשה מחיי שפע לתנאים צנועים, בנתה המשפחה את חייה מחדש בארץ ישראל. הילדים למדו עברית, התרגלו למנהגי הארץ, והפכו לחלק בלתי נפרד מהחברה הישראלית.</p>
                     </div>
                 </details>
-            </div>
+            </section>
+
+            <!-- Quotes (shown only if populated from admin) -->
+            <section id="section-quotes" class="page-section quotes-section hidden">
+                <h2 class="section-title">ציטוטים ואמרות</h2>
+                <div id="quotes-list" class="quotes-list"></div>
+            </section>
+
+            <!-- Audio recordings (shown only if populated) -->
+            <section id="section-audio" class="page-section audio-section hidden">
+                <h2 class="section-title">הקלטות קוליות</h2>
+                <p class="section-lead">סיפורים, שירים וצחוקים שנשמרו עם השנים</p>
+                <div id="audio-list" class="audio-list"></div>
+            </section>
+
+            <!-- Recipes / favorite foods (shown only if populated) -->
+            <section id="section-recipes" class="page-section recipes-section hidden">
+                <h2 class="section-title">מתכונים ומאכלים אהובים</h2>
+                <p class="section-lead">הטעמים שליוו את המשפחה</p>
+                <div id="recipes-list" class="recipes-list"></div>
+            </section>
 
             <!-- Family Tree -->
-            <div class="family-tree-section">
-                <h3>עץ המשפחה</h3>
+            <section id="section-family" class="page-section family-tree-section">
+                <h2 class="section-title">עץ המשפחה</h2>
                 <div id="family-tree-container"></div>
-            </div>
+            </section>
 
             <!-- Unified Gallery -->
-            <div class="photos-section" id="gallery-section">
-                <h3>גלריה</h3>
+            <section id="section-gallery" class="page-section photos-section">
+                <h2 class="section-title">גלריה</h2>
 
                 <!-- Filters -->
                 <div class="gallery-filters" id="gallery-filters"></div>
@@ -153,7 +166,30 @@
 
                 <!-- Unified Grid -->
                 <div class="photo-grid" id="unified-gallery-grid"></div>
-            </div>
+            </section>
+
+            <!-- PDF Tool (moved to end — it's a tool, not content) -->
+            <section id="section-pdf" class="page-section">
+                <h2 class="section-title">סדר אזכרה להדפסה</h2>
+                <details class="quick-pdf-section" id="quick-pdf-section" open>
+                    <summary class="pdf-summary">בחר רכיבים והורד PDF ▾</summary>
+                    <div class="pdf-details-content">
+                        <p class="info-text">בחר מה לכלול בסדר ולחץ להורדה</p>
+
+                        <div class="seder-checklist" id="main-seder-checklist">
+                            <label><input type="checkbox" value="candle" checked> הדלקת נר נשמה</label>
+                            <label><input type="checkbox" value="tehillim" checked> תהילים קי"ט - אותיות שם פרטי</label>
+                            <label><input type="checkbox" value="neshama"> תהילים קי"ט - אותיות נשמה (נ-ש-מ-ה)</label>
+                            <label><input type="checkbox" value="psalm91" checked> תהילים צ"א (יושב בסתר)</label>
+                            <label><input type="checkbox" value="psalm121" checked> תהילים קכ"א (שיר למעלות)</label>
+                            <label><input type="checkbox" value="hashkava" checked> השכבה</label>
+                            <label><input type="checkbox" value="kaddish" checked> קדיש יתום</label>
+                        </div>
+
+                        <button id="quick-pdf-btn">הורד PDF לאזכרה</button>
+                    </div>
+                </details>
+            </section>
         </section>
 
         <!-- ========== TAB 2: Management (password protected) ========== -->
@@ -274,6 +310,199 @@
 
             <hr>
 
+            <!-- Hebcal Yahrzeit Helper -->
+            <div class="manage-block">
+                <h3>חישוב יארצייט עברי (עזר)</h3>
+                <p class="info-text">מחשב את תאריך היארצייט הבא לפי תאריך הפטירה. לא מחליף את שדה התאריך אוטומטית — אתה בוחר מהרשימה.</p>
+                <div class="yahrzeit-btns">
+                    <button type="button" id="yahrzeit-shlomo-btn">חשב יארצייט לשלמה</button>
+                    <button type="button" id="yahrzeit-doris-btn">חשב יארצייט לדוריס</button>
+                </div>
+                <div id="yahrzeit-results" class="yahrzeit-results"></div>
+            </div>
+
+            <hr>
+
+            <!-- Memory Book PDF Export -->
+            <div class="manage-block">
+                <h3>ספר זיכרון — יצוא PDF מלא</h3>
+                <p class="info-text">מייצר PDF מקיף של הדף: סיפור חיים, ציטוטים, מתכונים, הקלטות (כרשימה), עם QR של האתר בסוף. מושלם לחלוקה פיזית באירועים משפחתיים.</p>
+                <div class="form-group">
+                    <label>רכיבים לכלול:</label>
+                    <div class="seder-checklist" id="book-checklist">
+                        <label><input type="checkbox" value="cover" checked> עמוד שער</label>
+                        <label><input type="checkbox" value="life" checked> סיפור חיים</label>
+                        <label><input type="checkbox" value="quotes" checked> ציטוטים</label>
+                        <label><input type="checkbox" value="recipes" checked> מתכונים ומאכלים</label>
+                        <label><input type="checkbox" value="audio" checked> רשימת הקלטות</label>
+                        <label><input type="checkbox" value="qr" checked> עמוד QR לאתר</label>
+                    </div>
+                </div>
+                <button type="button" id="memory-book-btn">הפק ספר זיכרון</button>
+            </div>
+
+            <hr>
+
+            <!-- Audio Recordings Manager -->
+            <div class="manage-block">
+                <h3>הקלטות קוליות</h3>
+                <p class="info-text">הוסף הקלטות של סבא וסבתא — סיפורים, שירים, שיחות. העלה קובץ ל-Google Drive (שיתוף: "כל מי שיש את הקישור"), קח את מזהה הקובץ והדבק כאן. הסקשן יוצג בדף רק אם יש לפחות הקלטה אחת.</p>
+
+                <div class="form-group">
+                    <label>כותרת:</label>
+                    <input type="text" id="audio-title" placeholder="לדוגמה: סיפור על העלייה מבגדד">
+                </div>
+                <div class="form-group">
+                    <label>קישור לקובץ האודיו:</label>
+                    <input type="url" id="audio-url" placeholder="URL ישיר או Drive file ID">
+                    <p class="info-text" style="font-size:0.82rem">אפשר להדביק Drive file ID בלבד (מופיע ב-URL אחרי <code>/d/</code>) או URL מלא של mp3/m4a/ogg.</p>
+                </div>
+                <div class="form-group">
+                    <label>דובר:</label>
+                    <select id="audio-author">
+                        <option value="shlomo">סבא שלמה</option>
+                        <option value="doris">סבתא דוריס</option>
+                        <option value="both">שניהם</option>
+                        <option value="family">משפחה</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>תיאור (אופציונלי):</label>
+                    <textarea id="audio-description" rows="2" placeholder="הקשר, שנה, מי הקליט..."></textarea>
+                </div>
+                <button type="button" id="audio-add-btn">הוסף הקלטה</button>
+
+                <ul id="audio-admin-list" class="admin-list"></ul>
+            </div>
+
+            <hr>
+
+            <!-- Recipes Manager -->
+            <div class="manage-block">
+                <h3>מתכונים ומאכלים אהובים</h3>
+                <p class="info-text">מתכונים של סבתא או מאכלים שסבא וסבתא אהבו. הסקשן יוצג בדף רק אם יש לפחות פריט אחד.</p>
+
+                <div class="form-group">
+                    <label>שם המנה:</label>
+                    <input type="text" id="recipe-name" placeholder="לדוגמה: קובה במרק סלק">
+                </div>
+                <div class="form-group">
+                    <label>סוג:</label>
+                    <select id="recipe-type">
+                        <option value="recipe">מתכון</option>
+                        <option value="loved">מאכל אהוב</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>שייך ל:</label>
+                    <select id="recipe-author">
+                        <option value="doris">סבתא דוריס</option>
+                        <option value="shlomo">סבא שלמה</option>
+                        <option value="both">שניהם</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>רכיבים (אופציונלי):</label>
+                    <textarea id="recipe-ingredients" rows="3" placeholder="כל רכיב בשורה חדשה"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>הוראות / תיאור (אופציונלי):</label>
+                    <textarea id="recipe-instructions" rows="4" placeholder="אופן הכנה או זיכרון אישי מהמאכל"></textarea>
+                </div>
+                <button type="button" id="recipe-add-btn">הוסף מתכון / מאכל</button>
+
+                <ul id="recipes-admin-list" class="admin-list"></ul>
+            </div>
+
+            <hr>
+
+            <!-- Telegram Reminders -->
+            <div class="manage-block">
+                <h3>תזכורות בטלגרם</h3>
+                <p class="info-text">הגדר בוט טלגרם משפחתי לשליחת תזכורות לאזכרה. צריך: בוט (נוצר דרך @BotFather), טוקן, וצ'אט ID של הקבוצה.</p>
+
+                <div class="form-group">
+                    <label>Bot Token:</label>
+                    <input type="password" id="tg-token" placeholder="123456:ABC-DEF1234...">
+                </div>
+                <div class="form-group">
+                    <label>Chat ID (קבוצה או ערוץ):</label>
+                    <input type="text" id="tg-chat" placeholder="-1001234567890 או @channelname">
+                </div>
+                <button type="button" id="tg-save-btn">שמור הגדרות</button>
+
+                <h4 style="margin-top:1.5rem">שליחת תזכורת</h4>
+                <div class="form-group">
+                    <label>טקסט (ברירת מחדל: פרטי האזכרה הנוכחית):</label>
+                    <textarea id="tg-message" rows="5" placeholder="ישתף אוטומטית לפי פרטי האזכרה אם ריק"></textarea>
+                </div>
+                <button type="button" id="tg-send-btn">שלח תזכורת לקבוצה</button>
+                <p id="tg-status" class="info-text"></p>
+
+                <p class="info-text" style="margin-top:1rem">
+                    <strong>WhatsApp ממספר ייעודי:</strong> יתווסף בעתיד אם המיזם יגדל (דורש WhatsApp Business API, חשבון עסקי ותשתית שרת).
+                </p>
+            </div>
+
+            <hr>
+
+            <!-- Quotes Manager -->
+            <div class="manage-block">
+                <h3>ציטוטים ואמרות</h3>
+                <p class="info-text">אמרות, משפטים או בדיחות שהם נהגו לומר. הסקשן יוצג בדף ההנצחה רק אם יש לפחות ציטוט אחד.</p>
+
+                <div class="form-group">
+                    <label>ציטוט:</label>
+                    <textarea id="quote-text" rows="3" placeholder="מה הם נהגו לומר..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>מי אמר:</label>
+                    <select id="quote-author">
+                        <option value="shlomo">סבא שלמה</option>
+                        <option value="doris">סבתא דוריס</option>
+                        <option value="both">שניהם</option>
+                    </select>
+                </div>
+                <button type="button" id="quote-add-btn">הוסף ציטוט</button>
+
+                <ul id="quotes-admin-list" class="quotes-admin-list"></ul>
+            </div>
+
+            <hr>
+
+            <!-- QR Code for Gravestone / Print -->
+            <div class="manage-block">
+                <h3>קוד QR להדפסה / מצבה</h3>
+                <p class="info-text">מייצר קוד QR שמוביל לאתר. ניתן להדפיס על לוחית למצבה, מדבקה, הזמנה לאזכרה או על גבי ה-PDF.</p>
+
+                <div class="form-group">
+                    <label>כתובת:</label>
+                    <input type="url" id="qr-url" value="">
+                </div>
+                <div class="form-group">
+                    <label>הקדשה (אופציונלי):</label>
+                    <select id="qr-for">
+                        <option value="both">שלמה ודוריס לוי ז"ל</option>
+                        <option value="shlomo">שלמה לוי ז"ל</option>
+                        <option value="doris">דוריס (חנה) לוי ז"ל</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>גודל (פיקסלים):</label>
+                    <input type="number" id="qr-size" value="512" min="128" max="1024" step="32">
+                </div>
+
+                <div id="qr-preview" class="qr-preview"></div>
+
+                <div class="qr-actions">
+                    <button type="button" id="qr-refresh-btn">רענן</button>
+                    <button type="button" id="qr-download-btn">הורד PNG</button>
+                    <button type="button" id="qr-print-btn">הדפס לוחית</button>
+                </div>
+            </div>
+
+            <hr>
+
             <!-- Duplicate Detection -->
             <div class="manage-block">
                 <h3>איתור תמונות כפולות</h3>
@@ -298,7 +527,8 @@
                 </div>
                 <div class="form-group">
                     <label>טלפון:</label>
-                    <input type="tel" id="member-phone" placeholder="מספר טלפון">
+                    <input type="tel" id="member-phone" placeholder="05X-XXX-XXXX" inputmode="tel">
+                    <p class="info-text" style="font-size:0.8rem">יתוקן אוטומטית לפורמט בינלאומי (+972...)</p>
                 </div>
                 <button id="add-member-btn">הוסף משתתף</button>
 
@@ -316,10 +546,11 @@
         <p>נבנה באהבה ע"י יהונתן ספיבק</p>
     </footer>
 
-    <script src="js/prayers.js?v=20260410a"></script>
-    <script src="js/app.js?v=20260410a"></script>
-    <script src="js/family-tree.js?v=20260410a"></script>
-    <script src="js/gallery.js?v=20260410a"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="js/prayers.js?v=20260421a"></script>
+    <script src="js/app.js?v=20260421a"></script>
+    <script src="js/family-tree.js?v=20260421a"></script>
+    <script src="js/gallery.js?v=20260421a"></script>
 
     <!-- Context menu for photos -->
     <div id="photo-context-menu" class="ctx-menu hidden">
