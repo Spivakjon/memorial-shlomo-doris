@@ -94,22 +94,21 @@ function formatAzkaraDate(azkara) {
 function updateMemorialAzkara() {
     const azkara = state.azkara;
     const container = document.getElementById('memorial-azkara');
+    if (!azkara || !azkara.date) { container.innerHTML = ''; return; }
+
     const dateObj = new Date(azkara.date + 'T00:00:00');
     const now = new Date();
     now.setHours(0, 0, 0, 0);
-    const diffDays = Math.ceil((dateObj.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-
-    if (diffDays < 0) {
-        container.innerHTML = '';
-        return;
-    }
+    const diffDays = Math.round((dateObj.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
     let countdownText = '';
-    if (diffDays === 0) countdownText = 'היום!';
-    else if (diffDays === 1) countdownText = 'מחר!';
-    else countdownText = `בעוד ${diffDays} ימים`;
+    let bannerClass = 'azkara-banner';
+    if (diffDays > 1) countdownText = `בעוד ${diffDays} ימים`;
+    else if (diffDays === 1) countdownText = 'מחר';
+    else if (diffDays === 0) countdownText = 'היום';
+    else if (diffDays === -1) { countdownText = 'התקיימה אתמול'; bannerClass += ' azkara-banner--past'; }
+    else { countdownText = `התקיימה לפני ${Math.abs(diffDays)} ימים`; bannerClass += ' azkara-banner--past'; }
 
-    // Calculate years since death
     var yearsText = azkara.yearLabel;
     if (azkara.forPerson === 'shlomo' || azkara.forPerson === 'both') {
         var deathYear = 2021;
@@ -119,8 +118,8 @@ function updateMemorialAzkara() {
     }
 
     container.innerHTML = `
-        <div class="azkara-banner">
-            <h3>אזכרה - ${yearsText}</h3>
+        <div class="${bannerClass}">
+            <h3>${diffDays < 0 ? 'אזכרה אחרונה' : 'אזכרה'} - ${yearsText}</h3>
             <p><strong>${getPersonTitle(azkara.forPerson)}</strong></p>
             <p>${formatAzkaraDate(azkara)} בשעה ${azkara.time}</p>
             <p>${azkara.location}</p>

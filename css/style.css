@@ -2854,6 +2854,21 @@ body {
     letter-spacing: 0.4px;
 }
 
+.azkara-banner--past {
+    border-color: var(--border);
+    opacity: 0.85;
+    background:
+        radial-gradient(600px 300px at 0% 0%, color-mix(in srgb, var(--accent-glow) 30%, transparent), transparent 70%),
+        var(--bg-card);
+}
+.azkara-banner--past::before { opacity: 0.25; }
+.azkara-banner--past h3 { color: var(--text-light); }
+.azkara-banner--past .countdown {
+    border-color: var(--border);
+    color: var(--text-light);
+    background: var(--bg);
+}
+
 /* ===== Action chips — rounded pills, subtle icons ===== */
 .action-buttons-row { gap: 0.55rem; margin-top: 1rem; }
 .action-chip {
