@@ -2869,6 +2869,34 @@ body {
     background: var(--bg);
 }
 
+/* ===== Gallery: "show all" pagination button ===== */
+.gallery-show-more-wrap {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.2rem;
+}
+.gallery-show-more {
+    padding: 0.8rem 1.6rem;
+    border: 1px solid var(--accent);
+    background: var(--bg-card);
+    color: var(--accent-dark);
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.22s var(--ease);
+}
+.gallery-show-more:hover {
+    background: var(--accent);
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px var(--accent-glow);
+}
+.gallery-show-more:active { transform: translateY(0); }
+
 /* ===== Action chips — rounded pills, subtle icons ===== */
 .action-buttons-row { gap: 0.55rem; margin-top: 1rem; }
 .action-chip {

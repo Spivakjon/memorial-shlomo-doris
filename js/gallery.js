@@ -236,10 +236,31 @@ function loadDrivePhotos() {
         });
 }
 
+var GALLERY_PAGE_SIZE = 12;
+var galleryShownCount = GALLERY_PAGE_SIZE;
+
 function renderGallery() {
+    galleryShownCount = GALLERY_PAGE_SIZE;
+    _paintGallery();
+}
+
+function showAllGallery() {
+    galleryShownCount = Infinity;
+    _paintGallery();
+}
+
+function _removeShowMoreBtn() {
+    var grid = document.getElementById('unified-gallery-grid');
+    if (!grid) return;
+    var existing = grid.parentNode.querySelector('.gallery-show-more-wrap');
+    if (existing) existing.remove();
+}
+
+function _paintGallery() {
     var grid = document.getElementById('unified-gallery-grid');
     if (!grid) return;
     grid.innerHTML = '';
+    _removeShowMoreBtn();
 
     var filtered = allPhotos.filter(function(p) {
         if (activePersonFilter) {
@@ -255,7 +276,8 @@ function renderGallery() {
         return;
     }
 
-    filtered.forEach(function(photo, filteredIdx) {
+    var visible = filtered.slice(0, galleryShownCount);
+    visible.forEach(function(photo, filteredIdx) {
         var div = document.createElement('div');
         div.className = 'gallery-item';
 
@@ -320,6 +342,20 @@ function renderGallery() {
 
         grid.appendChild(div);
     });
+
+    // Show-more button when more photos are available
+    if (filtered.length > visible.length) {
+        var remaining = filtered.length - visible.length;
+        var wrap = document.createElement('div');
+        wrap.className = 'gallery-show-more-wrap';
+        var moreBtn = document.createElement('button');
+        moreBtn.type = 'button';
+        moreBtn.className = 'gallery-show-more';
+        moreBtn.textContent = 'הצג את כל ' + filtered.length + ' התמונות ( +' + remaining + ' )';
+        moreBtn.onclick = showAllGallery;
+        wrap.appendChild(moreBtn);
+        grid.parentNode.insertBefore(wrap, grid.nextSibling);
+    }
 }
 
 // Filter by person (from tag click or tree click)
